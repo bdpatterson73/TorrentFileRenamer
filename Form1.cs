@@ -33,23 +33,48 @@ namespace TorrentFileRenamer
 
         private void miScanFiles_Click(object sender, EventArgs e)
         {
-            statusLabel.Text = "";
+            statusLabel.Text = "Scanning for TV episodes...";
             statusProgress.Value = 0;
             frmScanOptions options = new frmScanOptions();
             DialogResult dr = options.ShowDialog();
             if (dr == DialogResult.OK)
             {
-
                 string[] allFiles = Directory.GetFiles(options.VideoPath, "*.*", SearchOption.AllDirectories);
+                statusProgress.Maximum = allFiles.Length;
+                statusProgress.Value = 0;
+                
+                int totalVideoFiles = 0;
+                int likelyMoviesSkipped = 0;
+                int validEpisodes = 0;
+                int unparsedFiles = 0;
+
                 foreach (string s in allFiles)
                 {
+                    statusProgress.PerformStep();
+                    Application.DoEvents();
+                    
                     if (s.EndsWith(options.FileExtension, StringComparison.OrdinalIgnoreCase))
                     {
+                        totalVideoFiles++;
+                        
+                        // Check if this file is likely a movie and should be skipped
+                        int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(s);
+                        int movieConfidence = MediaTypeDetector.GetMovieConfidence(s);
+                        
+                        // Skip files that seem more like movies than TV episodes
+                        if (movieConfidence > tvConfidence && movieConfidence > 40)
+                        {
+                            likelyMoviesSkipped++;
+                            Debug.WriteLine($"Skipping likely movie: {Path.GetFileName(s)} (Movie: {movieConfidence}%, TV: {tvConfidence}%)");
+                            continue;
+                        }
+                        
                         FileEpisode fe = new FileEpisode(s, options.OutputDirectory);
                         
                         // Only add files where we successfully parsed episode information
                         if (fe.EpisodeNumber != 0 && !string.IsNullOrWhiteSpace(fe.ShowName) && fe.ShowName != "Unknown Show")
                         {
+                            validEpisodes++;
                             ListViewItem lvi = new ListViewItem();
                             lvi.Text = s;
                             lvi.SubItems.Add(fe.NewFileNamePath);
@@ -74,23 +99,37 @@ namespace TorrentFileRenamer
                         }
                         else
                         {
-                            // Add unparsed files with a different background color for review
-                            ListViewItem lvi = new ListViewItem();
-                            lvi.Text = s;
-                            lvi.SubItems.Add("UNPARSED - Please review");
-                            lvi.SubItems.Add(fe.ShowName ?? "Unknown");
-                            lvi.SubItems.Add(fe.SeasonNumber.ToString());
-                            lvi.SubItems.Add(fe.EpisodeNumber.ToString());
-                            lvi.SubItems.Add("Not processed");
-                            lvi.BackColor = Color.LightGray;
-                            lvi.Tag = fe;
-                            lvFiles.Items.Add(lvi);
+                            // Only add unparsed files that have some TV characteristics
+                            if (tvConfidence > 20 || movieConfidence < 30)
+                            {
+                                unparsedFiles++;
+                                ListViewItem lvi = new ListViewItem();
+                                lvi.Text = s;
+                                lvi.SubItems.Add("UNPARSED - Please review");
+                                lvi.SubItems.Add(fe.ShowName ?? "Unknown");
+                                lvi.SubItems.Add(fe.SeasonNumber.ToString());
+                                lvi.SubItems.Add(fe.EpisodeNumber.ToString());
+                                lvi.SubItems.Add("Not processed");
+                                lvi.BackColor = Color.LightGray;
+                                lvi.Tag = fe;
+                                lvFiles.Items.Add(lvi);
+                            }
+                            else
+                            {
+                                likelyMoviesSkipped++;
+                                Debug.WriteLine($"Skipping unparsed likely movie: {Path.GetFileName(s)}");
+                            }
                         }
                     }
                 }
+                
+                statusLabel.Text = $"TV scan completed: {validEpisodes} episodes found, {unparsedFiles} unparsed, {likelyMoviesSkipped} movies skipped from {totalVideoFiles} total files at {DateTime.Now.ToString("HH:mm:ss")}";
             }
             else
+            {
+                statusLabel.Text = "TV episode scan cancelled";
                 Debug.WriteLine("Dialog Cancelled");
+            }
         }
 
 
@@ -234,17 +273,32 @@ namespace TorrentFileRenamer
 
         private void miRemove_Click(object sender, EventArgs e)
         {
-            // Remove the currently selected listviewitem.
-            foreach (ListViewItem lvi in lvFiles.SelectedItems)
+            // Remove all currently selected listview items for TV episodes
+            if (lvFiles.SelectedItems.Count == 0)
+            {
+                statusLabel.Text = "No items selected for removal";
+                return;
+            }
+
+            int removedCount = 0;
+            // Create a copy of the selected items since we'll be modifying the collection
+            ListViewItem[] selectedItems = new ListViewItem[lvFiles.SelectedItems.Count];
+            lvFiles.SelectedItems.CopyTo(selectedItems, 0);
+
+            foreach (ListViewItem lvi in selectedItems)
             {
                 try
                 {
                     lvFiles.Items.Remove(lvi);
+                    removedCount++;
                 }
-                catch (Exception ex) { }
+                catch (Exception ex) 
+                {
+                    Debug.WriteLine($"Error removing TV episode item: {ex.Message}");
+                }
             }
             
-
+            statusLabel.Text = $"Removed {removedCount} TV episode item(s) from list";
         }
 
         private void tsbScan_Click(object sender, EventArgs e)
@@ -261,6 +315,7 @@ namespace TorrentFileRenamer
         private void clearToolStripMenuItem_Click(object sender, EventArgs e)
         {
             lvFiles.Items.Clear();
+            statusLabel.Text = "TV episode list cleared";
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -283,26 +338,89 @@ namespace TorrentFileRenamer
 
         private void toolStripButton1_Click(object sender, EventArgs e)
         {
+            statusLabel.Text = "Scanning for movies...";
+            statusProgress.Value = 0;
+            
             frmScanMovies sm = new frmScanMovies();
             DialogResult dr = sm.ShowDialog();
             if (dr == DialogResult.OK)
             {
                 string[] allFiles = Directory.GetFiles(sm.VideoPath, "*.*", SearchOption.AllDirectories);
+                statusProgress.Maximum = allFiles.Length;
+                statusProgress.Value = 0;
+                
+                int totalVideoFiles = 0;
+                int likelyTVEpisodesSkipped = 0;
+                int validMovies = 0;
+                int unparsedFiles = 0;
+                
                 foreach (string s in allFiles)
                 {
+                    statusProgress.PerformStep();
+                    Application.DoEvents();
+                    
                     if (s.EndsWith(sm.FileExtension, StringComparison.OrdinalIgnoreCase))
                     {
+                        totalVideoFiles++;
+                        
+                        // Check if this file is likely a TV episode and should be skipped
+                        int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(s);
+                        int movieConfidence = MediaTypeDetector.GetMovieConfidence(s);
+                        
+                        // Skip files that seem more like TV episodes than movies
+                        if (tvConfidence > movieConfidence && tvConfidence > 50)
+                        {
+                            likelyTVEpisodesSkipped++;
+                            Debug.WriteLine($"Skipping likely TV episode: {Path.GetFileName(s)} (TV: {tvConfidence}%, Movie: {movieConfidence}%)");
+                            continue;
+                        }
+                        
                         MovieFile mv = new MovieFile(s, sm.OutputDirectory);
+                        
+                        // Check if movie was successfully parsed
+                        bool isValidMovie = !string.IsNullOrWhiteSpace(mv.MovieName) && 
+                                          mv.MovieName != "Unknown Movie" &&
+                                          !string.IsNullOrWhiteSpace(mv.NewDestDirectory);
+                        
                         ListViewItem lvi = new ListViewItem();
                         lvi.Text = s;
                         lvi.SubItems.Add(mv.NewDestDirectory);
-                        lvi.SubItems.Add(mv.MovieName);
-                        lvi.SubItems.Add(mv.MovieYear);
-                        lvi.SubItems.Add("");
+                        lvi.SubItems.Add(mv.MovieName ?? "Unknown");
+                        lvi.SubItems.Add(mv.MovieYear ?? "Unknown");
+                        
+                        if (isValidMovie)
+                        {
+                            validMovies++;
+                            lvi.SubItems.Add("");
+                        }
+                        else
+                        {
+                            // Only add unparsed files that have some movie characteristics
+                            if (movieConfidence > 20 || tvConfidence < 30)
+                            {
+                                unparsedFiles++;
+                                lvi.SubItems.Add("UNPARSED - Please review");
+                                lvi.BackColor = Color.LightGray;
+                            }
+                            else
+                            {
+                                likelyTVEpisodesSkipped++;
+                                Debug.WriteLine($"Skipping unparsed likely TV episode: {Path.GetFileName(s)}");
+                                continue; // Skip adding this item to the list
+                            }
+                        }
+                        
                         lvi.Tag = mv;
                         lvMovies.Items.Add(lvi);
                     }
                 }
+                
+                statusLabel.Text = $"Movie scan completed: {validMovies} movies found, {unparsedFiles} unparsed, {likelyTVEpisodesSkipped} TV episodes skipped from {totalVideoFiles} total files at {DateTime.Now.ToString("HH:mm:ss")}";
+            }
+            else
+            {
+                statusLabel.Text = "Movie scan cancelled";
+                Debug.WriteLine("Dialog Cancelled");
             }
         }
 
@@ -311,7 +429,12 @@ namespace TorrentFileRenamer
             DateTime startMove = DateTime.Now;
             bool existed = false;
             int listIndex = 0;
+            int processedCount = 0;
+            int successfulCount = 0;
+            int skippedCount = 0;
+            
             statusProgress.Maximum = lvMovies.Items.Count;
+            
             foreach (ListViewItem lvi in lvMovies.Items)
             {
                 statusProgress.PerformStep();
@@ -319,25 +442,40 @@ namespace TorrentFileRenamer
                 float pct = (li / lvMovies.Items.Count) * 100;
                 int pcti = (int)pct;
                 statusLabel.Text = pcti.ToString() + " %";
+                
                 MovieFile fe = (MovieFile)lvi.Tag;
                 lvMovies.EnsureVisible(listIndex);
                 lvMovies.Refresh();
                 Application.DoEvents();
+                
+                // Skip unparsed movies (gray background)
+                if (lvi.BackColor == Color.LightGray)
+                {
+                    lvi.SubItems[4].Text = "Skipped - unparsed file";
+                    skippedCount++;
+                    listIndex++;
+                    continue;
+                }
+                
+                processedCount++;
+                
                 try
                 {
                     if (!Directory.Exists(Path.GetDirectoryName(fe.NewDestDirectory)))
                     {
-                        //Debug.WriteLine("No Directory. Creating: " + fe.NewDirectoryName);
+                        Debug.WriteLine("No Directory. Creating: " + Path.GetDirectoryName(fe.NewDestDirectory));
                         Directory.CreateDirectory(Path.GetDirectoryName(fe.NewDestDirectory));
                     }
+                    
                     if (File.Exists(fe.NewDestDirectory))
                     {
                         File.Delete(fe.NewDestDirectory);
                         lvi.BackColor = Color.Blue;
                         existed = true;
                     }
+                    
                     File.Move(fe.FileNamePath, fe.NewDestDirectory);
-                    //DEBUG  System.Threading.Thread.Sleep(30000);
+                    
                     if (!existed)
                     {
                         lvi.BackColor = Color.Yellow;
@@ -347,7 +485,8 @@ namespace TorrentFileRenamer
                         existed = false;
                     }
 
-                    //lvi.SubItems[4].Text = "Successful";
+                    lvi.SubItems[4].Text = "Successful";
+                    successfulCount++;
                     lvMovies.Refresh();
                     Application.DoEvents();
                 }
@@ -362,24 +501,46 @@ namespace TorrentFileRenamer
                 lvMovies.Refresh();
                 Application.DoEvents();
             }
-            //MessageBox.Show("Move operation has finished.", "Done", MessageBoxButtons.OK, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1);
+            
             TimeSpan ts = DateTime.Now - startMove;
 
-            statusLabel.Text = "Completed at " + DateTime.Now.ToString() + " (" + ts.Minutes.ToString() + ":" + ts.Seconds.ToString("D2") + ")";
+            statusLabel.Text = $"Completed at {DateTime.Now.ToString("HH:mm:ss")} - Processed: {successfulCount}/{processedCount}, Skipped: {skippedCount} ({ts.Minutes}:{ts.Seconds:D2})";
         }
 
         private void msMovieRemove_Click(object sender, EventArgs e)
         {
-            try
+            // Remove all currently selected listview items for movies (improved multi-select)
+            if (lvMovies.SelectedItems.Count == 0)
             {
-                lvMovies.Items.Remove(lvMovies.SelectedItems[0]);
+                statusLabel.Text = "No items selected for removal";
+                return;
             }
-            catch (Exception ex) { }
+
+            int removedCount = 0;
+            // Create a copy of the selected items since we'll be modifying the collection
+            ListViewItem[] selectedItems = new ListViewItem[lvMovies.SelectedItems.Count];
+            lvMovies.SelectedItems.CopyTo(selectedItems, 0);
+
+            foreach (ListViewItem lvi in selectedItems)
+            {
+                try
+                {
+                    lvMovies.Items.Remove(lvi);
+                    removedCount++;
+                }
+                catch (Exception ex) 
+                {
+                    Debug.WriteLine($"Error removing movie item: {ex.Message}");
+                }
+            }
+            
+            statusLabel.Text = $"Removed {removedCount} movie item(s) from list";
         }
 
         private void msMovieClear_Click(object sender, EventArgs e)
         {
             lvMovies.Items.Clear();
+            statusLabel.Text = "Movie list cleared";
         }
 
         private void toolStripButton3_Click(object sender, EventArgs e)
@@ -508,6 +669,118 @@ namespace TorrentFileRenamer
             //        }
             //    }
             //}
+        }
+
+        /// <summary>
+        /// Remove all unparsed TV episodes from the list
+        /// </summary>
+        private void RemoveUnparsedTVEpisodes()
+        {
+            int removedCount = 0;
+            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
+
+            foreach (ListViewItem lvi in lvFiles.Items)
+            {
+                if (lvi.BackColor == Color.LightGray || 
+                    (lvi.SubItems.Count > 1 && lvi.SubItems[1].Text.Contains("UNPARSED")))
+                {
+                    itemsToRemove.Add(lvi);
+                }
+            }
+
+            foreach (ListViewItem lvi in itemsToRemove)
+            {
+                lvFiles.Items.Remove(lvi);
+                removedCount++;
+            }
+
+            statusLabel.Text = $"Removed {removedCount} unparsed TV episode(s)";
+        }
+
+        /// <summary>
+        /// Remove all unparsed movies from the list
+        /// </summary>
+        private void RemoveUnparsedMovies()
+        {
+            int removedCount = 0;
+            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
+
+            foreach (ListViewItem lvi in lvMovies.Items)
+            {
+                if (lvi.BackColor == Color.LightGray || 
+                    (lvi.SubItems.Count > 4 && lvi.SubItems[4].Text.Contains("UNPARSED")))
+                {
+                    itemsToRemove.Add(lvi);
+                }
+            }
+
+            foreach (ListViewItem lvi in itemsToRemove)
+            {
+                lvMovies.Items.Remove(lvi);
+                removedCount++;
+            }
+
+            statusLabel.Text = $"Removed {removedCount} unparsed movie(s)";
+        }
+
+        /// <summary>
+        /// Remove likely misclassified files from TV episode list (those that seem more like movies)
+        /// </summary>
+        private void RemoveLikelyMoviesFromTVList()
+        {
+            int removedCount = 0;
+            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
+
+            foreach (ListViewItem lvi in lvFiles.Items)
+            {
+                string filename = lvi.Text;
+                int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(filename);
+                int movieConfidence = MediaTypeDetector.GetMovieConfidence(filename);
+
+                // Remove items that seem more like movies
+                if (movieConfidence > tvConfidence && movieConfidence > 60)
+                {
+                    itemsToRemove.Add(lvi);
+                }
+            }
+
+            foreach (ListViewItem lvi in itemsToRemove)
+            {
+                lvFiles.Items.Remove(lvi);
+                removedCount++;
+            }
+
+            statusLabel.Text = $"Removed {removedCount} likely movie(s) from TV list";
+        }
+
+        /// <summary>
+        /// Remove likely misclassified files from movie list (those that seem more like TV episodes)
+        /// </summary>
+        private void RemoveLikelyTVFromMovieList()
+        {
+            int removedCount = 0;
+            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
+
+            foreach (ListViewItem lvi in lvMovies.Items)
+            {
+                string filename = lvi.Text;
+                int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(filename);
+                int movieConfidence = MediaTypeDetector.GetMovieConfidence(filename);
+
+                // Remove items that seem more like TV episodes
+                if (tvConfidence > movieConfidence && tvConfidence > 70)
+                {
+                    itemsToRemove.Add(lvi);
+                }
+            }
+
+            foreach (ListViewItem lvi in itemsToRemove)
+            {
+                lvMovies.Items.Remove(lvi);
+                removedCount++;
+            }
+
+            statusLabel.Text = $"Removed {removedCount} likely TV episode(s) from movie list";
         }
     }
 }
