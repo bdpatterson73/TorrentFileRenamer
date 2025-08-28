@@ -43,58 +43,65 @@
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(19, 13);
+            label1.Location = new Point(15, 10);
+            label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
-            label1.Size = new Size(101, 25);
+            label1.Size = new Size(83, 20);
             label1.TabIndex = 0;
             label1.Text = "Video Path:";
             // 
             // txtVideoPath
             // 
-            txtVideoPath.Location = new Point(19, 42);
+            txtVideoPath.Location = new Point(15, 34);
+            txtVideoPath.Margin = new Padding(2, 2, 2, 2);
             txtVideoPath.Name = "txtVideoPath";
-            txtVideoPath.Size = new Size(740, 31);
+            txtVideoPath.Size = new Size(593, 27);
             txtVideoPath.TabIndex = 1;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(19, 97);
+            label2.Location = new Point(15, 78);
+            label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
-            label2.Size = new Size(87, 25);
+            label2.Size = new Size(72, 20);
             label2.TabIndex = 2;
             label2.Text = "Extension";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(19, 177);
+            label3.Location = new Point(15, 142);
+            label3.Margin = new Padding(2, 0, 2, 0);
             label3.Name = "label3";
-            label3.Size = new Size(146, 25);
+            label3.Size = new Size(120, 20);
             label3.TabIndex = 3;
             label3.Text = "Output Directory";
             // 
             // txtExtension
             // 
-            txtExtension.Location = new Point(19, 125);
+            txtExtension.Location = new Point(15, 100);
+            txtExtension.Margin = new Padding(2, 2, 2, 2);
             txtExtension.Name = "txtExtension";
-            txtExtension.Size = new Size(150, 31);
+            txtExtension.Size = new Size(121, 27);
             txtExtension.TabIndex = 4;
             txtExtension.Text = ".mp4";
             // 
             // txtOutputDirectory
             // 
-            txtOutputDirectory.Location = new Point(19, 203);
+            txtOutputDirectory.Location = new Point(15, 162);
+            txtOutputDirectory.Margin = new Padding(2, 2, 2, 2);
             txtOutputDirectory.Name = "txtOutputDirectory";
-            txtOutputDirectory.Size = new Size(740, 31);
+            txtOutputDirectory.Size = new Size(593, 27);
             txtOutputDirectory.TabIndex = 5;
-            txtOutputDirectory.Text = "U:\\TV";
+            txtOutputDirectory.Text = "Z:\\TV";
             // 
             // btnOK
             // 
-            btnOK.Location = new Point(689, 277);
+            btnOK.Location = new Point(551, 222);
+            btnOK.Margin = new Padding(2, 2, 2, 2);
             btnOK.Name = "btnOK";
-            btnOK.Size = new Size(111, 53);
+            btnOK.Size = new Size(89, 42);
             btnOK.TabIndex = 6;
             btnOK.Text = "&OK";
             btnOK.UseVisualStyleBackColor = true;
@@ -102,9 +109,10 @@
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(571, 277);
+            btnCancel.Location = new Point(457, 222);
+            btnCancel.Margin = new Padding(2, 2, 2, 2);
             btnCancel.Name = "btnCancel";
-            btnCancel.Size = new Size(111, 53);
+            btnCancel.Size = new Size(89, 42);
             btnCancel.TabIndex = 7;
             btnCancel.Text = "&Cancel";
             btnCancel.UseVisualStyleBackColor = true;
@@ -112,9 +120,10 @@
             // 
             // btnBrowse
             // 
-            btnBrowse.Location = new Point(766, 203);
+            btnBrowse.Location = new Point(613, 162);
+            btnBrowse.Margin = new Padding(2, 2, 2, 2);
             btnBrowse.Name = "btnBrowse";
-            btnBrowse.Size = new Size(34, 32);
+            btnBrowse.Size = new Size(27, 26);
             btnBrowse.TabIndex = 8;
             btnBrowse.Text = "...";
             btnBrowse.UseVisualStyleBackColor = true;
@@ -122,9 +131,10 @@
             // 
             // btnBrowseVideoPath
             // 
-            btnBrowseVideoPath.Location = new Point(766, 42);
+            btnBrowseVideoPath.Location = new Point(613, 34);
+            btnBrowseVideoPath.Margin = new Padding(2, 2, 2, 2);
             btnBrowseVideoPath.Name = "btnBrowseVideoPath";
-            btnBrowseVideoPath.Size = new Size(34, 32);
+            btnBrowseVideoPath.Size = new Size(27, 26);
             btnBrowseVideoPath.TabIndex = 9;
             btnBrowseVideoPath.Text = "...";
             btnBrowseVideoPath.UseVisualStyleBackColor = true;
@@ -132,9 +142,9 @@
             // 
             // frmScanOptions
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(813, 343);
+            ClientSize = new Size(650, 274);
             Controls.Add(btnBrowseVideoPath);
             Controls.Add(btnBrowse);
             Controls.Add(btnCancel);
@@ -146,6 +156,7 @@
             Controls.Add(txtVideoPath);
             Controls.Add(label1);
             FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            Margin = new Padding(2, 2, 2, 2);
             Name = "frmScanOptions";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Scan Options";
