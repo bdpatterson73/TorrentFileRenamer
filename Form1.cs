@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+ï»¿using System.Text.RegularExpressions;
 using System.Diagnostics;
 using static System.Windows.Forms.Design.AxImporter;
 using System.Runtime.InteropServices;
@@ -30,6 +30,17 @@ namespace TorrentFileRenamer
         {
             InitializeComponent();
         }
+
+        // Add folder monitoring service
+        private FolderMonitorService? _folderMonitorService;
+        private ListViewItem? _monitoringStatusItem;
+
+        // Add these after the existing field declarations at the top of the class
+        private string _savedWatchFolder = "";
+        private string _savedDestinationFolder = "";
+        private string _savedFileExtensions = "*.mp4;*.mkv;*.avi;*.m4v";
+        private int _savedStabilityDelay = 30;
+        private bool _savedAutoStart = false;
 
         /// <summary>
         /// Validates system state before processing files
@@ -118,27 +129,27 @@ namespace TorrentFileRenamer
             string helpText = @"Torrent File Renamer Help
 
 TV EPISODES:
-• Supports formats: S01E01, 1x01, Season 1 Episode 1
-• Multi-episode files: S01E01-02, S01E01E02
-• Creates structure: Show Name/Season X/Episode files
+â€¢ Supports formats: S01E01, 1x01, Season 1 Episode 1
+â€¢ Multi-episode files: S01E01-02, S01E01E02
+â€¢ Creates structure: Show Name/Season X/Episode files
 
 MOVIES:
-• Organizes by first letter (A-Z, 0-9, #)
-• Removes quality tags (720p, 1080p, etc.)
-• Handles years in various formats
+â€¢ Organizes by first letter (A-Z, 0-9, #)
+â€¢ Removes quality tags (720p, 1080p, etc.)
+â€¢ Handles years in various formats
 
 FEATURES:
-• Smart file type detection
-• Multi-select removal
-• Progress tracking
-• Disk space checking
-• Network path support
+â€¢ Smart file type detection
+â€¢ Multi-select removal
+â€¢ Progress tracking
+â€¢ Disk space checking
+â€¢ Network path support
 
 TIPS:
-• Always verify destination paths
-• Use 'Remove Unparsed' for cleanup
-• Check available disk space
-• Review unparsed files (gray) before processing";
+â€¢ Always verify destination paths
+â€¢ Use 'Remove Unparsed' for cleanup
+â€¢ Check available disk space
+â€¢ Review unparsed files (gray) before processing";
 
             MessageBox.Show(helpText, "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -189,8 +200,8 @@ TIPS:
                             
                             FileEpisode fe = new FileEpisode(s, options.OutputDirectory);
                             
-                            // Only add files where we successfully parsed episode information
-                            if (fe.EpisodeNumber != 0 && !string.IsNullOrWhiteSpace(fe.ShowName) && fe.ShowName != "Unknown Show")
+                            // Allow episode 0 for special episodes - only exclude truly invalid parsing
+                            if (fe.EpisodeNumber >= 0 && !string.IsNullOrWhiteSpace(fe.ShowName) && fe.ShowName != "Unknown Show")
                             {
                                 validEpisodes++;
                                 ListViewItem lvi = new ListViewItem();
@@ -556,6 +567,14 @@ TIPS:
 
         private void frmMain_Load(object sender, EventArgs e)
         {
+            // Initialize folder monitoring service
+            InitializeFolderMonitoring();
+
+            // Test the problematic filename parsing (remove this after testing)
+            #if DEBUG
+            FileEpisode.TestFilenameParsing(@"C:\temp\I Fought the Law 2025 S01E01 720p WEB-DL HEVC x265 BONE.mkv", @"C:\TestOutput");
+            FileEpisode.TestFilenameParsing(@"C:\temp\Show Name S01E00 Pilot Episode.mkv", @"C:\TestOutput");
+            #endif
 
             //DateTime startAt = DateTime.Now;
             //string c = HashHelper.CRC32File("C:\\swimapps\\swimcardb\\data\\MAIN_old.DCT");
@@ -572,134 +591,282 @@ TIPS:
             //    Console.WriteLine(result.Title);
         }
 
-        /// <summary>
-        /// Enhanced movie scanning with better error handling
-        /// </summary>
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private void InitializeFolderMonitoring()
         {
-            statusLabel.Text = "Scanning for movies...";
-            statusProgress.Value = 0;
-            
-            frmScanMovies sm = new frmScanMovies();
-            DialogResult dr = sm.ShowDialog();
-            if (dr == DialogResult.OK)
+            try
             {
-                try
+                _folderMonitorService = new FolderMonitorService();
+                
+                // Subscribe to events
+                _folderMonitorService.StatusChanged += FolderMonitorService_StatusChanged;
+                _folderMonitorService.FileFound += FolderMonitorService_FileFound;
+                _folderMonitorService.FileProcessed += FolderMonitorService_FileProcessed;
+                _folderMonitorService.ErrorOccurred += FolderMonitorService_ErrorOccurred;
+
+                // Load saved settings (in a real app, you'd load from config file or registry)
+                LoadMonitoringSettings();
+
+                // Auto-start if enabled
+                if (_savedAutoStart && !string.IsNullOrWhiteSpace(_savedWatchFolder) && !string.IsNullOrWhiteSpace(_savedDestinationFolder))
                 {
-                    string[] allFiles = Directory.GetFiles(sm.VideoPath, "*.*", SearchOption.AllDirectories);
-                    statusProgress.Maximum = allFiles.Length;
-                    statusProgress.Value = 0;
-                    
-                    int totalVideoFiles = 0;
-                    int likelyTVEpisodesSkipped = 0;
-                    int validMovies = 0;
-                    int unparsedFiles = 0;
-                    
-                    foreach (string s in allFiles)
-                    {
-                        statusProgress.PerformStep();
-                        Application.DoEvents();
-                        
-                        if (s.EndsWith(sm.FileExtension, StringComparison.OrdinalIgnoreCase))
-                        {
-                            totalVideoFiles++;
-                            
-                            // Check if this file is likely a TV episode and should be skipped
-                            int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(s);
-                            int movieConfidence = MediaTypeDetector.GetMovieConfidence(s);
-                            
-                            // Skip files that seem more like TV episodes than movies
-                            if (tvConfidence > movieConfidence && tvConfidence > 50)
-                            {
-                                likelyTVEpisodesSkipped++;
-                                Debug.WriteLine($"Skipping likely TV episode: {Path.GetFileName(s)} (TV: {tvConfidence}%, Movie: {movieConfidence}%)");
-                                continue;
-                            }
-                            
-                            MovieFile mv = new MovieFile(s, sm.OutputDirectory);
-                            
-                            // Check if movie was successfully parsed
-                            bool isValidMovie = !string.IsNullOrWhiteSpace(mv.MovieName) && 
-                                              mv.MovieName != "Unknown Movie" &&
-                                              !string.IsNullOrWhiteSpace(mv.NewDestDirectory);
-                            
-                            ListViewItem lvi = new ListViewItem();
-                            lvi.Text = s;
-                            lvi.SubItems.Add(mv.NewDestDirectory);
-                            lvi.SubItems.Add(mv.MovieName ?? "Unknown");
-                            lvi.SubItems.Add(mv.MovieYear ?? "Unknown");
-                            
-                            if (isValidMovie)
-                            {
-                                validMovies++;
-                                lvi.SubItems.Add("");
-                            }
-                            else
-                            {
-                                // Only add unparsed files that have some movie characteristics
-                                if (movieConfidence > 20 || tvConfidence < 30)
-                                {
-                                    unparsedFiles++;
-                                    lvi.SubItems.Add("UNPARSED - Please review");
-                                    lvi.BackColor = Color.LightGray;
-                                }
-                                else
-                                {
-                                    likelyTVEpisodesSkipped++;
-                                    Debug.WriteLine($"Skipping unparsed likely TV episode: {Path.GetFileName(s)}");
-                                    continue; // Skip adding this item to the list
-                                }
-                            }
-                            
-                            lvi.Tag = mv;
-                            lvMovies.Items.Add(lvi);
-                        }
-                    }
-                    
-                    statusLabel.Text = $"Movie scan completed: {validMovies} movies found, {unparsedFiles} unparsed, {likelyTVEpisodesSkipped} TV episodes skipped from {totalVideoFiles} total files at {DateTime.Now.ToString("HH:mm:ss")}";
-                    
-                    // Show summary if useful
-                    if (totalVideoFiles > 0)
-                    {
-                        string summary = $"Scan Results:\n" +
-                                       $"Total video files: {totalVideoFiles}\n" +
-                                       $"Valid movies: {validMovies}\n" +
-                                       $"Unparsed files: {unparsedFiles}\n" +
-                                       $"TV episodes skipped: {likelyTVEpisodesSkipped}";
-                        
-                        if (unparsedFiles > 0)
-                        {
-                            summary += "\n\nTip: Review unparsed files (gray) and remove them if they're not movies.";
-                        }
-                        
-                        MessageBox.Show(summary, "Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
+                    ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay);
                 }
-                catch (UnauthorizedAccessException)
-                {
-                    MessageBox.Show("Access denied to source directory. Please check permissions.", 
-                        "Access Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    statusLabel.Text = "Scan failed - Access denied";
-                }
-                catch (DirectoryNotFoundException)
-                {
-                    MessageBox.Show("Source directory not found. Please verify the path.", 
-                        "Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    statusLabel.Text = "Scan failed - Directory not found";
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error during scan: {ex.Message}", 
-                        "Scan Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    statusLabel.Text = "Scan failed - Error occurred";
-                    Debug.WriteLine($"Movie scan error: {ex}");
-                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error initializing folder monitoring: {ex.Message}", 
+                    "Monitoring Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void LoadMonitoringSettings()
+        {
+            // In a real application, load these from app settings or registry
+            // For now, use defaults - you could enhance this to save/load from a config file
+        }
+
+        private void SaveMonitoringSettings()
+        {
+            // In a real application, save these to app settings or registry
+        }
+
+        private void FolderMonitorService_StatusChanged(object? sender, string status)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<string>(UpdateMonitoringStatus), status);
             }
             else
             {
-                statusLabel.Text = "Movie scan cancelled";
-                Debug.WriteLine("Dialog Cancelled");
+                UpdateMonitoringStatus(status);
             }
+        }
+
+        private void UpdateMonitoringStatus(string status)
+        {
+            statusLabel.Text = $"Auto-Monitor: {status}";
+            
+            // Update monitoring status in the TV episodes list
+            if (_monitoringStatusItem == null)
+            {
+                _monitoringStatusItem = new ListViewItem("Folder Monitoring");
+                _monitoringStatusItem.BackColor = Color.LightBlue;
+                _monitoringStatusItem.SubItems.Add(status);
+                _monitoringStatusItem.SubItems.Add("System");
+                _monitoringStatusItem.SubItems.Add("Auto");
+                _monitoringStatusItem.SubItems.Add("Monitor");
+                _monitoringStatusItem.SubItems.Add(DateTime.Now.ToString("HH:mm:ss"));
+                lvFiles.Items.Insert(0, _monitoringStatusItem);
+            }
+            else
+            {
+                _monitoringStatusItem.SubItems[1].Text = status;
+                _monitoringStatusItem.SubItems[5].Text = DateTime.Now.ToString("HH:mm:ss");
+            }
+        }
+
+        private void FolderMonitorService_FileFound(object? sender, FileFoundEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<FileFoundEventArgs>(HandleFileFound), e);
+            }
+            else
+            {
+                HandleFileFound(e);
+            }
+        }
+
+        private void HandleFileFound(FileFoundEventArgs e)
+        {
+            Debug.WriteLine($"File found: {Path.GetFileName(e.FilePath)} ({e.EventType})");
+            statusLabel.Text = $"Auto-Monitor: Found TV show - {Path.GetFileName(e.FilePath)}";
+        }
+
+        private void FolderMonitorService_FileProcessed(object? sender, FileProcessedEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<FileProcessedEventArgs>(HandleFileProcessed), e);
+            }
+            else
+            {
+                HandleFileProcessed(e);
+            }
+        }
+
+        private void HandleFileProcessed(FileProcessedEventArgs e)
+        {
+            // Add processed file to the list for tracking
+            ListViewItem lvi = new ListViewItem($"ðŸ”„ {Path.GetFileName(e.FilePath)}");
+            lvi.BackColor = e.Success ? Color.LightGreen : Color.LightCoral;
+            lvi.SubItems.Add(e.Success ? "Auto-processed" : "Auto-failed");
+            lvi.SubItems.Add("Auto-Monitor");
+            lvi.SubItems.Add("Auto");
+            lvi.SubItems.Add("Auto");
+            lvi.SubItems.Add(e.Message);
+            lvFiles.Items.Insert(1, lvi); // Insert after status item
+
+            // Keep only last 10 auto-processed items to avoid cluttering
+            var autoItems = lvFiles.Items.Cast<ListViewItem>()
+                .Where(item => item.Text.StartsWith("ðŸ”„"))
+                .Skip(10)
+                .ToList();
+            
+            foreach (var item in autoItems)
+            {
+                lvFiles.Items.Remove(item);
+            }
+
+            Debug.WriteLine($"File processed: {Path.GetFileName(e.FilePath)} - Success: {e.Success} - {e.Message}");
+        }
+
+        private void FolderMonitorService_ErrorOccurred(object? sender, Exception e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action<Exception>(HandleMonitoringError), e);
+            }
+            else
+            {
+                HandleMonitoringError(e);
+            }
+        }
+
+        private void HandleMonitoringError(Exception ex)
+        {
+            Debug.WriteLine($"Monitoring error: {ex.Message}");
+            statusLabel.Text = $"Auto-Monitor Error: {ex.Message}";
+            
+            // You might want to show this to user or log it
+            // For now, just update status
+        }
+
+        /// <summary>
+        /// Configure and start folder monitoring
+        /// </summary>
+        private bool ConfigureAndStartMonitoring(string watchFolder, string destinationFolder, string extensions, int stabilityDelay)
+        {
+            if (_folderMonitorService == null)
+                return false;
+
+            try
+            {
+                // Parse extensions
+                string[] extensionArray = extensions.Split(';', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(ext => ext.Trim())
+                    .ToArray();
+
+                _folderMonitorService.WatchFolder = watchFolder;
+                _folderMonitorService.DestinationFolder = destinationFolder;
+                _folderMonitorService.FileExtensions = extensionArray;
+                _folderMonitorService.StabilityDelaySeconds = stabilityDelay;
+
+                return _folderMonitorService.StartMonitoring();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error starting monitoring: {ex.Message}", 
+                    "Monitoring Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Menu item to configure auto-monitoring
+        /// </summary>
+        private void miAutoMonitor_Click(object sender, EventArgs e)
+        {
+            using (frmFolderMonitor monitorDialog = new frmFolderMonitor())
+            {
+                // Pre-populate with saved settings
+                monitorDialog.WatchFolder = _savedWatchFolder;
+                monitorDialog.DestinationPath = _savedDestinationFolder;
+                monitorDialog.FileExtensions = _savedFileExtensions;
+                monitorDialog.StabilityDelaySeconds = _savedStabilityDelay;
+                monitorDialog.AutoStartOnLoad = _savedAutoStart;
+
+                if (monitorDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Save settings
+                    _savedWatchFolder = monitorDialog.WatchFolder;
+                    _savedDestinationFolder = monitorDialog.DestinationPath;
+                    _savedFileExtensions = monitorDialog.FileExtensions;
+                    _savedStabilityDelay = monitorDialog.StabilityDelaySeconds;
+                    _savedAutoStart = monitorDialog.AutoStartOnLoad;
+                    SaveMonitoringSettings();
+
+                    // Stop current monitoring if running
+                    _folderMonitorService?.StopMonitoring();
+
+                    // Start new monitoring
+                    if (ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay))
+                    {
+                        MessageBox.Show($"Auto-monitoring started!\n\nWatching: {_savedWatchFolder}\nDestination: {_savedDestinationFolder}", 
+                            "Monitoring Started", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Menu item to start/stop monitoring
+        /// </summary>
+        private void miToggleMonitoring_Click(object sender, EventArgs e)
+        {
+            if (_folderMonitorService == null)
+                return;
+
+            if (_folderMonitorService.IsMonitoring)
+            {
+                _folderMonitorService.StopMonitoring();
+                MessageBox.Show("Auto-monitoring stopped.", "Monitoring", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(_savedWatchFolder) || string.IsNullOrWhiteSpace(_savedDestinationFolder))
+                {
+                    MessageBox.Show("Please configure monitoring settings first.", "Configuration Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    miAutoMonitor_Click(sender, e);
+                    return;
+                }
+
+                if (ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay))
+                {
+                    MessageBox.Show("Auto-monitoring started.", "Monitoring", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Show monitoring status and statistics
+        /// </summary>
+        private void miMonitoringStatus_Click(object sender, EventArgs e)
+        {
+            if (_folderMonitorService == null)
+            {
+                MessageBox.Show("Monitoring service not initialized.", "Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string status = _folderMonitorService.IsMonitoring ? "Running" : "Stopped";
+            string statusMessage = $"Auto-Monitoring Status: {status}\n\n";
+            
+            if (_folderMonitorService.IsMonitoring)
+            {
+                statusMessage += $"Watch Folder: {_savedWatchFolder}\n";
+                statusMessage += $"Destination: {_savedDestinationFolder}\n";
+                statusMessage += $"Extensions: {_savedFileExtensions}\n";
+                statusMessage += $"Stability Delay: {_savedStabilityDelay} seconds\n\n";
+                statusMessage += "The system is actively monitoring for completed HandBrake conversions.";
+            }
+            else
+            {
+                statusMessage += "Monitoring is currently stopped.\n";
+                statusMessage += "Use 'Configure Auto-Monitor' to set it up.";
+            }
+
+            MessageBox.Show(statusMessage, "Monitoring Status", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -975,116 +1142,170 @@ TIPS:
                 "Feature Disabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        /// <summary>
-        /// Remove all unparsed TV episodes from the list
-        /// </summary>
-        private void RemoveUnparsedTVEpisodes()
+        private void toolStripButton1_Click(object sender, EventArgs e)
         {
-            int removedCount = 0;
-            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
-
-            foreach (ListViewItem lvi in lvFiles.Items)
+            statusLabel.Text = "Scanning for movies...";
+            statusProgress.Value = 0;
+            
+            frmScanMovies sm = new frmScanMovies();
+            DialogResult dr = sm.ShowDialog();
+            if (dr == DialogResult.OK)
             {
-                if (lvi.BackColor == Color.LightGray || 
-                    (lvi.SubItems.Count > 1 && lvi.SubItems[1].Text.Contains("UNPARSED")))
+                try
                 {
-                    itemsToRemove.Add(lvi);
+                    string[] allFiles = Directory.GetFiles(sm.VideoPath, "*.*", SearchOption.AllDirectories);
+                    statusProgress.Maximum = allFiles.Length;
+                    statusProgress.Value = 0;
+                    
+                    int totalVideoFiles = 0;
+                    int likelyTVEpisodesSkipped = 0;
+                    int validMovies = 0;
+                    int unparsedFiles = 0;
+                    
+                    foreach (string s in allFiles)
+                    {
+                        statusProgress.PerformStep();
+                        Application.DoEvents();
+                        
+                        if (s.EndsWith(sm.FileExtension, StringComparison.OrdinalIgnoreCase))
+                        {
+                            totalVideoFiles++;
+                            
+                            // Check if this file is likely a TV episode and should be skipped
+                            int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(s);
+                            int movieConfidence = MediaTypeDetector.GetMovieConfidence(s);
+                            
+                            // Skip files that seem more like TV episodes than movies
+                            if (tvConfidence > movieConfidence && tvConfidence > 50)
+                            {
+                                likelyTVEpisodesSkipped++;
+                                Debug.WriteLine($"Skipping likely TV episode: {Path.GetFileName(s)} (TV: {tvConfidence}%, Movie: {movieConfidence}%)");
+                                continue;
+                            }
+                            
+                            MovieFile mv = new MovieFile(s, sm.OutputDirectory);
+                            
+                            // Check if movie was successfully parsed
+                            bool isValidMovie = !string.IsNullOrWhiteSpace(mv.MovieName) && 
+                                              mv.MovieName != "Unknown Movie" &&
+                                              !string.IsNullOrWhiteSpace(mv.NewDestDirectory);
+                            
+                            ListViewItem lvi = new ListViewItem();
+                            lvi.Text = s;
+                            lvi.SubItems.Add(mv.NewDestDirectory);
+                            lvi.SubItems.Add(mv.MovieName ?? "Unknown");
+                            lvi.SubItems.Add(mv.MovieYear ?? "Unknown");
+                            
+                            if (isValidMovie)
+                            {
+                                validMovies++;
+                                lvi.SubItems.Add("");
+                            }
+                            else
+                            {
+                                // Only add unparsed files that have some movie characteristics
+                                if (movieConfidence > 20 || tvConfidence < 30)
+                                {
+                                    unparsedFiles++;
+                                    lvi.SubItems.Add("UNPARSED - Please review");
+                                    lvi.BackColor = Color.LightGray;
+                                }
+                                else
+                                {
+                                    likelyTVEpisodesSkipped++;
+                                    Debug.WriteLine($"Skipping unparsed likely TV episode: {Path.GetFileName(s)}");
+                                    continue; // Skip adding this item to the list
+                                }
+                            }
+                            
+                            lvi.Tag = mv;
+                            lvMovies.Items.Add(lvi);
+                        }
+                    }
+                    
+                    statusLabel.Text = $"Movie scan completed: {validMovies} movies found, {unparsedFiles} unparsed, {likelyTVEpisodesSkipped} TV episodes skipped from {totalVideoFiles} total files at {DateTime.Now.ToString("HH:mm:ss")}";
+                    
+                    // Show summary if useful
+                    if (totalVideoFiles > 0)
+                    {
+                        string summary = $"Scan Results:\n" +
+                                       $"Total video files: {totalVideoFiles}\n" +
+                                       $"Valid movies: {validMovies}\n" +
+                                       $"Unparsed files: {unparsedFiles}\n" +
+                                       $"TV episodes skipped: {likelyTVEpisodesSkipped}";
+                        
+                        if (unparsedFiles > 0)
+                        {
+                            summary += "\n\nTip: Review unparsed files (gray) and remove them if they're not movies.";
+                        }
+                        
+                        MessageBox.Show(summary, "Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    MessageBox.Show("Access denied to source directory. Please check permissions.", 
+                        "Access Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Scan failed - Access denied";
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    MessageBox.Show("Source directory not found. Please verify the path.", 
+                        "Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Scan failed - Directory not found";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error during scan: {ex.Message}", 
+                        "Scan Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Scan failed - Error occurred";
+                    Debug.WriteLine($"Movie scan error: {ex}");
                 }
             }
-
-            foreach (ListViewItem lvi in itemsToRemove)
+            else
             {
-                lvFiles.Items.Remove(lvi);
-                removedCount++;
+                statusLabel.Text = "Movie scan cancelled";
+                Debug.WriteLine("Dialog Cancelled");
             }
-
-            statusLabel.Text = $"Removed {removedCount} unparsed TV episode(s)";
         }
 
         /// <summary>
-        /// Remove all unparsed movies from the list
+        /// Show help dialog
         /// </summary>
-        private void RemoveUnparsedMovies()
+        private void miShowHelp_Click(object sender, EventArgs e)
         {
-            int removedCount = 0;
-            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
-
-            foreach (ListViewItem lvi in lvMovies.Items)
-            {
-                if (lvi.BackColor == Color.LightGray || 
-                    (lvi.SubItems.Count > 4 && lvi.SubItems[4].Text.Contains("UNPARSED")))
-                {
-                    itemsToRemove.Add(lvi);
-                }
-            }
-
-            foreach (ListViewItem lvi in itemsToRemove)
-            {
-                lvMovies.Items.Remove(lvi);
-                removedCount++;
-            }
-
-            statusLabel.Text = $"Removed {removedCount} unparsed movie(s)";
+            ShowHelp();
         }
 
         /// <summary>
-        /// Remove likely misclassified files from TV episode list (those that seem more like movies)
+        /// Show about dialog
         /// </summary>
-        private void RemoveLikelyMoviesFromTVList()
+        private void miAbout_Click(object sender, EventArgs e)
         {
-            int removedCount = 0;
-            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
+            string aboutText = $@"Torrent File Renamer
+Version 2.0 Enhanced
 
-            foreach (ListViewItem lvi in lvFiles.Items)
-            {
-                string filename = lvi.Text;
-                int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(filename);
-                int movieConfidence = MediaTypeDetector.GetMovieConfidence(filename);
+Features:
+â€¢ TV Episode Organization (S01E01 format)
+â€¢ Movie Organization (Alphabetical)
+â€¢ Smart File Type Detection
+â€¢ Automatic HandBrake Monitoring
+â€¢ Multi-select Operations
+â€¢ Path Validation & Space Checking
+â€¢ Network Drive Support
 
-                // Remove items that seem more like movies
-                if (movieConfidence > tvConfidence && movieConfidence > 60)
-                {
-                    itemsToRemove.Add(lvi);
-                }
-            }
+Â© 2024 Enhanced for .NET 8
+Built with intelligent media detection";
 
-            foreach (ListViewItem lvi in itemsToRemove)
-            {
-                lvFiles.Items.Remove(lvi);
-                removedCount++;
-            }
-
-            statusLabel.Text = $"Removed {removedCount} likely movie(s) from TV list";
+            MessageBox.Show(aboutText, "About Torrent File Renamer", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
-        /// Remove likely misclassified files from movie list (those that seem more like TV episodes)
+        /// Toolbar button for quick access to auto-monitoring configuration
         /// </summary>
-        private void RemoveLikelyTVFromMovieList()
+        private void tsbAutoMonitor_Click(object sender, EventArgs e)
         {
-            int removedCount = 0;
-            List<ListViewItem> itemsToRemove = new List<ListViewItem>();
-
-            foreach (ListViewItem lvi in lvMovies.Items)
-            {
-                string filename = lvi.Text;
-                int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(filename);
-                int movieConfidence = MediaTypeDetector.GetMovieConfidence(filename);
-
-                // Remove items that seem more like TV episodes
-                if (tvConfidence > movieConfidence && tvConfidence > 70)
-                {
-                    itemsToRemove.Add(lvi);
-                }
-            }
-
-            foreach (ListViewItem lvi in itemsToRemove)
-            {
-                lvMovies.Items.Remove(lvi);
-                removedCount++;
-            }
-
-            statusLabel.Text = $"Removed {removedCount} likely TV episode(s) from movie list";
+            miAutoMonitor_Click(sender, e);
         }
     }
 }

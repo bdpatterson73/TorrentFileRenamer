@@ -17,6 +17,13 @@
             {
                 components.Dispose();
             }
+            
+            // Dispose folder monitoring service
+            if (disposing)
+            {
+                _folderMonitorService?.Dispose();
+            }
+            
             base.Dispose(disposing);
         }
 
@@ -34,8 +41,16 @@
             miScan = new ToolStripMenuItem();
             miScanFiles = new ToolStripMenuItem();
             miProcess = new ToolStripMenuItem();
+            miAutoMonitor = new ToolStripMenuItem();
+            miConfigureAutoMonitor = new ToolStripMenuItem();
+            miToggleMonitoring = new ToolStripMenuItem();
+            toolStripSeparator3 = new ToolStripSeparator();
+            miMonitoringStatus = new ToolStripMenuItem();
             editToolStripMenuItem = new ToolStripMenuItem();
             helpToolStripMenuItem = new ToolStripMenuItem();
+            miShowHelp = new ToolStripMenuItem();
+            toolStripSeparator4 = new ToolStripSeparator();
+            miAbout = new ToolStripMenuItem();
             lvFiles = new ListView();
             chFileName = new ColumnHeader();
             chNewName = new ColumnHeader();
@@ -75,6 +90,8 @@
             toolStripButton1 = new ToolStripButton();
             toolStripButton2 = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
+            tsbAutoMonitor = new ToolStripButton();
+            toolStripSeparator5 = new ToolStripSeparator();
             toolStripButton3 = new ToolStripButton();
             toolStripButton4 = new ToolStripButton();
             tsbForceDateCheck = new ToolStripButton();
@@ -96,7 +113,7 @@
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(24, 24);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { miScan, editToolStripMenuItem, helpToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { miScan, miAutoMonitor, editToolStripMenuItem, helpToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Padding = new Padding(4, 1, 0, 1);
@@ -125,6 +142,39 @@
             miProcess.Text = "Process";
             miProcess.Click += miProcess_Click;
             // 
+            // miAutoMonitor
+            // 
+            miAutoMonitor.DropDownItems.AddRange(new ToolStripItem[] { miConfigureAutoMonitor, miToggleMonitoring, toolStripSeparator3, miMonitoringStatus });
+            miAutoMonitor.Name = "miAutoMonitor";
+            miAutoMonitor.Size = new Size(88, 22);
+            miAutoMonitor.Text = "&Auto-Monitor";
+            // 
+            // miConfigureAutoMonitor
+            // 
+            miConfigureAutoMonitor.Name = "miConfigureAutoMonitor";
+            miConfigureAutoMonitor.Size = new Size(180, 22);
+            miConfigureAutoMonitor.Text = "&Configure Auto-Monitor...";
+            miConfigureAutoMonitor.Click += miAutoMonitor_Click;
+            // 
+            // miToggleMonitoring
+            // 
+            miToggleMonitoring.Name = "miToggleMonitoring";
+            miToggleMonitoring.Size = new Size(180, 22);
+            miToggleMonitoring.Text = "&Start/Stop Monitoring";
+            miToggleMonitoring.Click += miToggleMonitoring_Click;
+            // 
+            // toolStripSeparator3
+            // 
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new Size(177, 6);
+            // 
+            // miMonitoringStatus
+            // 
+            miMonitoringStatus.Name = "miMonitoringStatus";
+            miMonitoringStatus.Size = new Size(180, 22);
+            miMonitoringStatus.Text = "Monitoring &Status...";
+            miMonitoringStatus.Click += miMonitoringStatus_Click;
+            // 
             // editToolStripMenuItem
             // 
             editToolStripMenuItem.Name = "editToolStripMenuItem";
@@ -133,9 +183,29 @@
             // 
             // helpToolStripMenuItem
             // 
+            helpToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { miShowHelp, toolStripSeparator4, miAbout });
             helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             helpToolStripMenuItem.Size = new Size(44, 22);
             helpToolStripMenuItem.Text = "&Help";
+            // 
+            // miShowHelp
+            // 
+            miShowHelp.Name = "miShowHelp";
+            miShowHelp.Size = new Size(107, 22);
+            miShowHelp.Text = "&Help";
+            miShowHelp.Click += miShowHelp_Click;
+            // 
+            // toolStripSeparator4
+            // 
+            toolStripSeparator4.Name = "toolStripSeparator4";
+            toolStripSeparator4.Size = new Size(104, 6);
+            // 
+            // miAbout
+            // 
+            miAbout.Name = "miAbout";
+            miAbout.Size = new Size(107, 22);
+            miAbout.Text = "&About";
+            miAbout.Click += miAbout_Click;
             // 
             // lvFiles
             // 
@@ -377,10 +447,10 @@
             // 
             toolStrip1.Dock = DockStyle.None;
             toolStrip1.ImageScalingSize = new Size(32, 32);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbScan, tsbProcess, toolStripSeparator1, toolStripButton1, toolStripButton2, toolStripSeparator2, toolStripButton3, toolStripButton4, tsbForceDateCheck });
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbScan, tsbProcess, toolStripSeparator1, toolStripButton1, toolStripButton2, toolStripSeparator2, tsbAutoMonitor, toolStripSeparator5, toolStripButton3, toolStripButton4, tsbForceDateCheck });
             toolStrip1.Location = new Point(3, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new Size(307, 39);
+            toolStrip1.Size = new Size(380, 39);
             toolStrip1.TabIndex = 0;
             // 
             // tsbScan
@@ -432,6 +502,21 @@
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
             toolStripSeparator2.Size = new Size(6, 39);
+            // 
+            // tsbAutoMonitor
+            // 
+            tsbAutoMonitor.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            tsbAutoMonitor.ImageTransparentColor = Color.Magenta;
+            tsbAutoMonitor.Name = "tsbAutoMonitor";
+            tsbAutoMonitor.Size = new Size(63, 36);
+            tsbAutoMonitor.Text = "📁 Monitor";
+            tsbAutoMonitor.ToolTipText = "Configure Auto-Monitor for HandBrake";
+            tsbAutoMonitor.Click += tsbAutoMonitor_Click;
+            // 
+            // toolStripSeparator5
+            // 
+            toolStripSeparator5.Name = "toolStripSeparator5";
+            toolStripSeparator5.Size = new Size(6, 39);
             // 
             // toolStripButton3
             // 
@@ -508,8 +593,16 @@
         private MenuStrip menuStrip1;
         private ToolStripMenuItem miScan;
         private ToolStripMenuItem miScanFiles;
+        private ToolStripMenuItem miAutoMonitor;
+        private ToolStripMenuItem miConfigureAutoMonitor;
+        private ToolStripMenuItem miToggleMonitoring;
+        private ToolStripSeparator toolStripSeparator3;
+        private ToolStripMenuItem miMonitoringStatus;
         private ToolStripMenuItem editToolStripMenuItem;
         private ToolStripMenuItem helpToolStripMenuItem;
+        private ToolStripMenuItem miShowHelp;
+        private ToolStripSeparator toolStripSeparator4;
+        private ToolStripMenuItem miAbout;
         private ListView lvFiles;
         private ColumnHeader chFileName;
         private ColumnHeader chNewName;
@@ -554,5 +647,7 @@
         private ColumnHeader chmcComment;
         private ToolStripButton tsbForceDateCheck;
         private ColumnHeader chRemark;
+        private ToolStripSeparator toolStripSeparator5;
+        private ToolStripButton tsbAutoMonitor;
     }
 }
