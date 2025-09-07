@@ -311,6 +311,35 @@ namespace TorrentFileRenamer
                     return;
                 }
 
+                // Check Plex compatibility for auto mode
+                if (episode.PlexValidation != null)
+                {
+                    // Set auto mode for validation
+                    var autoValidation = PlexCompatibilityValidator.ValidateTVEpisode(
+                        episode.ShowName,
+                        episode.SeasonNumber,
+                        episode.EpisodeNumber,
+                        episode.NewFileName,
+                        episode.NewFileNamePath,
+                        true // Auto mode
+                    );
+
+                    if (!autoValidation.IsValid && autoValidation.SuggestedAction == PlexValidationAction.SkipInAutoMode)
+                    {
+                        string issues = string.Join("; ", autoValidation.Issues);
+                        FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, 
+                            $"Skipped due to Plex compatibility issues: {issues}"));
+                        return;
+                    }
+
+                    // Log warnings but continue processing
+                    if (autoValidation.Warnings.Any())
+                    {
+                        string warnings = string.Join("; ", autoValidation.Warnings);
+                        Debug.WriteLine($"Plex warnings for {Path.GetFileName(filePath)}: {warnings}");
+                    }
+                }
+
                 // Create destination directory if needed
                 if (!Directory.Exists(episode.NewDirectoryName))
                 {
@@ -335,8 +364,14 @@ namespace TorrentFileRenamer
                     {
                         // Delete original
                         File.Delete(filePath);
-                        FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, true, 
-                            $"Successfully moved to: {episode.NewFileNamePath}"));
+                        
+                        string successMessage = $"Successfully moved to: {episode.NewFileNamePath}";
+                        if (episode.PlexValidation?.Warnings.Any() == true)
+                        {
+                            successMessage += " (with Plex warnings)";
+                        }
+                        
+                        FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, true, successMessage));
                         StatusChanged?.Invoke(this, $"Completed: {episode.ShowName} S{episode.SeasonNumber:D2}E{episode.EpisodeNumber:D2}");
                     }
                     else

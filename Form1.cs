@@ -203,28 +203,85 @@ TIPS:
                             // Allow episode 0 for special episodes - only exclude truly invalid parsing
                             if (fe.EpisodeNumber >= 0 && !string.IsNullOrWhiteSpace(fe.ShowName) && fe.ShowName != "Unknown Show")
                             {
-                                validEpisodes++;
-                                ListViewItem lvi = new ListViewItem();
-                                lvi.Text = s;
-                                lvi.SubItems.Add(fe.NewFileNamePath);
-                                lvi.SubItems.Add(fe.ShowName);
-                                lvi.SubItems.Add(fe.SeasonNumber.ToString());
-                                
-                                // Display episode numbers - show all episodes if multi-episode
-                                string episodeDisplay;
-                                if (fe.IsMultiEpisode)
+                                // Check Plex compatibility for manual processing
+                                bool shouldAdd = true;
+                                if (fe.PlexValidation != null && !fe.PlexValidation.IsValid)
                                 {
-                                    episodeDisplay = string.Join(", ", fe.EpisodeNumbers.OrderBy(x => x));
+                                    // Handle Plex compatibility issues in manual mode
+                                    if (fe.PlexValidation.SuggestedAction == PlexValidationAction.PromptUser)
+                                    {
+                                        string issuesText = string.Join("\n• ", fe.PlexValidation.Issues);
+                                        string warningsText = fe.PlexValidation.Warnings.Any() ? 
+                                            "\n\nWarnings:\n• " + string.Join("\n• ", fe.PlexValidation.Warnings) : "";
+                                        
+                                        var result = MessageBox.Show(
+                                            $"Plex Compatibility Issues Found:\n• {issuesText}{warningsText}\n\n" +
+                                            $"Original file: {Path.GetFileName(s)}\n" +
+                                            $"Suggested name: {fe.NewFileName}\n\n" +
+                                            "Would you like to:\n" +
+                                            "• Yes: Use the suggested fix\n" +
+                                            "• No: Skip this file\n" +
+                                            "• Cancel: Stop scanning",
+                                            "Plex Compatibility Issue",
+                                            MessageBoxButtons.YesNoCancel,
+                                            MessageBoxIcon.Warning);
+
+                                        switch (result)
+                                        {
+                                            case DialogResult.Yes:
+                                                // Use the suggested filename (already applied by auto-fix)
+                                                break;
+                                            case DialogResult.No:
+                                                shouldAdd = false;
+                                                break;
+                                            case DialogResult.Cancel:
+                                                return; // Stop scanning entirely
+                                        }
+                                    }
                                 }
-                                else
+
+                                if (shouldAdd)
                                 {
-                                    episodeDisplay = fe.EpisodeNumber.ToString();
+                                    validEpisodes++;
+                                    ListViewItem lvi = new ListViewItem();
+                                    lvi.Text = s;
+                                    lvi.SubItems.Add(fe.NewFileNamePath);
+                                    lvi.SubItems.Add(fe.ShowName);
+                                    lvi.SubItems.Add(fe.SeasonNumber.ToString());
+                                    
+                                    // Display episode numbers - show all episodes if multi-episode
+                                    string episodeDisplay;
+                                    if (fe.IsMultiEpisode)
+                                    {
+                                        episodeDisplay = string.Join(", ", fe.EpisodeNumbers.OrderBy(x => x));
+                                    }
+                                    else
+                                    {
+                                        episodeDisplay = fe.EpisodeNumber.ToString();
+                                    }
+                                    lvi.SubItems.Add(episodeDisplay);
+                                    
+                                    // Add status based on Plex validation
+                                    string status = "";
+                                    if (fe.PlexValidation != null)
+                                    {
+                                        if (!fe.PlexValidation.IsValid)
+                                            status = "⚠️ Plex Issues Fixed";
+                                        else if (fe.PlexValidation.Warnings.Any())
+                                            status = "⚠️ Plex Warnings";
+                                        else
+                                            status = "✅ Plex Compatible";
+                                    }
+                                    lvi.SubItems.Add(status);
+                                    
+                                    lvi.Tag = fe;
+                                    
+                                    // Color code based on Plex validation
+                                    if (fe.PlexValidation != null && fe.PlexValidation.Warnings.Any())
+                                        lvi.BackColor = Color.LightYellow;
+                                    
+                                    lvFiles.Items.Add(lvi);
                                 }
-                                lvi.SubItems.Add(episodeDisplay);
-                                
-                                lvi.SubItems.Add("");
-                                lvi.Tag = fe;
-                                lvFiles.Items.Add(lvi);
                             }
                             else
                             {
@@ -574,6 +631,8 @@ TIPS:
             #if DEBUG
             FileEpisode.TestFilenameParsing(@"C:\temp\I Fought the Law 2025 S01E01 720p WEB-DL HEVC x265 BONE.mkv", @"C:\TestOutput");
             FileEpisode.TestFilenameParsing(@"C:\temp\Show Name S01E00 Pilot Episode.mkv", @"C:\TestOutput");
+            FileEpisode.TestFilenameParsing(@"C:\temp\Show:Name*With?Problems S01E01.mkv", @"C:\TestOutput");
+            FileEpisode.TestFilenameParsing(@"C:\temp\Unknown Show S01E01.mkv", @"C:\TestOutput");
             #endif
 
             //DateTime startAt = DateTime.Now;

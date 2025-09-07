@@ -46,11 +46,14 @@ namespace TorrentFileRenamer
         public List<int> EpisodeNumbers { get; set; }
         public bool IsMultiEpisode => EpisodeNumbers.Count > 1;
 
-        public string ShowName { get; set; }
+        public string ShowName { get; set; } = "";
 
-        public string NewFileName { get; set; }
+        public string NewFileName { get; set; } = "";
 
-        public string NewFileNamePath { get; set; }
+        public string NewFileNamePath { get; set; } = "";
+
+        // Plex compatibility validation result
+        public PlexValidationResult? PlexValidation { get; set; }
         
         private void ParseFileDetails()
         {
@@ -392,12 +395,95 @@ namespace TorrentFileRenamer
                 NewFileName = $"{ShowName}.S{SeasonNumber:D2}{episodeString}{Extension}";
                 NewFileName = NewFileName.Replace(" ", ".");
                 
+                // Validate for Plex compatibility
+                ValidateForPlexCompatibility();
+                
                 Debug.WriteLine($"Generated filename: {NewFileName}");
             }
             catch (Exception e)
             {
                 Debug.WriteLine($"Error generating new filename: {e.Message}");
                 NewFileName = "NO NAME";
+            }
+        }
+
+        /// <summary>
+        /// Validates the generated filename for Plex compatibility
+        /// </summary>
+        private void ValidateForPlexCompatibility()
+        {
+            try
+            {
+                // Validate the generated filename and path
+                var validation = PlexCompatibilityValidator.ValidateTVEpisode(
+                    ShowName, 
+                    SeasonNumber, 
+                    EpisodeNumber, 
+                    NewFileName, 
+                    NewFileNamePath,
+                    false // This will be set to true for auto mode in the calling code
+                );
+
+                PlexValidation = validation;
+
+                // If there are issues that can be auto-fixed, try to fix them
+                if (!validation.IsValid && validation.CanAutoFix)
+                {
+                    Debug.WriteLine("Attempting to auto-fix Plex compatibility issues...");
+                    
+                    // Fix the show name
+                    string fixedShowName = PlexCompatibilityValidator.FixShowNameForPlex(ShowName);
+                    
+                    // Generate a suggested filename
+                    List<int> additionalEpisodes = IsMultiEpisode ? 
+                        EpisodeNumbers.Skip(1).ToList() : null;
+                    
+                    string suggestedFilename = PlexCompatibilityValidator.SuggestPlexTVFilename(
+                        fixedShowName, 
+                        SeasonNumber, 
+                        EpisodeNumber, 
+                        Extension,
+                        additionalEpisodes
+                    );
+
+                    // Update the filename if the suggestion is better
+                    if (!string.Equals(NewFileName, suggestedFilename, StringComparison.OrdinalIgnoreCase))
+                    {
+                        ShowName = fixedShowName;
+                        NewFileName = suggestedFilename;
+                        
+                        // Regenerate paths with fixed name
+                        NewFileNamePath = Path.Combine(OutputDirectory, ShowName, $"Season {SeasonNumber}", NewFileName);
+                        NewDirectoryName = Path.Combine(OutputDirectory, ShowName, $"Season {SeasonNumber}") + Path.DirectorySeparatorChar;
+                        
+                        Debug.WriteLine($"Auto-fixed filename: {NewFileName}");
+                        
+                        // Re-validate after fixing
+                        PlexValidation = PlexCompatibilityValidator.ValidateTVEpisode(
+                            ShowName, 
+                            SeasonNumber, 
+                            EpisodeNumber, 
+                            NewFileName, 
+                            NewFileNamePath,
+                            false
+                        );
+                    }
+                }
+
+                Debug.WriteLine($"Plex validation result: Valid={validation.IsValid}, Issues={validation.Issues.Count}, Warnings={validation.Warnings.Count}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error during Plex validation: {ex.Message}");
+                // Create a simple validation result indicating unknown status
+                PlexValidation = new PlexValidationResult
+                {
+                    IsValid = true, // Assume valid if validation fails
+                    Issues = new List<string>(),
+                    Warnings = new List<string> { $"Could not validate Plex compatibility: {ex.Message}" },
+                    SuggestedAction = PlexValidationAction.ProcessNormally,
+                    CanAutoFix = false
+                };
             }
         }
 
@@ -466,6 +552,22 @@ namespace TorrentFileRenamer
                 Debug.WriteLine($"New Filename: {testEpisode.NewFileName}");
                 Debug.WriteLine($"Full Path: {testEpisode.NewFileNamePath}");
                 Debug.WriteLine($"Episode 0 Support: {(testEpisode.EpisodeNumber == 0 ? "✅ Working" : "N/A")}");
+                
+                // Plex validation results
+                if (testEpisode.PlexValidation != null)
+                {
+                    Debug.WriteLine($"Plex Compatible: {(testEpisode.PlexValidation.IsValid ? "✅ Yes" : "❌ No")}");
+                    if (testEpisode.PlexValidation.Issues.Any())
+                    {
+                        Debug.WriteLine($"Plex Issues: {string.Join("; ", testEpisode.PlexValidation.Issues)}");
+                    }
+                    if (testEpisode.PlexValidation.Warnings.Any())
+                    {
+                        Debug.WriteLine($"Plex Warnings: {string.Join("; ", testEpisode.PlexValidation.Warnings)}");
+                    }
+                    Debug.WriteLine($"Suggested Action: {testEpisode.PlexValidation.SuggestedAction}");
+                }
+                
                 Debug.WriteLine($"===================");
             }
             catch (Exception ex)
