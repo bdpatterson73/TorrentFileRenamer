@@ -279,9 +279,9 @@
             // 
             // statusLabel
             // 
-            statusLabel.AutoSize = false;
             statusLabel.Name = "statusLabel";
-            statusLabel.Size = new Size(500, 17);
+            statusLabel.Size = new Size(687, 17);
+            statusLabel.Spring = true;
             statusLabel.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // statusProgress
