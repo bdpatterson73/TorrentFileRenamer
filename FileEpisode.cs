@@ -88,12 +88,13 @@ namespace TorrentFileRenamer
         }
 
         /// <summary>
-        /// Parse SxxExx format (e.g., S01E03, S01E03-04, S1E3)
+        /// Parse SxxExx format (e.g., S01E03, S01E03-04, S1E3, S01 E01)
         /// </summary>
         private bool TryParseSxxExxFormat()
         {
-            // Find the main SxxExx pattern - be very specific about what constitutes valid episode info
-            Regex mainPattern = new Regex(@"S(?<season>\d{1,2})E(?<episode>\d{1,2})", RegexOptions.IgnoreCase);
+            // Find the main SxxExx pattern - allow optional space between S and E parts
+            // Updated to handle: S01E01, S01 E01, S1E3, S1 E3
+            Regex mainPattern = new Regex(@"S(?<season>\d{1,2})\s*E(?<episode>\d{1,2})", RegexOptions.IgnoreCase);
             Match mainMatch = mainPattern.Match(Filename);
             
             if (!mainMatch.Success)
@@ -119,9 +120,10 @@ namespace TorrentFileRenamer
                 // - S01E01E02 (no spaces/separators between)
                 // - S01E01-E02 (clear separator with E prefix)
                 // - S01E01-02 (clear separator)
+                // - S01 E01 E02 (with spaces)
                 // Do NOT match random numbers that appear later in quality info
                 
-                Regex strictMultiEpisodePattern = new Regex(@"^(?:(?:E(?<episode>\d{1,2}))|(?:-E(?<episode>\d{1,2}))|(?:-(?<episode>\d{1,2})))(?=\s|$|[^0-9])", RegexOptions.IgnoreCase);
+                Regex strictMultiEpisodePattern = new Regex(@"^(?:(?:\s*E(?<episode>\d{1,2}))|(?:-\s*E(?<episode>\d{1,2}))|(?:-(?<episode>\d{1,2})))(?=\s|$|[^0-9])", RegexOptions.IgnoreCase);
                 Match multiMatch = strictMultiEpisodePattern.Match(textAfterMatch);
                 
                 if (multiMatch.Success)

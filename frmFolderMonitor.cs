@@ -25,6 +25,7 @@ namespace TorrentFileRenamer
             numStabilityDelay.Value = 30; // 30 seconds default
             txtDestinationPath.Text = "";
             chkAutoStart.Checked = false;
+            numMaxLogEntries.Value = 20; // 20 log entries default
         }
 
         public string WatchFolder
@@ -55,6 +56,12 @@ namespace TorrentFileRenamer
         {
             get { return chkAutoStart.Checked; }
             set { chkAutoStart.Checked = value; }
+        }
+
+        public int MaxAutoMonitorLogEntries
+        {
+            get { return (int)numMaxLogEntries.Value; }
+            set { numMaxLogEntries.Value = Math.Max(5, Math.Min(50, value)); }
         }
 
         private void btnBrowseWatchFolder_Click(object sender, EventArgs e)

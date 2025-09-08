@@ -193,6 +193,7 @@ namespace TorrentFileRenamer
         public int StabilityDelaySeconds { get; set; } = 30;
         public bool AutoStartOnLoad { get; set; } = false;
         public bool ProcessSubfolders { get; set; } = false;
+        public int MaxAutoMonitorLogEntries { get; set; } = 20;
     }
 
     public class PlexSettings

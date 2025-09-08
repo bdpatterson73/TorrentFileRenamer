@@ -26,6 +26,9 @@ namespace TorrentFileRenamer
             txtDestinationPath = new TextBox();
             label2 = new Label();
             groupBox3 = new GroupBox();
+            label6 = new Label();
+            numMaxLogEntries = new NumericUpDown();
+            label7 = new Label();
             label5 = new Label();
             numStabilityDelay = new NumericUpDown();
             label4 = new Label();
@@ -39,6 +42,7 @@ namespace TorrentFileRenamer
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)numStabilityDelay).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numMaxLogEntries).BeginInit();
             SuspendLayout();
             // 
             // groupBox1
@@ -148,6 +152,9 @@ namespace TorrentFileRenamer
             // 
             // groupBox3
             // 
+            groupBox3.Controls.Add(label6);
+            groupBox3.Controls.Add(numMaxLogEntries);
+            groupBox3.Controls.Add(label7);
             groupBox3.Controls.Add(label5);
             groupBox3.Controls.Add(numStabilityDelay);
             groupBox3.Controls.Add(label4);
@@ -157,10 +164,39 @@ namespace TorrentFileRenamer
             groupBox3.Margin = new Padding(3, 4, 3, 4);
             groupBox3.Name = "groupBox3";
             groupBox3.Padding = new Padding(3, 4, 3, 4);
-            groupBox3.Size = new Size(640, 133);
+            groupBox3.Size = new Size(640, 185);
             groupBox3.TabIndex = 2;
             groupBox3.TabStop = false;
             groupBox3.Text = "Monitoring Settings";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(149, 147);
+            label6.Name = "label6";
+            label6.Size = new Size(362, 20);
+            label6.TabIndex = 7;
+            label6.Text = "entries (how many auto-processed files to show in list)";
+            // 
+            // numMaxLogEntries
+            // 
+            numMaxLogEntries.Location = new Point(7, 144);
+            numMaxLogEntries.Margin = new Padding(3, 4, 3, 4);
+            numMaxLogEntries.Maximum = new decimal(new int[] { 50, 0, 0, 0 });
+            numMaxLogEntries.Minimum = new decimal(new int[] { 5, 0, 0, 0 });
+            numMaxLogEntries.Name = "numMaxLogEntries";
+            numMaxLogEntries.Size = new Size(135, 27);
+            numMaxLogEntries.TabIndex = 6;
+            numMaxLogEntries.Value = new decimal(new int[] { 20, 0, 0, 0 });
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(7, 120);
+            label7.Name = "label7";
+            label7.Size = new Size(130, 20);
+            label7.TabIndex = 5;
+            label7.Text = "Max log entries:";
             // 
             // label5
             // 
@@ -211,7 +247,7 @@ namespace TorrentFileRenamer
             // chkAutoStart
             // 
             chkAutoStart.AutoSize = true;
-            chkAutoStart.Location = new Point(21, 387);
+            chkAutoStart.Location = new Point(21, 439);
             chkAutoStart.Margin = new Padding(3, 4, 3, 4);
             chkAutoStart.Name = "chkAutoStart";
             chkAutoStart.Size = new Size(374, 24);
@@ -221,7 +257,7 @@ namespace TorrentFileRenamer
             // 
             // btnOK
             // 
-            btnOK.Location = new Point(475, 427);
+            btnOK.Location = new Point(475, 479);
             btnOK.Margin = new Padding(3, 4, 3, 4);
             btnOK.Name = "btnOK";
             btnOK.Size = new Size(86, 31);
@@ -232,7 +268,7 @@ namespace TorrentFileRenamer
             // 
             // btnCancel
             // 
-            btnCancel.Location = new Point(568, 427);
+            btnCancel.Location = new Point(568, 479);
             btnCancel.Margin = new Padding(3, 4, 3, 4);
             btnCancel.Name = "btnCancel";
             btnCancel.Size = new Size(86, 31);
@@ -243,7 +279,7 @@ namespace TorrentFileRenamer
             // 
             // btnTestConfiguration
             // 
-            btnTestConfiguration.Location = new Point(14, 427);
+            btnTestConfiguration.Location = new Point(14, 479);
             btnTestConfiguration.Margin = new Padding(3, 4, 3, 4);
             btnTestConfiguration.Name = "btnTestConfiguration";
             btnTestConfiguration.Size = new Size(137, 31);
@@ -256,7 +292,7 @@ namespace TorrentFileRenamer
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(667, 473);
+            ClientSize = new Size(667, 525);
             Controls.Add(btnTestConfiguration);
             Controls.Add(btnCancel);
             Controls.Add(btnOK);
@@ -279,6 +315,7 @@ namespace TorrentFileRenamer
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)numStabilityDelay).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numMaxLogEntries).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -294,6 +331,9 @@ namespace TorrentFileRenamer
         private TextBox txtDestinationPath;
         private Label label2;
         private GroupBox groupBox3;
+        private Label label6;
+        private NumericUpDown numMaxLogEntries;
+        private Label label7;
         private Label label5;
         private NumericUpDown numStabilityDelay;
         private Label label4;

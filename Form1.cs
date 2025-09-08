@@ -33,6 +33,7 @@ namespace TorrentFileRenamer
         private string _savedFileExtensions = "*.mp4;*.mkv;*.avi;*.m4v";
         private int _savedStabilityDelay = 30;
         private bool _savedAutoStart = false;
+        private int _savedMaxAutoMonitorLogEntries = 20;
 
         public frmMain()
         {
@@ -58,6 +59,7 @@ namespace TorrentFileRenamer
             FileEpisode.TestFilenameParsing(@"C:\temp\Show Name S01E00 Pilot Episode.mkv", @"C:\TestOutput");
             FileEpisode.TestFilenameParsing(@"C:\temp\Show:Name*With?Problems S01E01.mkv", @"C:\TestOutput");
             FileEpisode.TestFilenameParsing(@"C:\temp\Unknown Show S01E01.mkv", @"C:\TestOutput");
+            FileEpisode.TestFilenameParsing(@"C:\temp\Smallville - S01 E01 - Pilot (720P - Amzn Web-Dl).mp4", @"C:\TestOutput");
             #endif
         }
 
@@ -75,8 +77,11 @@ namespace TorrentFileRenamer
                     ? settings.Monitoring.StabilityDelaySeconds 
                     : 30;
                 _savedAutoStart = settings.Monitoring.AutoStartOnLoad;
+                _savedMaxAutoMonitorLogEntries = settings.Monitoring.MaxAutoMonitorLogEntries > 0
+                    ? settings.Monitoring.MaxAutoMonitorLogEntries
+                    : 20;
                 
-                LoggingService.LogInfo($"Settings applied - Watch: '{_savedWatchFolder}', Dest: '{_savedDestinationFolder}', Ext: '{_savedFileExtensions}', Delay: {_savedStabilityDelay}s, AutoStart: {_savedAutoStart}", "Settings");
+                LoggingService.LogInfo($"Settings applied - Watch: '{_savedWatchFolder}', Dest: '{_savedDestinationFolder}', Ext: '{_savedFileExtensions}', Delay: {_savedStabilityDelay}s, AutoStart: {_savedAutoStart}, MaxLogEntries: {_savedMaxAutoMonitorLogEntries}", "Settings");
             }
             catch (Exception ex)
             {
@@ -88,6 +93,7 @@ namespace TorrentFileRenamer
                 _savedFileExtensions = "*.mp4;*.mkv;*.avi;*.m4v";
                 _savedStabilityDelay = 30;
                 _savedAutoStart = false;
+                _savedMaxAutoMonitorLogEntries = 20;
             }
         }
 
@@ -103,6 +109,7 @@ namespace TorrentFileRenamer
                 settings.Monitoring.FileExtensions = _savedFileExtensions;
                 settings.Monitoring.StabilityDelaySeconds = _savedStabilityDelay;
                 settings.Monitoring.AutoStartOnLoad = _savedAutoStart;
+                settings.Monitoring.MaxAutoMonitorLogEntries = _savedMaxAutoMonitorLogEntries;
                 
                 settings.Save();
                 LoggingService.LogInfo("Current settings saved", "Settings");
@@ -511,7 +518,7 @@ TIPS:
                     File.Copy(sourceFile, destFile);
                     return true;
                 }
-                catch (IOException iox)
+                catch (IOException)
                 {
                     Debug.WriteLine("IO Exception. Waiting for file copy retry. " + i.ToString());
                     System.Threading.Thread.Sleep(5000);
@@ -880,7 +887,7 @@ TIPS:
                     File.Delete(GetShortPath(filename));
                     return true;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Thread.Sleep(1000);
                 }
@@ -917,6 +924,48 @@ TIPS:
             }
             
             statusLabel.Text = $"Removed {removedCount} TV episode item(s) from list";
+        }
+
+        /// <summary>
+        /// Remove selected movie items from the list
+        /// </summary>
+        private void msMovieRemove_Click(object sender, EventArgs e)
+        {
+            // Remove all currently selected listview items for movies
+            if (lvMovies.SelectedItems.Count == 0)
+            {
+                statusLabel.Text = "No movie items selected for removal";
+                return;
+            }
+
+            int removedCount = 0;
+            // Create a copy of the selected items since we'll be modifying the collection
+            ListViewItem[] selectedItems = new ListViewItem[lvMovies.SelectedItems.Count];
+            lvMovies.SelectedItems.CopyTo(selectedItems, 0);
+
+            foreach (ListViewItem lvi in selectedItems)
+            {
+                try
+                {
+                    lvMovies.Items.Remove(lvi);
+                    removedCount++;
+                }
+                catch (Exception ex) 
+                {
+                    Debug.WriteLine($"Error removing movie item: {ex.Message}");
+                }
+            }
+            
+            statusLabel.Text = $"Removed {removedCount} movie item(s) from list";
+        }
+
+        /// <summary>
+        /// Clear all movie items from the list
+        /// </summary>
+        private void msMovieClear_Click(object sender, EventArgs e)
+        {
+            lvMovies.Items.Clear();
+            statusLabel.Text = "Movie list cleared";
         }
 
         private void tsbScan_Click(object sender, EventArgs e)
@@ -1068,11 +1117,11 @@ TIPS:
             lvi.SubItems.Add("Auto-Monitor");
             lvi.SubItems.Add("Auto");
             lvi.SubItems.Add("Auto");
-            lvi.SubItems.Add(e.Message);
+            lvi.SubItems.Add($"{e.Message} at {e.ProcessedAt:HH:mm:ss}");
             
-            // Insert after status item if it exists, otherwise add at beginning
+            // Insert newest items right after the monitoring status item (most recent first)
             int insertIndex = _monitoringStatusItem != null ? 1 : 0;
-            if (insertIndex < lvFiles.Items.Count)
+            if (insertIndex <= lvFiles.Items.Count)
             {
                 lvFiles.Items.Insert(insertIndex, lvi);
             }
@@ -1081,10 +1130,10 @@ TIPS:
                 lvFiles.Items.Add(lvi);
             }
 
-            // Keep only last 10 auto-processed items to avoid cluttering
+            // Keep only the configured number of auto-processed items to avoid cluttering
             var autoItems = lvFiles.Items.Cast<ListViewItem>()
                 .Where(item => item.Text.StartsWith("🔄"))
-                .Skip(10)
+                .Skip(_savedMaxAutoMonitorLogEntries)  // Keep only the first N items, remove the rest
                 .ToList();
             
             foreach (var item in autoItems)
@@ -1153,6 +1202,7 @@ TIPS:
                     configForm.FileExtensions = _savedFileExtensions;
                     configForm.StabilityDelaySeconds = _savedStabilityDelay;
                     configForm.AutoStartOnLoad = _savedAutoStart;
+                    configForm.MaxAutoMonitorLogEntries = _savedMaxAutoMonitorLogEntries;
                     
                     // Show config form as dialog
                     DialogResult result = configForm.ShowDialog();
@@ -1164,6 +1214,7 @@ TIPS:
                         _savedFileExtensions = configForm.FileExtensions;
                         _savedStabilityDelay = configForm.StabilityDelaySeconds;
                         _savedAutoStart = configForm.AutoStartOnLoad;
+                        _savedMaxAutoMonitorLogEntries = configForm.MaxAutoMonitorLogEntries;
                         
                         // Save settings to persistent storage
                         SaveCurrentSettings();
@@ -1296,25 +1347,473 @@ TIPS:
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // Add minimal stubs for other event handlers that may be called from UI
-        private void toolStripButton2_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Movie scan functionality - scan for movie files
+        /// </summary>
+        private async void toolStripButton1_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Movie processing not fully implemented in this version.", "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            statusLabel.Text = "Scanning for movies...";
+            statusProgress.Value = 0;
+            
+            frmScanMovies options = new frmScanMovies();
+            DialogResult dr = options.ShowDialog();
+            if (dr == DialogResult.OK)
+            {
+                // Create cancellation token for long operations
+                using var cts = new CancellationTokenSource();
+                
+                try
+                {
+                    // Use async file enumeration for better performance
+                    var allFiles = await Task.Run(() => 
+                        Directory.EnumerateFiles(options.VideoPath, "*.*", SearchOption.AllDirectories)
+                        .Where(f => f.EndsWith(options.FileExtension, StringComparison.OrdinalIgnoreCase))
+                        .ToArray(), cts.Token);
+                    
+                    statusProgress.Maximum = allFiles.Length;
+                    statusProgress.Value = 0;
+                    
+                    int totalVideoFiles = 0;
+                    int likelyTVShowsSkipped = 0;
+                    int validMovies = 0;
+                    int unparsedFiles = 0;
+
+                    // Process files in batches for better responsiveness
+                    const int batchSize = 10;
+                    for (int i = 0; i < allFiles.Length; i += batchSize)
+                    {
+                        var batch = allFiles.Skip(i).Take(batchSize);
+                        
+                        await Task.Run(() => {
+                            foreach (string s in batch)
+                            {
+                                if (cts.Token.IsCancellationRequested)
+                                    return;
+                                    
+                                ProcessMovieFileForScan(s, options, ref totalVideoFiles, ref likelyTVShowsSkipped, 
+                                                       ref validMovies, ref unparsedFiles);
+                            }
+                        }, cts.Token);
+                        
+                        // Update UI on main thread
+                        statusProgress.Value = Math.Min(i + batchSize, allFiles.Length);
+                        Application.DoEvents();
+                    }
+                    
+                    statusLabel.Text = $"Movie scan completed: {validMovies} movies found, {unparsedFiles} unparsed, {likelyTVShowsSkipped} TV shows skipped from {totalVideoFiles} total files at {DateTime.Now:HH:mm:ss}";
+                    
+                    // Show summary if useful
+                    if (totalVideoFiles > 0)
+                    {
+                        await ShowMovieScanSummary(totalVideoFiles, validMovies, unparsedFiles, likelyTVShowsSkipped);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    statusLabel.Text = "Movie scan cancelled by user";
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    MessageBox.Show("Access denied to source directory. Please check permissions.", 
+                        "Access Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Movie scan failed - Access denied";
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    MessageBox.Show("Source directory not found. Please verify the path.", 
+                        "Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Movie scan failed - Directory not found";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error during movie scan: {ex.Message}", 
+                        "Scan Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    statusLabel.Text = "Movie scan failed - Error occurred";
+                    Debug.WriteLine($"Movie scan error: {ex}");
+                }
+            }
+            else
+            {
+                statusLabel.Text = "Movie scan cancelled";
+                Debug.WriteLine("Movie scan dialog cancelled");
+            }
         }
 
-        private void msMovieRemove_Click(object sender, EventArgs e)
+        private void ProcessMovieFileForScan(string filePath, frmScanMovies options, 
+            ref int totalVideoFiles, ref int likelyTVShowsSkipped, 
+            ref int validMovies, ref int unparsedFiles)
         {
-            MessageBox.Show("Movie remove not fully implemented in this version.", "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            totalVideoFiles++;
+            
+            // Check if this file is likely a TV show and should be skipped
+            int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(filePath);
+            int movieConfidence = MediaTypeDetector.GetMovieConfidence(filePath);
+            
+            // Skip files that seem more like TV shows than movies
+            if (tvConfidence > movieConfidence && tvConfidence > 40)
+            {
+                likelyTVShowsSkipped++;
+                Debug.WriteLine($"Skipping likely TV show: {Path.GetFileName(filePath)} (TV: {tvConfidence}%, Movie: {movieConfidence}%)");
+                return;
+            }
+            
+            MovieFile mv = new MovieFile(filePath, options.OutputDirectory);
+            
+            // Create local variables to avoid ref parameter issue in lambda
+            int localValidMovies = validMovies;
+            int localUnparsedFiles = unparsedFiles;
+            
+            // Process on main thread since it involves UI updates
+            Invoke(new Action(() => {
+                AddMovieToList(mv, ref localValidMovies, ref localUnparsedFiles, tvConfidence, movieConfidence);
+            }));
+            
+            // Update the original ref parameters
+            validMovies = localValidMovies;
+            unparsedFiles = localUnparsedFiles;
         }
 
-        private void msMovieClear_Click(object sender, EventArgs e)
+        private void AddMovieToList(MovieFile mv, ref int validMovies, ref int unparsedFiles, 
+            int tvConfidence, int movieConfidence)
         {
-            MessageBox.Show("Movie clear not fully implemented in this version.", "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Only exclude movies with completely invalid parsing
+            if (!string.IsNullOrWhiteSpace(mv.MovieName) && mv.MovieName != "Unknown Movie")
+            {
+                validMovies++;
+                ListViewItem lvi = new ListViewItem();
+                lvi.Text = mv.FileNamePath ?? "Unknown";
+                lvi.SubItems.Add(mv.NewDestDirectory ?? "");
+                lvi.SubItems.Add(mv.MovieName ?? "Unknown");
+                lvi.SubItems.Add(mv.MovieYear ?? "");
+                lvi.SubItems.Add($"Movie: {movieConfidence}%, TV: {tvConfidence}%");
+                lvi.Tag = mv;
+                lvMovies.Items.Add(lvi);
+            }
+            else
+            {
+                // Only add unparsed files that have some movie characteristics
+                if (movieConfidence > 20 || tvConfidence < 30)
+                {
+                    unparsedFiles++;
+                    ListViewItem lvi = new ListViewItem();
+                    lvi.Text = mv.FileNamePath ?? "Unknown";
+                    lvi.SubItems.Add("UNPARSED - Please review");
+                    lvi.SubItems.Add(mv.MovieName ?? "Unknown");
+                    lvi.SubItems.Add(mv.MovieYear ?? "");
+                    lvi.SubItems.Add("Not processed");
+                    lvi.BackColor = Color.LightGray;
+                    lvi.Tag = mv;
+                    lvMovies.Items.Add(lvi);
+                }
+                else
+                {
+                    Debug.WriteLine($"Skipping unparsed likely TV show: {Path.GetFileName(mv.FileNamePath)}");
+                }
+            }
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private async Task ShowMovieScanSummary(int totalVideoFiles, int validMovies, int unparsedFiles, int likelyTVShowsSkipped)
         {
-            MessageBox.Show("Movie scan not fully implemented in this version.", "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            await Task.Delay(100); // Brief delay for UI responsiveness
+            
+            string summary = $"Movie Scan Results:\n" +
+                           $"Total video files: {totalVideoFiles}\n" +
+                           $"Valid movies: {validMovies}\n" +
+                           $"Unparsed files: {unparsedFiles}\n" +
+                           $"TV shows skipped: {likelyTVShowsSkipped}";
+            
+            if (unparsedFiles > 0)
+            {
+                summary += "\n\nTip: Review unparsed files (gray) and remove them if they're not movies.";
+            }
+            
+            MessageBox.Show(summary, "Movie Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Movie processing functionality - process movie files
+        /// </summary>
+        private async void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            if (lvMovies.Items.Count == 0)
+            {
+                MessageBox.Show("No movies to process. Please scan for movie files first.", 
+                    "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // Pre-processing validation
+            if (!ValidateBeforeProcessing(false))
+                return;
+
+            // Ask for user confirmation
+            int validItems = lvMovies.Items.Cast<ListViewItem>()
+                .Count(item => item.BackColor != Color.LightGray);
+            
+            var result = MessageBox.Show(
+                $"Process {validItems} movie(s)?\n\nThis will:\n" +
+                "1. Copy files to the destination server\n" +
+                "2. Organize movies alphabetically\n" +
+                "3. Verify file sizes match\n" +
+                "4. Delete original files if verification succeeds\n\n" +
+                "Continue?", 
+                "Confirm Movie Processing", 
+                MessageBoxButtons.YesNo, 
+                MessageBoxIcon.Question);
+                
+            if (result != DialogResult.Yes)
+                return;
+
+            // Initialize processing with cancellation support
+            using var cts = new CancellationTokenSource();
+            var progress = new Progress<ProcessingProgress>(UpdateProcessingProgress);
+            
+            try
+            {
+                await ProcessMovieFilesAsync(validItems, progress, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                statusLabel.Text = "Movie processing cancelled by user";
+                LoggingService.LogInfo("Movie processing cancelled by user", "Processing");
+            }
+            catch (Exception ex)
+            {
+                statusLabel.Text = "Movie processing failed with error";
+                LoggingService.LogError("Movie processing failed", ex, "Processing");
+                MessageBox.Show($"Movie processing failed: {ex.Message}", "Error", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task ProcessMovieFilesAsync(int totalItems, IProgress<ProcessingProgress> progress, CancellationToken cancellationToken)
+        {
+            int processedCount = 0;
+            int successfulCopies = 0;
+            int successfulDeletions = 0;
+            int errors = 0;
+            
+            statusProgress.Maximum = totalItems;
+            DateTime startTime = DateTime.Now;
+            
+            var itemsToProcess = lvMovies.Items.Cast<ListViewItem>()
+                .Where(item => item.BackColor != Color.LightGray)
+                .ToList();
+
+            // Phase 1: Copy files
+            LoggingService.LogInfo($"Starting to process {totalItems} movie files", "Processing");
+            
+            foreach (var lvi in itemsToProcess)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                MovieFile mv = (MovieFile)lvi.Tag;
+                processedCount++;
+                
+                var currentProgress = new ProcessingProgress
+                {
+                    CurrentFile = Path.GetFileName(mv.FileNamePath),
+                    ProcessedCount = processedCount,
+                    TotalCount = totalItems,
+                    Phase = ProcessingPhase.Copying,
+                    Message = $"Copying movie {processedCount}/{totalItems}: {Path.GetFileName(mv.FileNamePath)}"
+                };
+                
+                progress.Report(currentProgress);
+                
+                try
+                {
+                    string destinationDir = Path.GetDirectoryName(mv.NewDestDirectory);
+                    if (!string.IsNullOrEmpty(destinationDir) && !Directory.Exists(destinationDir))
+                    {
+                        LoggingService.LogDebug($"Creating directory: {destinationDir}", "Processing");
+                        Directory.CreateDirectory(destinationDir);
+                    }
+
+                    // Enhanced retry logic with async
+                    bool retVal = await RetryFileOperationAsync(
+                        () => CopyFileAsync(mv.FileNamePath, mv.NewDestDirectory),
+                        maxRetries: 5,
+                        cancellationToken);
+                    
+                    // Update UI on the UI thread
+                    Invoke(new Action(() => {
+                        if (retVal)
+                        {
+                            lvi.BackColor = Color.Yellow;
+                            successfulCopies++;
+                            LoggingService.LogDebug($"Successfully copied movie: {Path.GetFileName(mv.FileNamePath)}", "Processing");
+                        }
+                        else
+                        {
+                            lvi.BackColor = Color.Red;
+                            lvi.SubItems[4].Text = "Copy failed after retries";
+                            errors++;
+                            LoggingService.LogError($"Failed to copy movie after retries: {mv.FileNamePath}", null, "Processing");
+                        }
+                    }));
+                }
+                catch (Exception ex)
+                {
+                    // Update UI on the UI thread
+                    Invoke(new Action(() => {
+                        lvi.BackColor = Color.Red;
+                        lvi.SubItems[4].Text = $"Error: {ex.Message}";
+                        errors++;
+                    }));
+                    LoggingService.LogError($"Error processing movie {mv.FileNamePath}", ex, "Processing");
+                }
+                
+                // Update UI
+                Invoke(new Action(() => {
+                    lvMovies.EnsureVisible(itemsToProcess.IndexOf(lvi));
+                    lvMovies.Refresh();
+                }));
+            }
+            
+            // Phase 2: Verify and cleanup
+            LoggingService.LogInfo("Starting movie verification and cleanup phase", "Processing");
+            processedCount = 0;
+            
+            foreach (var lvi in itemsToProcess.Where(item => item.BackColor == Color.Yellow))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                
+                MovieFile mv = (MovieFile)lvi.Tag;
+                processedCount++;
+                
+                var currentProgress = new ProcessingProgress
+                {
+                    CurrentFile = Path.GetFileName(mv.FileNamePath),
+                    ProcessedCount = processedCount,
+                    TotalCount = successfulCopies,
+                    Phase = ProcessingPhase.Verifying,
+                    Message = $"Verifying and cleaning up movie {processedCount}/{successfulCopies}"
+                };
+                
+                progress.Report(currentProgress);
+                
+                try
+                {
+                    await Task.Run(() => {
+                        FileInfo fiLocal = new FileInfo(mv.FileNamePath);
+                        FileInfo fiRemote = new FileInfo(mv.NewDestDirectory);
+                        
+                        // Prepare the UI updates on the background thread but don't execute them yet
+                        string statusMessage;
+                        Color statusColor;
+                        
+                        if (!fiRemote.Exists)
+                        {
+                            statusMessage = "Remote file not found";
+                            statusColor = Color.Red;
+                            errors++;
+                            LoggingService.LogError($"Remote movie file not found: {mv.NewDestDirectory}", null, "Processing");
+                        }
+                        else if (fiLocal.Length == fiRemote.Length)
+                        {
+                            File.Delete(mv.FileNamePath);
+                            statusMessage = "Completed - Original deleted";
+                            statusColor = Color.LightGreen;
+                            successfulDeletions++;
+                            LoggingService.LogInfo($"Successfully processed movie: {Path.GetFileName(mv.FileNamePath)}", "Processing");
+                        }
+                        else
+                        {
+                            statusMessage = $"Size mismatch - Local: {fiLocal.Length}, Remote: {fiRemote.Length}";
+                            statusColor = Color.Orange;
+                            errors++;
+                            LoggingService.LogWarning($"Size mismatch for movie {mv.FileNamePath}: Local={fiLocal.Length}, Remote={fiRemote.Length}", "Processing");
+                        }
+                        
+                        // Now update the UI on the UI thread
+                        Invoke(new Action(() => {
+                            lvi.SubItems[4].Text = statusMessage;
+                            lvi.BackColor = statusColor;
+                        }));
+                        
+                    }, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    // Update UI on the UI thread
+                    Invoke(new Action(() => {
+                        lvi.SubItems[4].Text = $"Cleanup error: {ex.Message}";
+                        lvi.BackColor = Color.Red;
+                        errors++;
+                    }));
+                    LoggingService.LogError($"Cleanup error for movie {mv.FileNamePath}", ex, "Processing");
+                }
+            }
+            
+            // Final summary
+            TimeSpan duration = DateTime.Now - startTime;
+            string finalMessage = $"Movie processing completed in {duration.Minutes}m {duration.Seconds}s - " +
+                                $"Copied: {successfulCopies}, Deleted: {successfulDeletions}, Errors: {errors}";
+            
+            progress.Report(new ProcessingProgress
+            {
+                Phase = ProcessingPhase.Complete,
+                Message = finalMessage,
+                ProcessedCount = totalItems,
+                TotalCount = totalItems
+            });
+            
+            LoggingService.LogInfo($"Movie processing completed: Copied={successfulCopies}, Deleted={successfulDeletions}, Errors={errors}, Duration={duration}", "Processing");
+            
+            // Show completion summary
+            string summary = $"Movie Processing Complete!\n\n" +
+                           $"Movies processed: {totalItems}\n" +
+                           $"Successfully copied: {successfulCopies}\n" +
+                           $"Original files deleted: {successfulDeletions}\n" +
+                           $"Errors: {errors}\n" +
+                           $"Duration: {duration.Minutes}m {duration.Seconds}s";
+                           
+            MessageBox.Show(summary, "Movie Processing Complete", 
+                MessageBoxButtons.OK, 
+                errors > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Movie cleaner scan functionality - scan for movies that need title cleanup
+        /// </summary>
+        private void toolStripButton3_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Movie cleaner functionality is under development.\n\n" +
+                          "This feature will scan for movie files that have messy titles and help clean them up automatically.\n\n" +
+                          "Current features available:\n" +
+                          "• Movie scan and processing (working)\n" +
+                          "• TV episode scan and processing (working)\n" +
+                          "• Auto-monitoring (working)", 
+                          "Movie Cleaner - Coming Soon", 
+                          MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Movie year processing functionality - process movies with year detection
+        /// </summary>
+        private void toolStripButton4_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Movie year processing functionality is under development.\n\n" +
+                          "This feature will help organize movies by year and handle year detection issues.\n\n" +
+                          "Current movie processing already includes:\n" +
+                          "• Year extraction from filenames\n" +
+                          "• Alphabetical organization\n" +
+                          "• Quality tag removal\n\n" +
+                          "Use the regular Movie scan and process buttons for full movie functionality.", 
+                          "Movie Year Processing - Coming Soon", 
+                          MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void tsbAutoMonitor_Click(object sender, EventArgs e)
+        {
+            miAutoMonitor_Click(sender, e);
+        }
+
+        private void tsbForceDateCheck_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Force date check functionality is currently disabled.", 
+                "Feature Disabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void miShowHelp_Click(object sender, EventArgs e)
@@ -1341,27 +1840,6 @@ Features:
 Built with intelligent media detection";
 
             MessageBox.Show(aboutText, "About Torrent File Renamer", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void tsbAutoMonitor_Click(object sender, EventArgs e)
-        {
-            miAutoMonitor_Click(sender, e);
-        }
-
-        private void toolStripButton3_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Movie cleaner not fully implemented in this version.", "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void toolStripButton4_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Movie year processing not fully implemented in this version.", "Feature Not Available", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void tsbForceDateCheck_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("Force date check functionality is currently disabled.", 
-                "Feature Disabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
