@@ -226,7 +226,10 @@ namespace TorrentFileRenamer
             {
                 if (string.IsNullOrWhiteSpace(MovieName) || MovieName == "Unknown Movie")
                 {
-                    NewDestDirectory = Path.Combine(_newParentRootDir, "Unknown", FileName ?? "Unknown File");
+                    // For unknown movies, create a folder with just the filename (without extension)
+                    string fileNameWithoutExt = Path.GetFileNameWithoutExtension(FileName ?? "Unknown File");
+                    string unknownMovieFolder = SanitizeForDirectoryName(fileNameWithoutExt);
+                    NewDestDirectory = Path.Combine(_newParentRootDir, "Unknown", unknownMovieFolder, FileName ?? "Unknown File");
                     return;
                 }
 
@@ -240,28 +243,112 @@ namespace TorrentFileRenamer
                 char firstLetter = GetFirstLetterForSorting(dirName);
                 string letterFolder = firstLetter.ToString().ToUpper();
                 
-                // Handle numbers
+                // Handle numbers and special characters
                 if (char.IsDigit(firstLetter))
                 {
                     letterFolder = "0-9";
                 }
+                else if (!char.IsLetter(firstLetter))
+                {
+                    letterFolder = "#";
+                }
 
-                // Create the full directory path
+                // Create the movie folder name - use cleaned movie name with year if available
+                string movieFolderName;
+                if (!string.IsNullOrEmpty(MovieYear))
+                {
+                    movieFolderName = $"{MovieName} ({MovieYear})";
+                }
+                else
+                {
+                    movieFolderName = MovieName;
+                }
+                
+                // Create the new filename - THIS IS THE KEY CHANGE!
+                string newFileName;
+                string extension = Path.GetExtension(FileName ?? "");
+                
+                if (!string.IsNullOrEmpty(MovieYear))
+                {
+                    newFileName = $"{MovieName} ({MovieYear}){extension}";
+                }
+                else
+                {
+                    newFileName = $"{MovieName}{extension}";
+                }
+                
+                // Sanitize names for file system compatibility
+                movieFolderName = SanitizeForDirectoryName(movieFolderName);
+                newFileName = SanitizeForFileName(newFileName);
+
+                // Create the full directory path: Root\Letter\MovieFolder\NewFileName
                 string parentDir = Path.Combine(_newParentRootDir, letterFolder);
+                string movieDir = Path.Combine(parentDir, movieFolderName);
                 
-                // Create a clean filename
-                TextInfo textInfo = new CultureInfo("en-US", false).TextInfo;
-                string cleanFileName = textInfo.ToTitleCase(FileName ?? "Unknown");
-                
-                NewDestDirectory = Path.Combine(parentDir, cleanFileName);
+                // Use the new formatted filename instead of the original
+                NewDestDirectory = Path.Combine(movieDir, newFileName);
 
                 Debug.WriteLine($"Movie directory: {NewDestDirectory}");
+                Debug.WriteLine($"New filename: {newFileName}");
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error creating directory path: {ex.Message}");
-                NewDestDirectory = Path.Combine(_newParentRootDir, "Unknown", FileName ?? "Unknown File");
+                string fallbackFolder = SanitizeForDirectoryName(Path.GetFileNameWithoutExtension(FileName ?? "Unknown"));
+                NewDestDirectory = Path.Combine(_newParentRootDir, "Unknown", fallbackFolder, FileName ?? "Unknown File");
             }
+        }
+
+        /// <summary>
+        /// Sanitize a string to be safe for use as a directory name
+        /// </summary>
+        private string SanitizeForDirectoryName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "Unknown";
+                
+            // Remove invalid characters for Windows file system
+            char[] invalidChars = Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray();
+            string sanitized = name;
+            
+            foreach (char c in invalidChars)
+            {
+                sanitized = sanitized.Replace(c, ' ');
+            }
+            
+            // Replace multiple spaces with single space
+            sanitized = Regex.Replace(sanitized, @"\s+", " ").Trim();
+            
+            // Remove leading/trailing periods and spaces (Windows doesn't like these)
+            sanitized = sanitized.Trim('.', ' ');
+            
+            // Ensure the name isn't empty after sanitization
+            if (string.IsNullOrWhiteSpace(sanitized))
+                return "Unknown";
+                
+            // Limit length to reasonable size (Windows max path considerations)
+            if (sanitized.Length > 100)
+                sanitized = sanitized.Substring(0, 100).Trim();
+            
+            return sanitized;
+        }
+
+        /// <summary>
+        /// Sanitize a string to be safe for use as a file name
+        /// </summary>
+        private string SanitizeForFileName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return "Unknown";
+            
+            // Get the extension separately
+            string extension = Path.GetExtension(name);
+            string nameWithoutExt = Path.GetFileNameWithoutExtension(name);
+            
+            // Apply same sanitization as directory names
+            nameWithoutExt = SanitizeForDirectoryName(nameWithoutExt);
+            
+            return nameWithoutExt + extension;
         }
 
         /// <summary>

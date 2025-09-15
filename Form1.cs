@@ -38,6 +38,94 @@ namespace TorrentFileRenamer
         public frmMain()
         {
             InitializeComponent();
+            ConfigureModernUI();
+        }
+
+        private void ConfigureModernUI()
+        {
+            // Enable modern look
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint |
+                     ControlStyles.DoubleBuffer | ControlStyles.ResizeRedraw, true);
+
+            // Configure ListView alternating row colors
+            ConfigureListViewAppearance();
+        }
+
+        private void ConfigureListViewAppearance()
+        {
+            // Configure TV ListView
+            lvFiles.OwnerDraw = true;
+            lvFiles.DrawItem += ListView_DrawItem;
+            lvFiles.DrawSubItem += ListView_DrawSubItem;
+            lvFiles.DrawColumnHeader += ListView_DrawColumnHeader;
+
+            // Configure Movies ListView
+            lvMovies.OwnerDraw = true;
+            lvMovies.DrawItem += ListView_DrawItem;
+            lvMovies.DrawSubItem += ListView_DrawSubItem;
+            lvMovies.DrawColumnHeader += ListView_DrawColumnHeader;
+
+            // Configure Movie Cleaner ListView
+            lvMovieCleaner.OwnerDraw = true;
+            lvMovieCleaner.DrawItem += ListView_DrawItem;
+            lvMovieCleaner.DrawSubItem += ListView_DrawSubItem;
+            lvMovieCleaner.DrawColumnHeader += ListView_DrawColumnHeader;
+        }
+
+        private void ListView_DrawColumnHeader(object? sender, DrawListViewColumnHeaderEventArgs e)
+        {
+            using (var brush = new SolidBrush(Color.FromArgb(240, 240, 240)))
+            {
+                e.Graphics.FillRectangle(brush, e.Bounds);
+            }
+
+            using (var pen = new Pen(Color.FromArgb(200, 200, 200)))
+            {
+                e.Graphics.DrawRectangle(pen, e.Bounds);
+            }
+
+            var textRect = new Rectangle(e.Bounds.X + 6, e.Bounds.Y, e.Bounds.Width - 6, e.Bounds.Height);
+            TextRenderer.DrawText(e.Graphics, e.Header.Text, new Font("Segoe UI", 9F, FontStyle.Bold),
+                                textRect, Color.FromArgb(60, 60, 60),
+                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+        }
+
+        private void ListView_DrawItem(object? sender, DrawListViewItemEventArgs e)
+        {
+            // This will be handled by DrawSubItem for detailed view
+            if (sender is ListView listView && listView.View != View.Details)
+            {
+                e.DrawDefault = true;
+            }
+        }
+
+        private void ListView_DrawSubItem(object? sender, DrawListViewSubItemEventArgs e)
+        {
+            var backColor = e.ItemIndex % 2 == 0 ? Color.White : Color.FromArgb(248, 248, 248);
+
+            if (e.Item.Selected)
+            {
+                backColor = Color.FromArgb(220, 235, 252);
+            }
+
+            using (var brush = new SolidBrush(backColor))
+            {
+                e.Graphics.FillRectangle(brush, e.Bounds);
+            }
+
+            var textColor = e.Item.Selected ? Color.FromArgb(40, 40, 40) : Color.FromArgb(60, 60, 60);
+            var textRect = new Rectangle(e.Bounds.X + 4, e.Bounds.Y, e.Bounds.Width - 4, e.Bounds.Height);
+
+            TextRenderer.DrawText(e.Graphics, e.SubItem.Text, new Font("Segoe UI", 9F),
+                                textRect, textColor,
+                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+
+            // Draw grid lines
+            using (var pen = new Pen(Color.FromArgb(230, 230, 230)))
+            {
+                e.Graphics.DrawLine(pen, e.Bounds.Right - 1, e.Bounds.Top, e.Bounds.Right - 1, e.Bounds.Bottom);
+                e.Graphics.DrawLine(pen, e.Bounds.Left, e.Bounds.Bottom - 1, e.Bounds.Right, e.Bounds.Bottom - 1);
+            }
         }
 
         private void frmMain_Load(object sender, EventArgs e)
@@ -233,6 +321,8 @@ TV EPISODES:
 
 MOVIES:
 • Organizes by first letter (A-Z, 0-9, #)
+• Creates individual movie folders for each file
+• Example: Lost In The Amazon (2024).mp4 → L/Lost In The Amazon (2024)/Lost In The Amazon (2024).mp4
 • Removes quality tags (720p, 1080p, etc.)
 • Handles years in various formats
 
@@ -1828,7 +1918,7 @@ Version 2.0 Enhanced
 
 Features:
 • TV Episode Organization (S01E01 format)
-• Movie Organization (Alphabetical)
+• Movie Organization (Alphabetical with individual folders)
 • Smart File Type Detection
 • Automatic HandBrake Monitoring
 • Multi-select Operations

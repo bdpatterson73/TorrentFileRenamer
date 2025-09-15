@@ -87,13 +87,13 @@
             tsbScan = new ToolStripButton();
             tsbProcess = new ToolStripButton();
             toolStripSeparator1 = new ToolStripSeparator();
-            toolStripButton1 = new ToolStripButton();
-            toolStripButton2 = new ToolStripButton();
+            tsbScanMovies = new ToolStripButton();
+            tsbProcessMovies = new ToolStripButton();
             toolStripSeparator2 = new ToolStripSeparator();
             tsbAutoMonitor = new ToolStripButton();
             toolStripSeparator5 = new ToolStripSeparator();
-            toolStripButton3 = new ToolStripButton();
-            toolStripButton4 = new ToolStripButton();
+            tsbScanMovieCleaner = new ToolStripButton();
+            tsbProcessMovieCleaner = new ToolStripButton();
             tsbForceDateCheck = new ToolStripButton();
             chRemark = new ColumnHeader();
             menuStrip1.SuspendLayout();
@@ -111,13 +111,15 @@
             SuspendLayout();
             // 
             // menuStrip1
-            // 
-            menuStrip1.ImageScalingSize = new Size(24, 24);
+            //
+            menuStrip1.BackColor = Color.White;
+            menuStrip1.ImageScalingSize = new Size(20, 20);
             menuStrip1.Items.AddRange(new ToolStripItem[] { miScan, miAutoMonitor, editToolStripMenuItem, helpToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Padding = new Padding(4, 1, 0, 1);
-            menuStrip1.Size = new Size(804, 24);
+            menuStrip1.Padding = new Padding(6, 2, 0, 2);
+            menuStrip1.RenderMode = ToolStripRenderMode.Professional;
+            menuStrip1.Size = new Size(1000, 28);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -208,16 +210,21 @@
             miAbout.Click += miAbout_Click;
             // 
             // lvFiles
-            // 
+            //
             lvFiles.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lvFiles.BackColor = Color.White;
+            lvFiles.BorderStyle = BorderStyle.None;
             lvFiles.Columns.AddRange(new ColumnHeader[] { chFileName, chNewName, chShow, chSeason, chEpisode, chRemark });
             lvFiles.ContextMenuStrip = contextMenuStrip1;
+            lvFiles.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
             lvFiles.FullRowSelect = true;
             lvFiles.GridLines = true;
-            lvFiles.Location = new Point(5, 5);
-            lvFiles.Margin = new Padding(2);
+            lvFiles.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            lvFiles.Location = new Point(8, 8);
+            lvFiles.Margin = new Padding(8);
             lvFiles.Name = "lvFiles";
-            lvFiles.Size = new Size(780, 258);
+            lvFiles.OwnerDraw = false;
+            lvFiles.Size = new Size(974, 310);
             lvFiles.TabIndex = 1;
             lvFiles.UseCompatibleStateImageBehavior = false;
             lvFiles.View = View.Details;
@@ -269,11 +276,14 @@
             clearToolStripMenuItem.Click += clearToolStripMenuItem_Click;
             // 
             // statusStrip1
-            // 
+            //
+            statusStrip1.BackColor = Color.FromArgb(240, 240, 240);
             statusStrip1.Items.AddRange(new ToolStripItem[] { statusLabel, statusProgress });
-            statusStrip1.Location = new Point(0, 371);
+            statusStrip1.Location = new Point(0, 578);
             statusStrip1.Name = "statusStrip1";
-            statusStrip1.Size = new Size(804, 22);
+            statusStrip1.Padding = new Padding(1, 0, 14, 0);
+            statusStrip1.RenderMode = ToolStripRenderMode.Professional;
+            statusStrip1.Size = new Size(1000, 22);
             statusStrip1.TabIndex = 2;
             statusStrip1.Text = "statusStrip1";
             // 
@@ -291,16 +301,18 @@
             statusProgress.Step = 1;
             // 
             // toolStripContainer1
-            // 
+            //
             toolStripContainer1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            // 
+            //
             // toolStripContainer1.ContentPanel
-            // 
+            //
+            toolStripContainer1.ContentPanel.BackColor = Color.FromArgb(245, 245, 245);
             toolStripContainer1.ContentPanel.Controls.Add(tabControl1);
-            toolStripContainer1.ContentPanel.Size = new Size(804, 302);
-            toolStripContainer1.Location = new Point(0, 27);
+            toolStripContainer1.ContentPanel.Padding = new Padding(8);
+            toolStripContainer1.ContentPanel.Size = new Size(1000, 506);
+            toolStripContainer1.Location = new Point(0, 28);
             toolStripContainer1.Name = "toolStripContainer1";
-            toolStripContainer1.Size = new Size(804, 341);
+            toolStripContainer1.Size = new Size(1000, 550);
             toolStripContainer1.TabIndex = 3;
             toolStripContainer1.Text = "toolStripContainer1";
             // 
@@ -309,49 +321,56 @@
             toolStripContainer1.TopToolStripPanel.Controls.Add(toolStrip1);
             // 
             // tabControl1
-            // 
+            //
             tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
-            tabControl1.Location = new Point(3, 3);
+            tabControl1.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            tabControl1.Location = new Point(8, 8);
             tabControl1.Name = "tabControl1";
+            tabControl1.Padding = new Point(12, 6);
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(798, 296);
+            tabControl1.Size = new Size(984, 490);
             tabControl1.TabIndex = 3;
             // 
             // tabPage1
-            // 
+            //
+            tabPage1.BackColor = Color.FromArgb(250, 250, 250);
             tabPage1.Controls.Add(lvFiles);
-            tabPage1.Location = new Point(4, 24);
+            tabPage1.Location = new Point(4, 28);
             tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(790, 268);
+            tabPage1.Padding = new Padding(8);
+            tabPage1.Size = new Size(976, 458);
             tabPage1.TabIndex = 0;
-            tabPage1.Text = "TV";
-            tabPage1.UseVisualStyleBackColor = true;
+            tabPage1.Text = "📺 TV Shows";
             // 
             // tabPage2
-            // 
+            //
+            tabPage2.BackColor = Color.FromArgb(250, 250, 250);
             tabPage2.Controls.Add(lvMovies);
-            tabPage2.Location = new Point(4, 24);
+            tabPage2.Location = new Point(4, 28);
             tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(790, 268);
+            tabPage2.Padding = new Padding(8);
+            tabPage2.Size = new Size(976, 458);
             tabPage2.TabIndex = 1;
-            tabPage2.Text = "Movie";
-            tabPage2.UseVisualStyleBackColor = true;
+            tabPage2.Text = "🎬 Movies";
             // 
             // lvMovies
-            // 
+            //
             lvMovies.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lvMovies.BackColor = Color.White;
+            lvMovies.BorderStyle = BorderStyle.None;
             lvMovies.Columns.AddRange(new ColumnHeader[] { chMovieFileName, chMovieNewFileNamePath, chMovieName, chMovieYear, chComment });
             lvMovies.ContextMenuStrip = cmsMovie;
+            lvMovies.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
             lvMovies.FullRowSelect = true;
             lvMovies.GridLines = true;
-            lvMovies.Location = new Point(6, 6);
+            lvMovies.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            lvMovies.Location = new Point(8, 8);
+            lvMovies.Margin = new Padding(8);
             lvMovies.Name = "lvMovies";
-            lvMovies.Size = new Size(778, 256);
+            lvMovies.Size = new Size(960, 442);
             lvMovies.TabIndex = 2;
             lvMovies.UseCompatibleStateImageBehavior = false;
             lvMovies.View = View.Details;
@@ -400,22 +419,30 @@
             msMovieClear.Click += msMovieClear_Click;
             // 
             // tabPage3
-            // 
+            //
+            tabPage3.BackColor = Color.FromArgb(250, 250, 250);
             tabPage3.Controls.Add(lvMovieCleaner);
-            tabPage3.Location = new Point(4, 24);
+            tabPage3.Location = new Point(4, 28);
             tabPage3.Name = "tabPage3";
-            tabPage3.Size = new Size(790, 268);
+            tabPage3.Padding = new Padding(8);
+            tabPage3.Size = new Size(976, 458);
             tabPage3.TabIndex = 2;
-            tabPage3.Text = "Movie Cleaner";
-            tabPage3.UseVisualStyleBackColor = true;
+            tabPage3.Text = "🧹 Movie Cleaner";
             // 
             // lvMovieCleaner
-            // 
+            //
             lvMovieCleaner.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lvMovieCleaner.BackColor = Color.White;
+            lvMovieCleaner.BorderStyle = BorderStyle.None;
             lvMovieCleaner.Columns.AddRange(new ColumnHeader[] { chmcFileNamePath, chmcMovieTitle, chmcYear, chmcNewFileName, chmcComment });
-            lvMovieCleaner.Location = new Point(5, 3);
+            lvMovieCleaner.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            lvMovieCleaner.FullRowSelect = true;
+            lvMovieCleaner.GridLines = true;
+            lvMovieCleaner.HeaderStyle = ColumnHeaderStyle.Nonclickable;
+            lvMovieCleaner.Location = new Point(8, 8);
+            lvMovieCleaner.Margin = new Padding(8);
             lvMovieCleaner.Name = "lvMovieCleaner";
-            lvMovieCleaner.Size = new Size(780, 262);
+            lvMovieCleaner.Size = new Size(960, 442);
             lvMovieCleaner.TabIndex = 0;
             lvMovieCleaner.UseCompatibleStateImageBehavior = false;
             lvMovieCleaner.View = View.Details;
@@ -444,33 +471,39 @@
             chmcComment.Text = "Comment";
             // 
             // toolStrip1
-            // 
+            //
+            toolStrip1.BackColor = Color.White;
             toolStrip1.Dock = DockStyle.None;
-            toolStrip1.ImageScalingSize = new Size(32, 32);
-            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbScan, tsbProcess, toolStripSeparator1, toolStripButton1, toolStripButton2, toolStripSeparator2, tsbAutoMonitor, toolStripSeparator5, toolStripButton3, toolStripButton4, tsbForceDateCheck });
-            toolStrip1.Location = new Point(3, 0);
+            toolStrip1.GripStyle = ToolStripGripStyle.Hidden;
+            toolStrip1.ImageScalingSize = new Size(24, 24);
+            toolStrip1.Items.AddRange(new ToolStripItem[] { tsbScan, tsbProcess, toolStripSeparator1, tsbScanMovies, tsbProcessMovies, toolStripSeparator2, tsbAutoMonitor, toolStripSeparator5, tsbScanMovieCleaner, tsbProcessMovieCleaner, tsbForceDateCheck });
+            toolStrip1.Location = new Point(8, 0);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new Size(380, 39);
+            toolStrip1.Padding = new Padding(8, 4, 1, 4);
+            toolStrip1.RenderMode = ToolStripRenderMode.Professional;
+            toolStrip1.Size = new Size(502, 44);
             toolStrip1.TabIndex = 0;
             // 
             // tsbScan
-            // 
-            tsbScan.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            //
+            tsbScan.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
             tsbScan.Image = (Image)resources.GetObject("tsbScan.Image");
             tsbScan.ImageTransparentColor = Color.Magenta;
             tsbScan.Name = "tsbScan";
-            tsbScan.Size = new Size(36, 36);
+            tsbScan.Size = new Size(72, 36);
             tsbScan.Text = "Scan TV";
+            tsbScan.ToolTipText = "Scan for TV show files";
             tsbScan.Click += tsbScan_Click;
             // 
             // tsbProcess
-            // 
-            tsbProcess.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            //
+            tsbProcess.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
             tsbProcess.Image = (Image)resources.GetObject("tsbProcess.Image");
             tsbProcess.ImageTransparentColor = Color.Magenta;
             tsbProcess.Name = "tsbProcess";
-            tsbProcess.Size = new Size(36, 36);
+            tsbProcess.Size = new Size(82, 36);
             tsbProcess.Text = "Process TV";
+            tsbProcess.ToolTipText = "Process scanned TV files";
             tsbProcess.Click += tsbProcess_Click;
             // 
             // toolStripSeparator1
@@ -478,25 +511,27 @@
             toolStripSeparator1.Name = "toolStripSeparator1";
             toolStripSeparator1.Size = new Size(6, 39);
             // 
-            // toolStripButton1
+            // tsbScanMovies
+            //
+            tsbScanMovies.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+            tsbScanMovies.Image = (Image)resources.GetObject("toolStripButton1.Image");
+            tsbScanMovies.ImageTransparentColor = Color.Magenta;
+            tsbScanMovies.Name = "tsbScanMovies";
+            tsbScanMovies.Size = new Size(94, 36);
+            tsbScanMovies.Text = "Scan Movies";
+            tsbScanMovies.ToolTipText = "Scan for movie files";
+            tsbScanMovies.Click += toolStripButton1_Click;
             // 
-            toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
-            toolStripButton1.ImageTransparentColor = Color.Magenta;
-            toolStripButton1.Name = "toolStripButton1";
-            toolStripButton1.Size = new Size(36, 36);
-            toolStripButton1.Text = "Scan Movie";
-            toolStripButton1.Click += toolStripButton1_Click;
-            // 
-            // toolStripButton2
-            // 
-            toolStripButton2.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton2.Image = (Image)resources.GetObject("toolStripButton2.Image");
-            toolStripButton2.ImageTransparentColor = Color.Magenta;
-            toolStripButton2.Name = "toolStripButton2";
-            toolStripButton2.Size = new Size(36, 36);
-            toolStripButton2.Text = "Process Movie";
-            toolStripButton2.Click += toolStripButton2_Click;
+            // tsbProcessMovies
+            //
+            tsbProcessMovies.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+            tsbProcessMovies.Image = (Image)resources.GetObject("toolStripButton2.Image");
+            tsbProcessMovies.ImageTransparentColor = Color.Magenta;
+            tsbProcessMovies.Name = "tsbProcessMovies";
+            tsbProcessMovies.Size = new Size(105, 36);
+            tsbProcessMovies.Text = "Process Movies";
+            tsbProcessMovies.ToolTipText = "Process scanned movie files";
+            tsbProcessMovies.Click += toolStripButton2_Click;
             // 
             // toolStripSeparator2
             // 
@@ -504,13 +539,16 @@
             toolStripSeparator2.Size = new Size(6, 39);
             // 
             // tsbAutoMonitor
-            // 
+            //
+            tsbAutoMonitor.BackColor = Color.FromArgb(230, 240, 255);
             tsbAutoMonitor.DisplayStyle = ToolStripItemDisplayStyle.Text;
+            tsbAutoMonitor.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            tsbAutoMonitor.ForeColor = Color.FromArgb(60, 100, 180);
             tsbAutoMonitor.ImageTransparentColor = Color.Magenta;
             tsbAutoMonitor.Name = "tsbAutoMonitor";
-            tsbAutoMonitor.Size = new Size(63, 36);
+            tsbAutoMonitor.Size = new Size(78, 36);
             tsbAutoMonitor.Text = "📁 Monitor";
-            tsbAutoMonitor.ToolTipText = "Configure Auto-Monitor for HandBrake";
+            tsbAutoMonitor.ToolTipText = "Configure Auto-Monitor";
             tsbAutoMonitor.Click += tsbAutoMonitor_Click;
             // 
             // toolStripSeparator5
@@ -518,34 +556,37 @@
             toolStripSeparator5.Name = "toolStripSeparator5";
             toolStripSeparator5.Size = new Size(6, 39);
             // 
-            // toolStripButton3
+            // tsbScanMovieCleaner
+            //
+            tsbScanMovieCleaner.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+            tsbScanMovieCleaner.Image = (Image)resources.GetObject("toolStripButton3.Image");
+            tsbScanMovieCleaner.ImageTransparentColor = Color.Magenta;
+            tsbScanMovieCleaner.Name = "tsbScanMovieCleaner";
+            tsbScanMovieCleaner.Size = new Size(74, 36);
+            tsbScanMovieCleaner.Text = "Scan Clean";
+            tsbScanMovieCleaner.ToolTipText = "Scan files for cleaning";
+            tsbScanMovieCleaner.Click += toolStripButton3_Click;
             // 
-            toolStripButton3.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton3.Image = (Image)resources.GetObject("toolStripButton3.Image");
-            toolStripButton3.ImageTransparentColor = Color.Magenta;
-            toolStripButton3.Name = "toolStripButton3";
-            toolStripButton3.Size = new Size(36, 36);
-            toolStripButton3.Text = "Scan Movie Cleaner";
-            toolStripButton3.Click += toolStripButton3_Click;
-            // 
-            // toolStripButton4
-            // 
-            toolStripButton4.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            toolStripButton4.Image = (Image)resources.GetObject("toolStripButton4.Image");
-            toolStripButton4.ImageTransparentColor = Color.Magenta;
-            toolStripButton4.Name = "toolStripButton4";
-            toolStripButton4.Size = new Size(36, 36);
-            toolStripButton4.Text = "Process Movie Cleaner";
-            toolStripButton4.Click += toolStripButton4_Click;
+            // tsbProcessMovieCleaner
+            //
+            tsbProcessMovieCleaner.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
+            tsbProcessMovieCleaner.Image = (Image)resources.GetObject("toolStripButton4.Image");
+            tsbProcessMovieCleaner.ImageTransparentColor = Color.Magenta;
+            tsbProcessMovieCleaner.Name = "tsbProcessMovieCleaner";
+            tsbProcessMovieCleaner.Size = new Size(92, 36);
+            tsbProcessMovieCleaner.Text = "Process Clean";
+            tsbProcessMovieCleaner.ToolTipText = "Process cleaned files";
+            tsbProcessMovieCleaner.Click += toolStripButton4_Click;
             // 
             // tsbForceDateCheck
-            // 
-            tsbForceDateCheck.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            //
+            tsbForceDateCheck.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
             tsbForceDateCheck.Image = (Image)resources.GetObject("tsbForceDateCheck.Image");
             tsbForceDateCheck.ImageTransparentColor = Color.Magenta;
             tsbForceDateCheck.Name = "tsbForceDateCheck";
-            tsbForceDateCheck.Size = new Size(36, 36);
-            tsbForceDateCheck.Text = "toolStripButton5";
+            tsbForceDateCheck.Size = new Size(85, 36);
+            tsbForceDateCheck.Text = "Date Check";
+            tsbForceDateCheck.ToolTipText = "Force date check on files";
             tsbForceDateCheck.Click += tsbForceDateCheck_Click;
             // 
             // chRemark
@@ -554,17 +595,20 @@
             chRemark.Width = 250;
             // 
             // frmMain
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(804, 393);
+            BackColor = Color.FromArgb(245, 245, 245);
+            ClientSize = new Size(1000, 600);
             Controls.Add(toolStripContainer1);
             Controls.Add(statusStrip1);
             Controls.Add(menuStrip1);
+            Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
             Icon = (Icon)resources.GetObject("$this.Icon");
             MainMenuStrip = menuStrip1;
-            Margin = new Padding(2);
+            MinimumSize = new Size(800, 500);
             Name = "frmMain";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Torrent File Renamer";
             Load += frmMain_Load;
             menuStrip1.ResumeLayout(false);
@@ -621,8 +665,8 @@
         private ToolStripButton tsbProcess;
         private ToolStripMenuItem clearToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator1;
-        private ToolStripButton toolStripButton1;
-        private ToolStripButton toolStripButton2;
+        private ToolStripButton tsbScanMovies;
+        private ToolStripButton tsbProcessMovies;
         private ListView lvMovies;
         private ColumnHeader chMovieFileName;
         private ColumnHeader chMovieNewFileNamePath;
@@ -637,8 +681,8 @@
         private TabPage tabPage2;
         private TabPage tabPage3;
         private ToolStripSeparator toolStripSeparator2;
-        private ToolStripButton toolStripButton3;
-        private ToolStripButton toolStripButton4;
+        private ToolStripButton tsbScanMovieCleaner;
+        private ToolStripButton tsbProcessMovieCleaner;
         private ListView lvMovieCleaner;
         private ColumnHeader chmcFileNamePath;
         private ColumnHeader chmcMovieTitle;
