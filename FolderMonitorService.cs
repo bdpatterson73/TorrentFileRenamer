@@ -31,6 +31,9 @@ namespace TorrentFileRenamer
         public event EventHandler<FileProcessedEventArgs>? FileProcessed;
         public event EventHandler<FileFoundEventArgs>? FileFound;
         public event EventHandler<Exception>? ErrorOccurred;
+        
+        // New event for file operation progress
+        public event EventHandler<FileProgressEventArgs>? FileProgressChanged;
 
         public bool IsMonitoring => _isMonitoring;
 
@@ -354,8 +357,20 @@ namespace TorrentFileRenamer
                     return;
                 }
 
-                // Copy file with retry logic
-                bool success = await CopyFileWithRetry(filePath, episode.NewFileNamePath);
+                // Use the new FileOperationProgress for copying with progress feedback
+                var fileOperation = new FileOperationProgress();
+                fileOperation.ProgressChanged += (sender, args) => {
+                    FileProgressChanged?.Invoke(this, args);
+                    
+                    // Update status with progress info
+                    if (!args.IsComplete)
+                    {
+                        StatusChanged?.Invoke(this, 
+                            $"Copying {Path.GetFileName(filePath)}: {args.FormattedProgress} at {args.FormattedSpeed} - ETA: {args.FormattedTimeRemaining}");
+                    }
+                };
+
+                bool success = await fileOperation.CopyFileWithRetryAsync(filePath, episode.NewFileNamePath, maxRetries: 3);
                 
                 if (success)
                 {
@@ -392,34 +407,6 @@ namespace TorrentFileRenamer
                 ErrorOccurred?.Invoke(this, ex);
                 FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, $"Error: {ex.Message}"));
             }
-        }
-
-        private async Task<bool> CopyFileWithRetry(string source, string destination, int maxRetries = 3)
-        {
-            for (int attempt = 1; attempt <= maxRetries; attempt++)
-            {
-                try
-                {
-                    if (File.Exists(destination))
-                        File.Delete(destination);
-                    
-                    File.Copy(source, destination);
-                    return true;
-                }
-                catch (IOException) when (attempt < maxRetries)
-                {
-                    Debug.WriteLine($"Copy attempt {attempt} failed, retrying in 5 seconds...");
-                    await Task.Delay(5000); // Wait 5 seconds before retry
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine($"Copy attempt {attempt} failed with error: {ex.Message}");
-                    if (attempt >= maxRetries)
-                        break;
-                    await Task.Delay(5000);
-                }
-            }
-            return false;
         }
 
         private bool VerifyFileCopy(string originalFile, string copiedFile)
