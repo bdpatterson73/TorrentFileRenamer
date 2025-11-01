@@ -20,6 +20,9 @@
             <converters:DateTimeToRelativeConverter x:Key="DateTimeToRelativeConverter"/>
             <converters:StatusToRetryVisibilityConverter x:Key="StatusToRetryVisibilityConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
+            <converters:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
