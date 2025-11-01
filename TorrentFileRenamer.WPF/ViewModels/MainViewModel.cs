@@ -52,6 +52,9 @@ public class MainViewModel : ViewModelBase
         ToggleSearchCommand = new RelayCommand(ExecuteToggleSearch);
         ToggleAdvancedFilterCommand = new RelayCommand(ExecuteToggleAdvancedFilter);
         FocusSearchCommand = new RelayCommand(ExecuteFocusSearch);
+        
+        // Phase 7: Export command
+        ShowExportCommand = new RelayCommand(ExecuteShowExport);
     }
 
     #region Properties
@@ -148,6 +151,9 @@ public class MainViewModel : ViewModelBase
     public ICommand ToggleSearchCommand { get; }
     public ICommand ToggleAdvancedFilterCommand { get; }
     public ICommand FocusSearchCommand { get; }
+    
+    // Phase 7: Export command
+    public ICommand ShowExportCommand { get; }
 
     #endregion
 
@@ -317,6 +323,26 @@ public class MainViewModel : ViewModelBase
         }
         StatusMessage = "Search focused";
         // Focus will be handled by the view
+    }
+
+    /// <summary>
+    /// Phase 7: Show export options
+    /// </summary>
+    private void ExecuteShowExport(object? parameter)
+    {
+        // Route command to the active tab's ViewModel
+        if (SelectedTabIndex == 0 && _tvEpisodesViewModel?.ExportCommand.CanExecute(null) == true)
+        {
+     _tvEpisodesViewModel.ExportCommand.Execute(null);
+    }
+        else if (SelectedTabIndex == 1 && _moviesViewModel?.ExportCommand.CanExecute(null) == true)
+        {
+_moviesViewModel.ExportCommand.Execute(null);
+   }
+  else
+{
+            StatusMessage = "No data available to export";
+}
     }
 
     #endregion

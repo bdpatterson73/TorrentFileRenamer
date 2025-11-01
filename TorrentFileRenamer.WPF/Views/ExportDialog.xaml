@@ -53,7 +53,10 @@ FontWeight="SemiBold"
  <RadioButton Content="JSON (JavaScript Object Notation)"
   IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Json}"
         Margin="0,0,0,8"/>
-  <RadioButton Content="Excel Spreadsheet (.xlsx)"
+  <RadioButton Content="XML (Extensible Markup Language)"
+       IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Xml}"
+        Margin="0,0,0,8"/>
+     <RadioButton Content="Excel Spreadsheet (.xlsx)"
        IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Excel}"
            IsEnabled="False"
     ToolTip="Excel export coming soon"/>
@@ -162,11 +165,13 @@ Margin="0,0,0,4"/>
         Style="{StaticResource CardTitle}"
        Margin="0,0,0,12"/>
 
-  <RadioButton Content="Export All Items"
+  <RadioButton Content="Export All Items (Filtered)"
    IsChecked="{Binding Options.ExportSelectedOnly, Converter={StaticResource InverseBoolConverter}}"
   Margin="0,0,0,8"/>
       <RadioButton Content="Export Selected Items Only"
-   IsChecked="{Binding Options.ExportSelectedOnly}"/>
+   IsChecked="{Binding Options.ExportSelectedOnly}"
+    IsEnabled="False"
+       ToolTip="Selection feature coming soon"/>
       </StackPanel>
   </Border>
      </StackPanel>

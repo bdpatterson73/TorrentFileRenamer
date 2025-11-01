@@ -2,6 +2,8 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Xml;
+using System.Xml.Linq;
 using TorrentFileRenamer.WPF.Models;
 
 namespace TorrentFileRenamer.WPF.Services;
@@ -18,55 +20,59 @@ public class ExportService : IExportService
         IProgress<int>? progress = null)
     {
         try
-        {
-            var movieList = movies.ToList();
+{
+ var movieList = movies.ToList();
      
-        switch (options.Format)
-     {
-         case ExportFormat.Csv:
-       return await ExportMoviesToCsvAsync(movieList, options, progress);
-          case ExportFormat.Json:
-       return await ExportMoviesToJsonAsync(movieList, options, progress);
-   case ExportFormat.Excel:
-             // Excel export requires additional library (e.g., EPPlus)
-      // For now, export as CSV with notice
-            return await ExportMoviesToCsvAsync(movieList, options, progress);
-   default:
-         return false;
-    }
-    }
-   catch
+    switch (options.Format)
   {
-            return false;
-   }
-    }
+              case ExportFormat.Csv:
+   return await ExportMoviesToCsvAsync(movieList, options, progress);
+                case ExportFormat.Json:
+   return await ExportMoviesToJsonAsync(movieList, options, progress);
+    case ExportFormat.Xml:
+           return await ExportMoviesToXmlAsync(movieList, options, progress);
+     case ExportFormat.Excel:
+      // Excel export requires additional library (e.g., EPPlus)
+          // For now, export as CSV with notice
+       return await ExportMoviesToCsvAsync(movieList, options, progress);
+     default:
+ return false;
+            }
+        }
+        catch
+        {
+   return false;
+     }
+  }
 
     /// <inheritdoc/>
     public async Task<bool> ExportEpisodesAsync(
-     IEnumerable<FileEpisodeModel> episodes,
-      ExportOptions options,
+        IEnumerable<FileEpisodeModel> episodes,
+        ExportOptions options,
         IProgress<int>? progress = null)
     {
-        try
-        {
- var episodeList = episodes.ToList();
+   try
+    {
+         var episodeList = episodes.ToList();
             
-            switch (options.Format)
- {
-    case ExportFormat.Csv:
-          return await ExportEpisodesToCsvAsync(episodeList, options, progress);
-     case ExportFormat.Json:
-         return await ExportEpisodesToJsonAsync(episodeList, options, progress);
-              case ExportFormat.Excel:
-          return await ExportEpisodesToCsvAsync(episodeList, options, progress);
-   default:
-    return false;
-            }
+ switch (options.Format)
+    {
+                case ExportFormat.Csv:
+         return await ExportEpisodesToCsvAsync(episodeList, options, progress);
+   case ExportFormat.Json:
+          return await ExportEpisodesToJsonAsync(episodeList, options, progress);
+                case ExportFormat.Xml:
+    return await ExportEpisodesToXmlAsync(episodeList, options, progress);
+        case ExportFormat.Excel:
+         return await ExportEpisodesToCsvAsync(episodeList, options, progress);
+        default:
+          return false;
+  }
         }
-     catch
- {
-     return false;
-     }
+  catch
+        {
+            return false;
+        }
     }
 
     /// <inheritdoc/>
@@ -117,25 +123,27 @@ sb.AppendLine($"  Total Files: {statistics.TotalFiles}");
     /// <inheritdoc/>
     public string GetFileExtension(ExportFormat format)
     {
-return format switch
-  {
-          ExportFormat.Csv => ".csv",
-    ExportFormat.Json => ".json",
-    ExportFormat.Excel => ".xlsx",
-  _ => ".txt"
+        return format switch
+     {
+  ExportFormat.Csv => ".csv",
+        ExportFormat.Json => ".json",
+            ExportFormat.Xml => ".xml",
+         ExportFormat.Excel => ".xlsx",
+         _ => ".txt"
         };
     }
 
-  /// <inheritdoc/>
+    /// <inheritdoc/>
     public string GetFileFilter(ExportFormat format)
     {
-        return format switch
+      return format switch
         {
-    ExportFormat.Csv => "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*",
-            ExportFormat.Json => "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
-   ExportFormat.Excel => "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*",
-        _ => "All Files (*.*)|*.*"
-        };
+     ExportFormat.Csv => "CSV Files (*.csv)|*.csv|All Files (*.*)|*.*",
+       ExportFormat.Json => "JSON Files (*.json)|*.json|All Files (*.*)|*.*",
+     ExportFormat.Xml => "XML Files (*.xml)|*.xml|All Files (*.*)|*.*",
+ ExportFormat.Excel => "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*",
+            _ => "All Files (*.*)|*.*"
+    };
     }
 
     #region Private Methods
@@ -318,6 +326,94 @@ if (options.IncludeFileSize) obj["fileSize"] = movie.FileSize;
         
   await File.WriteAllTextAsync(options.OutputPath, json, Encoding.UTF8);
 return true;
+    }
+
+    private async Task<bool> ExportMoviesToXmlAsync(
+        List<MovieFileModel> movies,
+        ExportOptions options,
+   IProgress<int>? progress)
+    {
+   var root = new XElement("Movies",
+    new XAttribute("ExportDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+         new XAttribute("TotalCount", movies.Count)
+        );
+
+        for (int i = 0; i < movies.Count; i++)
+        {
+            var movie = movies[i];
+            var movieElement = new XElement("Movie");
+
+      if (options.IncludeFileName) movieElement.Add(new XElement("FileName", movie.FileName));
+            if (options.IncludeNewFileName) movieElement.Add(new XElement("NewFileName", movie.NewFileName));
+            if (options.IncludeMediaName) movieElement.Add(new XElement("MovieName", movie.MovieName));
+       if (options.IncludeYear) movieElement.Add(new XElement("Year", movie.MovieYear));
+            if (options.IncludeConfidence) movieElement.Add(new XElement("Confidence", movie.Confidence));
+   if (options.IncludeStatus) movieElement.Add(new XElement("Status", movie.StatusText));
+            if (options.IncludeFileSize) movieElement.Add(new XElement("FileSize", movie.FileSize));
+            if (options.IncludeExtension) movieElement.Add(new XElement("Extension", movie.Extension));
+            if (options.IncludeFullPaths)
+            {
+  movieElement.Add(new XElement("SourcePath", movie.SourcePath));
+     movieElement.Add(new XElement("DestinationPath", movie.DestinationPath));
+       }
+            if (options.IncludeErrors && !string.IsNullOrEmpty(movie.ErrorMessage))
+   {
+      movieElement.Add(new XElement("ErrorMessage", movie.ErrorMessage));
+            }
+       if (options.IncludeTimestamp) movieElement.Add(new XElement("ExportedAt", DateTime.Now.ToString("o")));
+
+root.Add(movieElement);
+progress?.Report((i + 1) * 100 / movies.Count);
+ }
+
+        var doc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root);
+        await Task.Run(() => doc.Save(options.OutputPath));
+return true;
+    }
+
+    private async Task<bool> ExportEpisodesToXmlAsync(
+        List<FileEpisodeModel> episodes,
+   ExportOptions options,
+        IProgress<int>? progress)
+    {
+        var root = new XElement("Episodes",
+            new XAttribute("ExportDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+            new XAttribute("TotalCount", episodes.Count)
+     );
+
+        for (int i = 0; i < episodes.Count; i++)
+  {
+     var episode = episodes[i];
+            var episodeElement = new XElement("Episode");
+
+        if (options.IncludeFileName) episodeElement.Add(new XElement("FileName", episode.CoreEpisode.Filename));
+            if (options.IncludeNewFileName) episodeElement.Add(new XElement("NewFileName", episode.NewFileName));
+        if (options.IncludeMediaName) episodeElement.Add(new XElement("ShowName", episode.ShowName));
+ if (options.IncludeSeasonEpisode)
+       {
+     episodeElement.Add(new XElement("Season", episode.SeasonNumber));
+             episodeElement.Add(new XElement("Episode", episode.EpisodeNumbers));
+            }
+            if (options.IncludeStatus) episodeElement.Add(new XElement("Status", episode.StatusText));
+   if (options.IncludeExtension) episodeElement.Add(new XElement("Extension", episode.Extension));
+       if (options.IncludeFullPaths)
+       {
+    episodeElement.Add(new XElement("SourcePath", episode.SourcePath));
+    episodeElement.Add(new XElement("DestinationPath", episode.DestinationPath));
+    }
+            if (options.IncludeErrors && !string.IsNullOrEmpty(episode.ErrorMessage))
+            {
+     episodeElement.Add(new XElement("ErrorMessage", episode.ErrorMessage));
+            }
+       if (options.IncludeTimestamp) episodeElement.Add(new XElement("ExportedAt", DateTime.Now.ToString("o")));
+
+            root.Add(episodeElement);
+  progress?.Report((i + 1) * 100 / episodes.Count);
+        }
+
+        var doc = new XDocument(new XDeclaration("1.0", "utf-8", "yes"), root);
+        await Task.Run(() => doc.Save(options.OutputPath));
+        return true;
     }
 
     private string CsvEscape(string? value)

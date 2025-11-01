@@ -28,6 +28,9 @@
         <KeyBinding Key="F" Modifiers="Control" Command="{Binding ToggleSearchCommand}" />
         <KeyBinding Key="F" Modifiers="Control+Shift" Command="{Binding ToggleAdvancedFilterCommand}" />
         <KeyBinding Key="E" Modifiers="Control" Command="{Binding FocusSearchCommand}" />
+        
+<!-- Phase 7: Export keyboard shortcut -->
+        <KeyBinding Key="E" Modifiers="Control+Shift" Command="{Binding ShowExportCommand}" />
     </Window.InputBindings>
     
     <Grid>
@@ -106,14 +109,18 @@
       Command="{Binding ProcessCommand}"
         ToolTip="Process scanned files (Ctrl+P)"/>
    <Separator/>
-       <Button Content="⚙ Settings" 
-    Style="{StaticResource SecondaryButton}"
-      Command="{Binding ShowSettingsCommand}"
-   ToolTip="Open settings (Ctrl+,)"/>
-   <Button Content="⌨ Help" 
-Style="{StaticResource SecondaryButton}"
-           Command="{Binding ShowKeyboardShortcutsCommand}"
-         ToolTip="Show keyboard shortcuts (F1)"/>
+       <Button Content="📤 Export" 
+       Style="{StaticResource SecondaryButton}"
+         Command="{Binding ShowExportCommand}"
+       ToolTip="Export data to file (Ctrl+Shift+E)"/>
+<Button Content="⚙ Settings" 
+ Style="{StaticResource SecondaryButton}"
+   Command="{Binding ShowSettingsCommand}"
+    ToolTip="Open settings (Ctrl+,)"/>
+       <Button Content="⌨ Help" 
+      Style="{StaticResource SecondaryButton}"
+    Command="{Binding ShowKeyboardShortcutsCommand}"
+            ToolTip="Show keyboard shortcuts (F1)"/>
         </ToolBar>
 
   <!-- Phase 6: Search Panel -->

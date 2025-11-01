@@ -19,6 +19,7 @@ public class TvEpisodesViewModel : ViewModelBase
     private readonly IFileProcessingService _fileProcessingService;
     private readonly IDialogService _dialogService;
     private readonly IWindowStateService _windowStateService;
+    private readonly IExportService _exportService;
     private string _statusMessage = "No episodes scanned";
     private bool _isProcessing;
     private bool _isCardViewSelected = true;
@@ -29,10 +30,11 @@ public class TvEpisodesViewModel : ViewModelBase
     private ObservableCollection<FileEpisodeModel> _allEpisodes = new();
 
     public TvEpisodesViewModel(
-    IScanningService scanningService,
-  IFileProcessingService fileProcessingService,
+        IScanningService scanningService,
+        IFileProcessingService fileProcessingService,
       IDialogService dialogService,
-        IWindowStateService windowStateService,
+    IWindowStateService windowStateService,
+      IExportService exportService,
         SearchViewModel searchViewModel,
         FilterViewModel filterViewModel,
         StatsViewModel statsViewModel)
@@ -40,41 +42,45 @@ public class TvEpisodesViewModel : ViewModelBase
         _scanningService = scanningService;
         _fileProcessingService = fileProcessingService;
         _dialogService = dialogService;
-        _windowStateService = windowStateService;
+     _windowStateService = windowStateService;
+        _exportService = exportService;
 
-// Phase 6: Initialize ViewModels
+    // Phase 6: Initialize ViewModels
         SearchViewModel = searchViewModel ?? throw new ArgumentNullException(nameof(searchViewModel));
-        FilterViewModel = filterViewModel ?? throw new ArgumentNullException(nameof(filterViewModel));
-     StatsViewModel = statsViewModel ?? throw new ArgumentNullException(nameof(statsViewModel));
+   FilterViewModel = filterViewModel ?? throw new ArgumentNullException(nameof(filterViewModel));
+        StatsViewModel = statsViewModel ?? throw new ArgumentNullException(nameof(statsViewModel));
 
-  Episodes = new ObservableCollection<FileEpisodeModel>();
+        Episodes = new ObservableCollection<FileEpisodeModel>();
 
-        // Phase 6: Wire up event handlers
-      SearchViewModel.SearchChanged += OnSearchChanged;
+     // Phase 6: Wire up event handlers
+        SearchViewModel.SearchChanged += OnSearchChanged;
         FilterViewModel.FiltersApplied += OnFiltersApplied;
-  FilterViewModel.FiltersReset += OnFiltersReset;
+        FilterViewModel.FiltersReset += OnFiltersReset;
         StatsViewModel.RefreshRequested += OnStatsRefreshRequested;
 
- // Initialize commands
-   ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsProcessing);
+        // Initialize commands
+        ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsProcessing);
         ProcessCommand = new AsyncRelayCommand(ProcessAsync, CanProcess);
-  RemoveSelectedCommand = new RelayCommand(RemoveSelected, _ => !IsProcessing);
-  ClearAllCommand = new RelayCommand(ClearAll, _ => Episodes.Count > 0 && !IsProcessing);
+        RemoveSelectedCommand = new RelayCommand(RemoveSelected, _ => !IsProcessing);
+      ClearAllCommand = new RelayCommand(ClearAll, _ => Episodes.Count > 0 && !IsProcessing);
         RemoveUnparsedCommand = new RelayCommand(RemoveUnparsed, _ => Episodes.Any(e => e.Status == ProcessingStatus.Unparsed) && !IsProcessing);
-        SelectAllCommand = new RelayCommand(_ => { /* Handled by view */ });
+ SelectAllCommand = new RelayCommand(_ => { /* Handled by view */ });
         
         // Card action commands
-        ViewDetailsCommand = new RelayCommand(ViewDetails);
-        OpenFolderCommand = new RelayCommand(OpenFolder);
-        RetryCommand = new AsyncRelayCommand<object>(RetryAsync);
+    ViewDetailsCommand = new RelayCommand(ViewDetails);
+   OpenFolderCommand = new RelayCommand(OpenFolder);
+      RetryCommand = new AsyncRelayCommand<object>(RetryAsync);
         
-        // Enhanced context menu commands
+    // Enhanced context menu commands
         OpenSourceFolderCommand = new RelayCommand(OpenSourceFolder);
-        OpenDestinationFolderCommand = new RelayCommand(OpenDestinationFolder);
-     CopySourcePathCommand = new RelayCommand(CopySourcePath);
-        CopyDestinationPathCommand = new RelayCommand(CopyDestinationPath);
-   RemoveAllFailedCommand = new RelayCommand(RemoveAllFailed, _ => Episodes.Any(e => e.Status == ProcessingStatus.Failed) && !IsProcessing);
-        RemoveAllCompletedCommand = new RelayCommand(RemoveAllCompleted, _ => Episodes.Any(e => e.Status == ProcessingStatus.Completed) && !IsProcessing);
+  OpenDestinationFolderCommand = new RelayCommand(OpenDestinationFolder);
+    CopySourcePathCommand = new RelayCommand(CopySourcePath);
+   CopyDestinationPathCommand = new RelayCommand(CopyDestinationPath);
+        RemoveAllFailedCommand = new RelayCommand(RemoveAllFailed, _ => Episodes.Any(e => e.Status == ProcessingStatus.Failed) && !IsProcessing);
+  RemoveAllCompletedCommand = new RelayCommand(RemoveAllCompleted, _ => Episodes.Any(e => e.Status == ProcessingStatus.Completed) && !IsProcessing);
+        
+        // Phase 7: Export command
+  ExportCommand = new AsyncRelayCommand(ExecuteExportAsync, () => Episodes.Count > 0 && !IsProcessing);
     }
 
 #region Phase 6: ViewModels
@@ -101,17 +107,18 @@ public class TvEpisodesViewModel : ViewModelBase
  get => _isProcessing;
         set
         {
-          if (SetProperty(ref _isProcessing, value))
-            {
-     ((AsyncRelayCommand)ScanCommand).RaiseCanExecuteChanged();
-     ((AsyncRelayCommand)ProcessCommand).RaiseCanExecuteChanged();
-    ((RelayCommand)RemoveSelectedCommand).RaiseCanExecuteChanged();
-          ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
-       ((RelayCommand)RemoveUnparsedCommand).RaiseCanExecuteChanged();
+  if (SetProperty(ref _isProcessing, value))
+   {
+  ((AsyncRelayCommand)ScanCommand).RaiseCanExecuteChanged();
+   ((AsyncRelayCommand)ProcessCommand).RaiseCanExecuteChanged();
+     ((RelayCommand)RemoveSelectedCommand).RaiseCanExecuteChanged();
+    ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
+     ((RelayCommand)RemoveUnparsedCommand).RaiseCanExecuteChanged();
      ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
-      ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
-       }
-  }
+    ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
+       ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
+   }
+        }
     }
 
     public bool IsCardViewSelected
@@ -196,8 +203,9 @@ public class TvEpisodesViewModel : ViewModelBase
   public ICommand CopyDestinationPathCommand { get; }
     public ICommand RemoveAllFailedCommand { get; }
     public ICommand RemoveAllCompletedCommand { get; }
+    public ICommand ExportCommand { get; }
 
-#endregion
+    #endregion
 
     #region Filtering
 
@@ -241,16 +249,17 @@ public class TvEpisodesViewModel : ViewModelBase
 
     Episodes.Clear();
         foreach (var episode in filtered)
-    {
-Episodes.Add(episode);
-        }
+        {
+            Episodes.Add(episode);
+   }
     
         // Phase 6: Update search result count and statistics
     SearchViewModel.UpdateResultCount(Episodes.Count);
-        StatsViewModel.UpdateEpisodeStatistics(Episodes);
-        
-        ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
-     ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
+   StatsViewModel.UpdateEpisodeStatistics(Episodes);
+   
+   ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
+        ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
+     ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
     }
 
     #endregion
@@ -713,31 +722,117 @@ if (!string.IsNullOrEmpty(folderPath))
 
     private async void RemoveAllCompleted(object? parameter)
     {
-        var completedEpisodes = _allEpisodes.Where(e => e.Status == ProcessingStatus.Completed).ToList();
+ var completedEpisodes = _allEpisodes.Where(e => e.Status == ProcessingStatus.Completed).ToList();
 
-        if (completedEpisodes.Count == 0)
+     if (completedEpisodes.Count == 0)
         {
-        await _dialogService.ShowMessageAsync("Remove Completed", "No completed episodes to remove.");
-            return;
+     await _dialogService.ShowMessageAsync("Remove Completed", "No completed episodes to remove.");
+   return;
+      }
+
+ var result = await _dialogService.ShowConfirmationAsync(
+            "Remove All Completed",
+       $"Remove all {completedEpisodes.Count} completed episodes from the list?");
+
+   if (result)
+{
+       foreach (var episode in completedEpisodes)
+       {
+    _allEpisodes.Remove(episode);
+  }
+
+         ApplyFilters();
+         StatusMessage = $"Removed {completedEpisodes.Count} completed episodes. {_allEpisodes.Count} remaining.";
+  ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RemoveUnparsedCommand).RaiseCanExecuteChanged();
+     ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
+     ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
         }
+    }
 
-      var result = await _dialogService.ShowConfirmationAsync(
-  "Remove All Completed",
-          $"Remove all {completedEpisodes.Count} completed episodes from the list?");
-
-        if (result)
-        {
-      foreach (var episode in completedEpisodes)
+    /// <summary>
+  /// Phase 7: Export episodes to file
+    /// </summary>
+private async Task ExecuteExportAsync()
     {
-          _allEpisodes.Remove(episode);
-     }
+        try
+ {
+            // Create export view model
+      var exportViewModel = new ExportViewModel(_exportService, _dialogService);
+         
+         // Show export dialog
+   var dialog = new Views.ExportDialog
+     {
+     Owner = System.Windows.Application.Current.MainWindow,
+        DataContext = exportViewModel
+       };
 
- ApplyFilters();
-            StatusMessage = $"Removed {completedEpisodes.Count} completed episodes. {_allEpisodes.Count} remaining.";
-    ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
-      ((RelayCommand)RemoveUnparsedCommand).RaiseCanExecuteChanged();
-       ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
-   ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
+            if (dialog.ShowDialog() != true)
+         {
+     StatusMessage = "Export cancelled";
+     return;
+            }
+
+ // Check if output path was selected
+    if (string.IsNullOrWhiteSpace(exportViewModel.Options.OutputPath))
+     {
+          StatusMessage = "Export cancelled - no output path selected";
+         return;
+   }
+
+  IsProcessing = true;
+  StatusMessage = "Exporting episodes...";
+
+         // Export episodes (export all visible episodes in current filter)
+            var episodesToExport = Episodes.ToList();
+
+   if (episodesToExport.Count == 0)
+      {
+          await _dialogService.ShowMessageAsync("Export", "No episodes to export.");
+            return;
+   }
+
+            var success = await exportViewModel.ExportEpisodesAsync(episodesToExport);
+
+            if (success)
+   {
+    StatusMessage = $"Successfully exported {episodesToExport.Count} episodes to {Path.GetFileName(exportViewModel.Options.OutputPath)}";
+       
+       var result = await _dialogService.ShowConfirmationAsync(
+        "Export Complete",
+      $"Successfully exported {episodesToExport.Count} episodes.\n\nOpen the export file?");
+
+  if (result)
+      {
+         try
+    {
+System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+  {
+        FileName = exportViewModel.Options.OutputPath,
+   UseShellExecute = true
+          });
+      }
+        catch (Exception ex)
+      {
+   await _dialogService.ShowErrorAsync("Open File Error", $"Failed to open export file: {ex.Message}");
+  }
+    }
+  }
+            else
+      {
+     StatusMessage = "Export failed";
+      await _dialogService.ShowErrorAsync("Export Error", "Failed to export episodes. Please check the file path and try again.");
+  }
+        }
+        catch (Exception ex)
+        {
+     StatusMessage = $"Export error: {ex.Message}";
+            await _dialogService.ShowErrorAsync("Export Error", $"An error occurred during export:\n\n{ex.Message}");
+        }
+        finally
+        {
+       IsProcessing = false;
+((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
         }
     }
 

@@ -7,6 +7,7 @@ public enum ExportFormat
 {
  Csv,
   Json,
+    Xml,
     Excel
 }
 

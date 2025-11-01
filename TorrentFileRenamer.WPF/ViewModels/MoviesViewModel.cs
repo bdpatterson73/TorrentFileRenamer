@@ -19,6 +19,7 @@ public class MoviesViewModel : ViewModelBase
     private readonly IFileProcessingService _fileProcessingService;
     private readonly IDialogService _dialogService;
     private readonly IWindowStateService _windowStateService;
+    private readonly IExportService _exportService;
     private string _statusMessage = "No movies scanned";
     private bool _isProcessing;
     private int _minimumConfidence = 40;
@@ -34,6 +35,7 @@ public class MoviesViewModel : ViewModelBase
         IFileProcessingService fileProcessingService,
         IDialogService dialogService,
         IWindowStateService windowStateService,
+        IExportService exportService,
         SearchViewModel searchViewModel,
         FilterViewModel filterViewModel,
         StatsViewModel statsViewModel)
@@ -42,6 +44,7 @@ public class MoviesViewModel : ViewModelBase
         _fileProcessingService = fileProcessingService;
         _dialogService = dialogService;
         _windowStateService = windowStateService;
+        _exportService = exportService;
 
         // Phase 6: Initialize ViewModels
         SearchViewModel = searchViewModel ?? throw new ArgumentNullException(nameof(searchViewModel));
@@ -74,6 +77,9 @@ public class MoviesViewModel : ViewModelBase
         CopyDestinationPathCommand = new RelayCommand(CopyDestinationPath);
         RemoveAllFailedCommand = new RelayCommand(RemoveAllFailed, _ => Movies.Any(m => m.Status == ProcessingStatus.Failed) && !IsProcessing);
         RemoveAllCompletedCommand = new RelayCommand(RemoveAllCompleted, _ => Movies.Any(m => m.Status == ProcessingStatus.Completed) && !IsProcessing);
+        
+        // Phase 7: Export command
+        ExportCommand = new AsyncRelayCommand(ExecuteExportAsync, () => Movies.Count > 0 && !IsProcessing);
     }
 
     #region Phase 6: ViewModels
@@ -111,14 +117,14 @@ public class MoviesViewModel : ViewModelBase
     
     #region Commands
 
-  public ICommand ScanCommand { get; }
+    public ICommand ScanCommand { get; }
     public ICommand ProcessCommand { get; }
     public ICommand RemoveSelectedCommand { get; }
     public ICommand ClearAllCommand { get; }
     public ICommand RemoveLowConfidenceCommand { get; }
     public ICommand SelectAllCommand { get; }
     public ICommand ViewDetailsCommand { get; }
- public ICommand OpenFolderCommand { get; }
+    public ICommand OpenFolderCommand { get; }
     public ICommand RetryCommand { get; }
     public ICommand OpenSourceFolderCommand { get; }
     public ICommand OpenDestinationFolderCommand { get; }
@@ -126,6 +132,7 @@ public class MoviesViewModel : ViewModelBase
     public ICommand CopyDestinationPathCommand { get; }
     public ICommand RemoveAllFailedCommand { get; }
     public ICommand RemoveAllCompletedCommand { get; }
+    public ICommand ExportCommand { get; }
 
     #endregion
 
@@ -156,6 +163,7 @@ public class MoviesViewModel : ViewModelBase
                 ((RelayCommand)RemoveLowConfidenceCommand).RaiseCanExecuteChanged();
                 ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
                 ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
+                ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
             }
         }
     }
@@ -327,10 +335,11 @@ public class MoviesViewModel : ViewModelBase
         // Phase 6: Update search result count and statistics
      SearchViewModel.UpdateResultCount(Movies.Count);
         StatsViewModel.UpdateMovieStatistics(Movies);
-        
+   
         // Refresh command states
-      ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
+        ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
         ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
+        ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
     }
 
     #region Phase 6: Event Handlers
@@ -801,29 +810,115 @@ catch (Exception ex)
     {
         var completedMovies = _allMovies.Where(m => m.Status == ProcessingStatus.Completed).ToList();
 
-   if (completedMovies.Count == 0)
-     {
-       await _dialogService.ShowMessageAsync("Remove Completed", "No completed movies to remove.");
-  return;
-   }
+ if (completedMovies.Count == 0)
+        {
+   await _dialogService.ShowMessageAsync("Remove Completed", "No completed movies to remove.");
+            return;
+        }
 
-   var result = await _dialogService.ShowConfirmationAsync(
-     "Remove All Completed",
- $"Remove all {completedMovies.Count} completed movies from the list?");
+var result = await _dialogService.ShowConfirmationAsync(
+ "Remove All Completed",
+            $"Remove all {completedMovies.Count} completed movies from the list?");
 
         if (result)
-     {
-      foreach (var movie in completedMovies)
-      {
-        _allMovies.Remove(movie);
-       }
+        {
+            foreach (var movie in completedMovies)
+   {
+ _allMovies.Remove(movie);
+  }
 
- ApplyFilters();
+         ApplyFilters();
     StatusMessage = $"Removed {completedMovies.Count} completed movies. {_allMovies.Count} remaining.";
             ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
-       ((RelayCommand)RemoveLowConfidenceCommand).RaiseCanExecuteChanged();
-      ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RemoveLowConfidenceCommand).RaiseCanExecuteChanged();
+            ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
  ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
+        }
+    }
+
+    /// <summary>
+    /// Phase 7: Export movies to file
+    /// </summary>
+    private async Task ExecuteExportAsync()
+    {
+     try
+        {
+            // Create export view model
+  var exportViewModel = new ExportViewModel(_exportService, _dialogService);
+         
+// Show export dialog
+            var dialog = new Views.ExportDialog
+        {
+             Owner = System.Windows.Application.Current.MainWindow,
+     DataContext = exportViewModel
+     };
+
+            if (dialog.ShowDialog() != true)
+       {
+     StatusMessage = "Export cancelled";
+      return;
+            }
+
+  // Check if output path was selected
+    if (string.IsNullOrWhiteSpace(exportViewModel.Options.OutputPath))
+       {
+     StatusMessage = "Export cancelled - no output path selected";
+           return;
+   }
+
+    IsProcessing = true;
+     StatusMessage = "Exporting movies...";
+
+            // Export movies (export all visible movies in current filter)
+            var moviesToExport = Movies.ToList();
+
+    if (moviesToExport.Count == 0)
+            {
+       await _dialogService.ShowMessageAsync("Export", "No movies to export.");
+   return;
+      }
+
+            var success = await exportViewModel.ExportMoviesAsync(moviesToExport);
+
+            if (success)
+            {
+         StatusMessage = $"Successfully exported {moviesToExport.Count} movies to {Path.GetFileName(exportViewModel.Options.OutputPath)}";
+      
+       var result = await _dialogService.ShowConfirmationAsync(
+     "Export Complete",
+  $"Successfully exported {moviesToExport.Count} movies.\n\nOpen the export file?");
+
+   if (result)
+     {
+         try
+          {
+   System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+     {
+      FileName = exportViewModel.Options.OutputPath,
+           UseShellExecute = true
+       });
+           }
+         catch (Exception ex)
+         {
+    await _dialogService.ShowErrorAsync("Open File Error", $"Failed to open export file: {ex.Message}");
+          }
+          }
+}
+  else
+      {
+        StatusMessage = "Export failed";
+    await _dialogService.ShowErrorAsync("Export Error", "Failed to export movies. Please check the file path and try again.");
+     }
+        }
+        catch (Exception ex)
+        {
+    StatusMessage = $"Export error: {ex.Message}";
+    await _dialogService.ShowErrorAsync("Export Error", $"An error occurred during export:\n\n{ex.Message}");
+        }
+    finally
+        {
+            IsProcessing = false;
+        ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
         }
     }
 }
