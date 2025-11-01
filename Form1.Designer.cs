@@ -211,7 +211,7 @@
             // 
             // lvFiles
             //
-            lvFiles.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lvFiles.Dock = DockStyle.Fill;
             lvFiles.BackColor = Color.White;
             lvFiles.BorderStyle = BorderStyle.None;
             lvFiles.Columns.AddRange(new ColumnHeader[] { chFileName, chNewName, chShow, chSeason, chEpisode, chRemark });
@@ -220,11 +220,11 @@
             lvFiles.FullRowSelect = true;
             lvFiles.GridLines = true;
             lvFiles.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            lvFiles.Location = new Point(8, 8);
-            lvFiles.Margin = new Padding(8);
+            lvFiles.Location = new Point(0, 0);
+            lvFiles.Margin = new Padding(0);
             lvFiles.Name = "lvFiles";
             lvFiles.OwnerDraw = false;
-            lvFiles.Size = new Size(974, 310);
+            lvFiles.Size = new Size(968, 426);
             lvFiles.TabIndex = 1;
             lvFiles.UseCompatibleStateImageBehavior = false;
             lvFiles.View = View.Details;
@@ -308,7 +308,7 @@
             //
             toolStripContainer1.ContentPanel.BackColor = Color.FromArgb(245, 245, 245);
             toolStripContainer1.ContentPanel.Controls.Add(tabControl1);
-            toolStripContainer1.ContentPanel.Padding = new Padding(8);
+            toolStripContainer1.ContentPanel.Padding = new Padding(4);
             toolStripContainer1.ContentPanel.Size = new Size(1000, 506);
             toolStripContainer1.Location = new Point(0, 28);
             toolStripContainer1.Name = "toolStripContainer1";
@@ -327,11 +327,11 @@
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
             tabControl1.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            tabControl1.Location = new Point(8, 8);
+            tabControl1.Location = new Point(4, 4);
             tabControl1.Name = "tabControl1";
             tabControl1.Padding = new Point(12, 6);
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(984, 490);
+            tabControl1.Size = new Size(992, 498);
             tabControl1.TabIndex = 3;
             // 
             // tabPage1
@@ -340,8 +340,8 @@
             tabPage1.Controls.Add(lvFiles);
             tabPage1.Location = new Point(4, 28);
             tabPage1.Name = "tabPage1";
-            tabPage1.Padding = new Padding(8);
-            tabPage1.Size = new Size(976, 458);
+            tabPage1.Padding = new Padding(0);
+            tabPage1.Size = new Size(968, 426);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "📺 TV Shows";
             // 
@@ -351,14 +351,14 @@
             tabPage2.Controls.Add(lvMovies);
             tabPage2.Location = new Point(4, 28);
             tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(8);
-            tabPage2.Size = new Size(976, 458);
+            tabPage2.Padding = new Padding(0);
+            tabPage2.Size = new Size(968, 426);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "🎬 Movies";
             // 
             // lvMovies
             //
-            lvMovies.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lvMovies.Dock = DockStyle.Fill;
             lvMovies.BackColor = Color.White;
             lvMovies.BorderStyle = BorderStyle.None;
             lvMovies.Columns.AddRange(new ColumnHeader[] { chMovieFileName, chMovieNewFileNamePath, chMovieName, chMovieYear, chComment });
@@ -367,10 +367,10 @@
             lvMovies.FullRowSelect = true;
             lvMovies.GridLines = true;
             lvMovies.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            lvMovies.Location = new Point(8, 8);
-            lvMovies.Margin = new Padding(8);
+            lvMovies.Location = new Point(0, 0);
+            lvMovies.Margin = new Padding(0);
             lvMovies.Name = "lvMovies";
-            lvMovies.Size = new Size(960, 442);
+            lvMovies.Size = new Size(968, 426);
             lvMovies.TabIndex = 2;
             lvMovies.UseCompatibleStateImageBehavior = false;
             lvMovies.View = View.Details;
@@ -424,14 +424,14 @@
             tabPage3.Controls.Add(lvMovieCleaner);
             tabPage3.Location = new Point(4, 28);
             tabPage3.Name = "tabPage3";
-            tabPage3.Padding = new Padding(8);
-            tabPage3.Size = new Size(976, 458);
+            tabPage3.Padding = new Padding(0);
+            tabPage3.Size = new Size(968, 426);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "🧹 Movie Cleaner";
             // 
             // lvMovieCleaner
             //
-            lvMovieCleaner.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            lvMovieCleaner.Dock = DockStyle.Fill;
             lvMovieCleaner.BackColor = Color.White;
             lvMovieCleaner.BorderStyle = BorderStyle.None;
             lvMovieCleaner.Columns.AddRange(new ColumnHeader[] { chmcFileNamePath, chmcMovieTitle, chmcYear, chmcNewFileName, chmcComment });
@@ -439,10 +439,10 @@
             lvMovieCleaner.FullRowSelect = true;
             lvMovieCleaner.GridLines = true;
             lvMovieCleaner.HeaderStyle = ColumnHeaderStyle.Nonclickable;
-            lvMovieCleaner.Location = new Point(8, 8);
-            lvMovieCleaner.Margin = new Padding(8);
+            lvMovieCleaner.Location = new Point(0, 0);
+            lvMovieCleaner.Margin = new Padding(0);
             lvMovieCleaner.Name = "lvMovieCleaner";
-            lvMovieCleaner.Size = new Size(960, 442);
+            lvMovieCleaner.Size = new Size(968, 426);
             lvMovieCleaner.TabIndex = 0;
             lvMovieCleaner.UseCompatibleStateImageBehavior = false;
             lvMovieCleaner.View = View.Details;
@@ -504,7 +504,7 @@
             tsbProcess.Size = new Size(82, 36);
             tsbProcess.Text = "Process TV";
             tsbProcess.ToolTipText = "Process scanned TV files";
-            tsbProcess.Click += tsbProcess_Click;
+            tsbProcess.Click += miProcess_Click;
             // 
             // toolStripSeparator1
             // 

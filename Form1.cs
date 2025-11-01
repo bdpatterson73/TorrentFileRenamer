@@ -321,8 +321,6 @@ TV EPISODES:
 
 MOVIES:
 • Organizes by first letter (A-Z, 0-9, #)
-• Creates individual movie folders for each file
-• Example: Lost In The Amazon (2024).mp4 → L/Lost In The Amazon (2024)/Lost In The Amazon (2024).mp4
 • Removes quality tags (720p, 1080p, etc.)
 • Handles years in various formats
 
@@ -639,7 +637,7 @@ TIPS:
             
             var result = MessageBox.Show(
                 $"Process {validItems} TV episode(s)?\n\nThis will:\n" +
-                "1. Copy files to the server (with progress feedback)\n" +
+                "1. Copy files to the server\n" +
                 "2. Verify file sizes match\n" +
                 "3. Delete original files if verification succeeds\n\n" +
                 "Continue?", 
@@ -686,7 +684,7 @@ TIPS:
                 .Where(item => item.BackColor != Color.LightGray)
                 .ToList();
 
-            // Phase 1: Copy files with progress feedback
+            // Phase 1: Copy files
             LoggingService.LogInfo($"Starting to process {totalItems} files", "Processing");
             
             foreach (var lvi in itemsToProcess)
@@ -715,39 +713,17 @@ TIPS:
                         Directory.CreateDirectory(fe.NewDirectoryName);
                     }
 
-                    // Use the new FileOperationProgress for detailed progress feedback
-                    var fileOperation = new FileOperationProgress();
-                    string currentFileName = Path.GetFileName(fe.FullFilePath);
-                    
-                    fileOperation.ProgressChanged += (sender, args) => {
-                        // Update the status with detailed file copy progress
-                        if (!args.IsComplete)
-                        {
-                            string detailedStatus = $"Copying {currentFileName}: {args.FormattedProgress} at {args.FormattedSpeed}";
-                            if (!string.IsNullOrEmpty(args.FormattedTimeRemaining))
-                                detailedStatus += $" - ETA: {args.FormattedTimeRemaining}";
-                            
-                            Invoke(new Action(() => {
-                                statusLabel.Text = detailedStatus;
-                                // Update the list view item with progress
-                                lvi.SubItems[5].Text = $"{args.PercentComplete:F1}% at {args.FormattedSpeed}";
-                            }));
-                        }
-                    };
-
-                    // Enhanced retry logic with async and progress
-                    bool retVal = await fileOperation.CopyFileWithRetryAsync(
-                        fe.FullFilePath, 
-                        fe.NewFileNamePath,
+                    // Enhanced retry logic with async
+                    bool retVal = await RetryFileOperationAsync(
+                        () => CopyFileAsync(fe.FullFilePath, fe.NewFileNamePath),
                         maxRetries: 5,
-                        cancellationToken: cancellationToken);
+                        cancellationToken);
                     
                     // Update UI on the UI thread
                     Invoke(new Action(() => {
                         if (retVal)
                         {
                             lvi.BackColor = Color.Yellow;
-                            lvi.SubItems[5].Text = "Copy completed - Verifying...";
                             successfulCopies++;
                             LoggingService.LogDebug($"Successfully copied: {Path.GetFileName(fe.FullFilePath)}", "Processing");
                         }
@@ -883,10 +859,13 @@ TIPS:
 
         private async Task<bool> CopyFileAsync(string source, string destination)
         {
-            // This method is now replaced by FileOperationProgress.CopyFileAsync
-            // Keeping for backward compatibility, but new code should use FileOperationProgress
-            var fileOperation = new FileOperationProgress();
-            return await fileOperation.CopyFileAsync(source, destination);
+            const int bufferSize = 8192; // 8KB buffer
+            
+            using var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true);
+            using var destinationStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true);
+            
+            await sourceStream.CopyToAsync(destinationStream);
+            return true;
         }
 
         private async Task<bool> RetryFileOperationAsync(Func<Task<bool>> operation, int maxRetries, CancellationToken cancellationToken)
@@ -1093,6 +1072,59 @@ TIPS:
             statusLabel.Text = "TV episode list cleared";
         }
 
+        private void InitializeFolderMonitoring()
+        {
+            try
+            {
+                _folderMonitorService = new FolderMonitorService();
+                
+                // Subscribe to events
+                _folderMonitorService.StatusChanged += FolderMonitorService_StatusChanged;
+                _folderMonitorService.FileFound += FolderMonitorService_FileFound;
+                _folderMonitorService.FileProcessed += FolderMonitorService_FileProcessed;
+                _folderMonitorService.ErrorOccurred += FolderMonitorService_ErrorOccurred;
+
+                // Load saved settings (in a real app, you'd load from config file or registry)
+                LoadMonitoringSettings();
+
+                // Auto-start only if explicitly enabled AND valid configuration exists
+                if (_savedAutoStart && 
+                    !string.IsNullOrWhiteSpace(_savedWatchFolder) && 
+                    !string.IsNullOrWhiteSpace(_savedDestinationFolder) &&
+                    Directory.Exists(_savedWatchFolder))
+                {
+                    LoggingService.LogInfo($"Auto-starting monitoring: Watch='{_savedWatchFolder}', Dest='{_savedDestinationFolder}'", "AutoMonitor");
+                    
+                    bool started = ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay);
+                    if (!started)
+                    {
+                        LoggingService.LogWarning("Auto-start monitoring failed - configuration may be invalid", "AutoMonitor");
+                    }
+                }
+                else
+                {
+                    LoggingService.LogInfo($"Auto-monitoring not started - AutoStart: {_savedAutoStart}, ValidConfig: {!string.IsNullOrWhiteSpace(_savedWatchFolder) && !string.IsNullOrWhiteSpace(_savedDestinationFolder)}", "AutoMonitor");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error initializing folder monitoring: {ex.Message}", 
+                    "Monitoring Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LoggingService.LogError("Failed to initialize folder monitoring", ex, "AutoMonitor");
+            }
+        }
+
+        private void LoadMonitoringSettings()
+        {
+            // In a real application, load these from app settings or registry
+            // For now, use defaults - you could enhance this to save/load from a config file
+        }
+
+        private void SaveMonitoringSettings()
+        {
+            // In a real application, save these to app settings or registry
+        }
+
         private void FolderMonitorService_StatusChanged(object? sender, string status)
         {
             if (InvokeRequired)
@@ -1126,103 +1158,6 @@ TIPS:
                 _monitoringStatusItem.SubItems[1].Text = status;
                 _monitoringStatusItem.SubItems[5].Text = DateTime.Now.ToString("HH:mm:ss");
             }
-        }
-
-        private void LoadMonitoringSettings()
-        {
-            // In a real application, load these from app settings or registry
-            // For now, use defaults - you could enhance this to save/load from a config file
-        }
-
-        private void SaveMonitoringSettings()
-        {
-            // In a real application, save these to app settings or registry
-        }
-
-        private void InitializeFolderMonitoring()
-        {
-            try
-            {
-                _folderMonitorService = new FolderMonitorService();
-                
-                // Subscribe to events
-                _folderMonitorService.StatusChanged += FolderMonitorService_StatusChanged;
-                _folderMonitorService.FileFound += FolderMonitorService_FileFound;
-                _folderMonitorService.FileProcessed += FolderMonitorService_FileProcessed;
-                _folderMonitorService.ErrorOccurred += FolderMonitorService_ErrorOccurred;
-                
-                // Subscribe to the new file progress event
-                _folderMonitorService.FileProgressChanged += FolderMonitorService_FileProgressChanged;
-
-                // Load saved settings (in a real app, you'd load from config file or registry)
-                LoadMonitoringSettings();
-
-                // Auto-start only if explicitly enabled AND valid configuration exists
-                if (_savedAutoStart && 
-                    !string.IsNullOrWhiteSpace(_savedWatchFolder) && 
-                    !string.IsNullOrWhiteSpace(_savedDestinationFolder) &&
-                    Directory.Exists(_savedWatchFolder))
-                {
-                    LoggingService.LogInfo($"Auto-starting monitoring: Watch='{_savedWatchFolder}', Dest='{_savedDestinationFolder}'", "AutoMonitor");
-                    
-                    bool started = ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay);
-                    if (!started)
-                    {
-                        LoggingService.LogWarning("Auto-start monitoring failed - configuration may be invalid", "AutoMonitor");
-                    }
-                }
-                else
-                {
-                    LoggingService.LogInfo($"Auto-monitoring not started - AutoStart: {_savedAutoStart}, ValidConfig: {!string.IsNullOrWhiteSpace(_savedWatchFolder) && !string.IsNullOrWhiteSpace(_savedDestinationFolder)}", "AutoMonitor");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error initializing folder monitoring: {ex.Message}", 
-                    "Monitoring Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                LoggingService.LogError("Failed to initialize folder monitoring", ex, "AutoMonitor");
-            }
-        }
-
-        private void FolderMonitorService_FileProgressChanged(object? sender, FileProgressEventArgs e)
-        {
-            if (InvokeRequired)
-            {
-                Invoke(new Action<FileProgressEventArgs>(HandleFileProgressChanged), e);
-            }
-            else
-            {
-                HandleFileProgressChanged(e);
-            }
-        }
-
-        private void HandleFileProgressChanged(FileProgressEventArgs e)
-        {
-            // Update the monitoring status item with detailed progress
-            if (_monitoringStatusItem != null)
-            {
-                if (e.IsComplete)
-                {
-                    _monitoringStatusItem.SubItems[1].Text = $"Completed copying {Path.GetFileName(e.SourceFile)}";
-                    _monitoringStatusItem.SubItems[5].Text = $"Copy completed at {DateTime.Now:HH:mm:ss}";
-                }
-                else if (!string.IsNullOrEmpty(e.CustomMessage))
-                {
-                    _monitoringStatusItem.SubItems[1].Text = e.CustomMessage;
-                    _monitoringStatusItem.SubItems[5].Text = DateTime.Now.ToString("HH:mm:ss");
-                }
-                else
-                {
-                    string progressText = $"Copying {Path.GetFileName(e.SourceFile)}: {e.FormattedProgress} at {e.FormattedSpeed}";
-                    if (!string.IsNullOrEmpty(e.FormattedTimeRemaining))
-                        progressText += $" - ETA: {e.FormattedTimeRemaining}";
-                    
-                    _monitoringStatusItem.SubItems[1].Text = progressText;
-                    _monitoringStatusItem.SubItems[5].Text = DateTime.Now.ToString("HH:mm:ss");
-                }
-            }
-
-            Debug.WriteLine($"File copy progress: {Path.GetFileName(e.SourceFile)} - {e.PercentComplete:F1}% at {e.FormattedSpeed}");
         }
 
         private void miConfigureMonitoring_Click(object sender, EventArgs e)
@@ -1753,7 +1688,7 @@ TIPS:
                 .Where(item => item.BackColor != Color.LightGray)
                 .ToList();
 
-            // Phase 1: Copy files with progress feedback
+            // Phase 1: Copy files
             LoggingService.LogInfo($"Starting to process {totalItems} movie files", "Processing");
             
             foreach (var lvi in itemsToProcess)
@@ -1783,39 +1718,17 @@ TIPS:
                         Directory.CreateDirectory(destinationDir);
                     }
 
-                    // Use the new FileOperationProgress for detailed progress feedback
-                    var fileOperation = new FileOperationProgress();
-                    string currentFileName = Path.GetFileName(mv.FileNamePath);
-                    
-                    fileOperation.ProgressChanged += (sender, args) => {
-                        // Update the status with detailed file copy progress
-                        if (!args.IsComplete)
-                        {
-                            string detailedStatus = $"Copying {currentFileName}: {args.FormattedProgress} at {args.FormattedSpeed}";
-                            if (!string.IsNullOrEmpty(args.FormattedTimeRemaining))
-                                detailedStatus += $" - ETA: {args.FormattedTimeRemaining}";
-                            
-                            Invoke(new Action(() => {
-                                statusLabel.Text = detailedStatus;
-                                // Update the list view item with progress
-                                lvi.SubItems[4].Text = $"{args.PercentComplete:F1}% at {args.FormattedSpeed}";
-                            }));
-                        }
-                    };
-
-                    // Enhanced retry logic with async and progress
-                    bool retVal = await fileOperation.CopyFileWithRetryAsync(
-                        mv.FileNamePath, 
-                        mv.NewDestDirectory,
+                    // Enhanced retry logic with async
+                    bool retVal = await RetryFileOperationAsync(
+                        () => CopyFileAsync(mv.FileNamePath, mv.NewDestDirectory),
                         maxRetries: 5,
-                        cancellationToken: cancellationToken);
+                        cancellationToken);
                     
                     // Update UI on the UI thread
                     Invoke(new Action(() => {
                         if (retVal)
                         {
                             lvi.BackColor = Color.Yellow;
-                            lvi.SubItems[4].Text = "Copy completed - Verifying...";
                             successfulCopies++;
                             LoggingService.LogDebug($"Successfully copied movie: {Path.GetFileName(mv.FileNamePath)}", "Processing");
                         }
@@ -2003,7 +1916,7 @@ Version 2.0 Enhanced
 
 Features:
 • TV Episode Organization (S01E01 format)
-• Movie Organization (Alphabetical with individual folders)
+• Movie Organization (Alphabetical)
 • Smart File Type Detection
 • Automatic HandBrake Monitoring
 • Multi-select Operations
