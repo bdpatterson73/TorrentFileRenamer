@@ -1,0 +1,141 @@
+<Window x:Class="TorrentFileRenamer.WPF.Views.FolderMonitorConfigDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:TorrentFileRenamer.WPF.ViewModels"
+        Title="Folder Monitor Configuration" 
+        Height="400" 
+  Width="600"
+    WindowStartupLocation="CenterOwner"
+  ResizeMode="NoResize"
+   ShowInTaskbar="False">
+    
+    <Window.Resources>
+   <Style TargetType="Label">
+       <Setter Property="Padding" Value="5,5,5,2"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="5"/>
+       <Setter Property="Height" Value="28"/>
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+  <Setter Property="MinWidth" Value="80"/>
+        <Setter Property="Height" Value="28"/>
+<Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+    <RowDefinition Height="Auto"/>
+          <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+    <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Watch Folder -->
+        <Grid Grid.Row="0">
+ <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="Auto"/>
+   </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+   <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+       </Grid.RowDefinitions>
+        
+      <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Watch Folder:"/>
+ <TextBox Grid.Row="1" Grid.Column="0" 
+            Text="{Binding WatchFolder, UpdateSourceTrigger=PropertyChanged}"
+    Margin="0,0,5,0"/>
+            <Button Grid.Row="1" Grid.Column="1" 
+ Content="Browse..." 
+    Command="{Binding BrowseWatchFolderCommand}"
+   Width="80"/>
+        </Grid>
+        
+        <!-- Destination Folder -->
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+      <Grid.ColumnDefinitions>
+    <ColumnDefinition Width="*"/>
+       <ColumnDefinition Width="Auto"/>
+     </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+    <RowDefinition Height="Auto"/>
+ <RowDefinition Height="Auto"/>
+ </Grid.RowDefinitions>
+    
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Destination Folder:"/>
+ <TextBox Grid.Row="1" Grid.Column="0" 
+         Text="{Binding DestinationFolder, UpdateSourceTrigger=PropertyChanged}"
+            Margin="0,0,5,0"/>
+            <Button Grid.Row="1" Grid.Column="1" 
+      Content="Browse..." 
+  Command="{Binding BrowseDestinationFolderCommand}"
+    Width="80"/>
+        </Grid>
+      
+        <!-- File Extensions -->
+    <StackPanel Grid.Row="2" Margin="0,10,0,0">
+         <Label Content="File Extensions (semicolon-separated):"/>
+            <TextBox Text="{Binding FileExtensions, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Text="Example: *.mp4;*.mkv;*.avi;*.m4v" 
+              FontSize="10" 
+  Foreground="Gray"
+        Margin="5,2,0,0"/>
+        </StackPanel>
+        
+    <!-- Stability Delay -->
+        <StackPanel Grid.Row="3" Margin="0,10,0,0">
+            <Label Content="File Stability Delay (seconds):"/>
+            <Grid>
+      <Grid.ColumnDefinitions>
+  <ColumnDefinition Width="*"/>
+         <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+          <Slider Grid.Column="0" 
+  Minimum="10" 
+      Maximum="300" 
+                TickFrequency="10"
+          IsSnapToTickEnabled="True"
+    Value="{Binding StabilityDelay}"
+    VerticalAlignment="Center"/>
+    <TextBlock Grid.Column="1" 
+       Text="{Binding StabilityDelay, StringFormat={}{0}s}" 
+            Width="50"
+        TextAlignment="Right"
+         VerticalAlignment="Center"
+                Margin="10,0,0,0"/>
+        </Grid>
+ <TextBlock Text="Time to wait for file to stabilize before processing" 
+              FontSize="10" 
+   Foreground="Gray"
+     Margin="5,2,0,0"
+          TextWrapping="Wrap"/>
+        </StackPanel>
+   
+        <!-- Auto Start -->
+        <CheckBox Grid.Row="4" 
+             Content="Auto-start monitoring when application loads"
+           IsChecked="{Binding AutoStart}"
+             Margin="0,15,0,0"
+    VerticalAlignment="Center"/>
+        
+     <!-- Buttons -->
+        <StackPanel Grid.Row="6" 
+          Orientation="Horizontal" 
+         HorizontalAlignment="Right"
+           Margin="0,10,0,0">
+            <Button Content="OK" 
+        IsDefault="True"
+     Click="OkButton_Click"
+                  IsEnabled="{Binding IsValid}"
+           Style="{StaticResource PrimaryButton}"/>
+         <Button Content="Cancel" 
+        IsCancel="True"
+       Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

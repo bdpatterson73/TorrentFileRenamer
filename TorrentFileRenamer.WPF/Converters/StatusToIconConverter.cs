@@ -1,0 +1,34 @@
+using System.Globalization;
+using System.Windows.Data;
+using TorrentFileRenamer.WPF.Models;
+
+namespace TorrentFileRenamer.WPF.Converters;
+
+/// <summary>
+/// Converts ProcessingStatus to Unicode icon
+/// </summary>
+public class StatusToIconConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        if (value is ProcessingStatus status)
+     {
+      return status switch
+       {
+   ProcessingStatus.Pending => "?",    // Circle
+ProcessingStatus.Processing => "?",    // Half Circle
+      ProcessingStatus.Completed => "?",     // Checkmark
+                ProcessingStatus.Failed => "?",  // X Mark
+     ProcessingStatus.Unparsed => "?",   // Question Mark
+         _ => "?"
+            };
+      }
+  
+      return "?";
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        throw new NotImplementedException();
+    }
+}
