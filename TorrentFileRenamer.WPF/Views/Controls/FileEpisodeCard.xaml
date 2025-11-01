@@ -88,7 +88,7 @@
         Padding="12,8"
         Background="{StaticResource CardWarningSection}"
           CornerRadius="6"
-    Visibility="{Binding IsMultiEpisode, Converter={StaticResource BoolToVisibilityConverter}}">
+  Visibility="{Binding IsMultiEpisode, Converter={StaticResource BoolToVisibilityConverter}}">
         <StackPanel Orientation="Horizontal">
         <TextBlock Text="&#x1F4D1;" 
   FontSize="16" 
@@ -97,7 +97,7 @@
  <TextBlock Style="{StaticResource CardBody}"
  VerticalAlignment="Center">
     <Run Text="Multi-Episode File | Episodes:"/>
-           <Run Text="{Binding EpisodeNumbers, Mode=OneWay}" FontWeight="SemiBold"/>
+ <Run Text="{Binding EpisodeNumbers, Mode=OneWay}" FontWeight="SemiBold"/>
  </TextBlock>
     </StackPanel>
 </Border>
