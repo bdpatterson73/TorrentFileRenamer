@@ -33,14 +33,28 @@ public class MoviesViewModel : ViewModelBase
         IScanningService scanningService,
         IFileProcessingService fileProcessingService,
         IDialogService dialogService,
-        IWindowStateService windowStateService)
+        IWindowStateService windowStateService,
+        SearchViewModel searchViewModel,
+        FilterViewModel filterViewModel,
+        StatsViewModel statsViewModel)
     {
         _scanningService = scanningService;
         _fileProcessingService = fileProcessingService;
         _dialogService = dialogService;
         _windowStateService = windowStateService;
 
+        // Phase 6: Initialize ViewModels
+        SearchViewModel = searchViewModel ?? throw new ArgumentNullException(nameof(searchViewModel));
+        FilterViewModel = filterViewModel ?? throw new ArgumentNullException(nameof(filterViewModel));
+        StatsViewModel = statsViewModel ?? throw new ArgumentNullException(nameof(statsViewModel));
+
         Movies = new ObservableCollection<MovieFileModel>();
+
+        // Phase 6: Wire up event handlers
+        SearchViewModel.SearchChanged += OnSearchChanged;
+        FilterViewModel.FiltersApplied += OnFiltersApplied;
+        FilterViewModel.FiltersReset += OnFiltersReset;
+        StatsViewModel.RefreshRequested += OnStatsRefreshRequested;
 
         // Initialize commands
         ScanCommand = new AsyncRelayCommand(ScanAsync, () => !IsProcessing);
@@ -62,6 +76,27 @@ public class MoviesViewModel : ViewModelBase
         RemoveAllCompletedCommand = new RelayCommand(RemoveAllCompleted, _ => Movies.Any(m => m.Status == ProcessingStatus.Completed) && !IsProcessing);
     }
 
+    #region Phase 6: ViewModels
+
+    /// <summary>
+    /// Search ViewModel (Phase 6)
+    /// </summary>
+    public SearchViewModel SearchViewModel { get; }
+
+    /// <summary>
+    /// Filter ViewModel (Phase 6)
+    /// </summary>
+    public FilterViewModel FilterViewModel { get; }
+
+    /// <summary>
+    /// Stats ViewModel (Phase 6)
+    /// </summary>
+    public StatsViewModel StatsViewModel { get; }
+
+    #endregion
+
+    #region Properties
+
     /// <summary>
     /// Collection of movies (filtered based on search and status filter)
     /// </summary>
@@ -71,6 +106,28 @@ public class MoviesViewModel : ViewModelBase
     /// Window state service for column width persistence
     /// </summary>
     public IWindowStateService WindowStateService => _windowStateService;
+    
+    #endregion
+    
+    #region Commands
+
+  public ICommand ScanCommand { get; }
+    public ICommand ProcessCommand { get; }
+    public ICommand RemoveSelectedCommand { get; }
+    public ICommand ClearAllCommand { get; }
+    public ICommand RemoveLowConfidenceCommand { get; }
+    public ICommand SelectAllCommand { get; }
+    public ICommand ViewDetailsCommand { get; }
+ public ICommand OpenFolderCommand { get; }
+    public ICommand RetryCommand { get; }
+    public ICommand OpenSourceFolderCommand { get; }
+    public ICommand OpenDestinationFolderCommand { get; }
+    public ICommand CopySourcePathCommand { get; }
+    public ICommand CopyDestinationPathCommand { get; }
+    public ICommand RemoveAllFailedCommand { get; }
+    public ICommand RemoveAllCompletedCommand { get; }
+
+    #endregion
 
     /// <summary>
     /// Status message
@@ -202,111 +259,107 @@ public class MoviesViewModel : ViewModelBase
     /// <summary>
     /// Apply search and status filters to the movies collection
     /// </summary>
-    private void ApplyFilters()
-    {
-        var filtered = _allMovies.AsEnumerable();
+  private void ApplyFilters()
+ {
+   var filtered = _allMovies.AsEnumerable();
 
-    // Apply search filter
-   if (!string.IsNullOrWhiteSpace(SearchText))
-    {
-         filtered = filtered.Where(m =>
-     (m.MovieName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
-  (m.FileName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
-(m.SourcePath?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
+        // Phase 6: Apply advanced filters if available
+ if (FilterViewModel.HasActiveFilters)
+        {
+       var criteria = FilterViewModel.GetCurrentCriteria();
+            
+            // Apply search text
+            if (!string.IsNullOrWhiteSpace(criteria.SearchText))
+            {
+            filtered = filtered.Where(m =>
+    (m.MovieName?.Contains(criteria.SearchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+  (m.FileName?.Contains(criteria.SearchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+      (m.SourcePath?.Contains(criteria.SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
+       }
+        
+      // Apply confidence range
+            if (criteria.MinConfidence > 0 || criteria.MaxConfidence < 100)
+          {
+    filtered = filtered.Where(m => m.Confidence >= criteria.MinConfidence && m.Confidence <= criteria.MaxConfidence);
+         }
+            
+  // Apply status filters
+         if (criteria.SelectedStatuses.Count > 0)
+   {
+    filtered = filtered.Where(m => criteria.SelectedStatuses.Contains(m.Status));
+            }
+
+   // Apply file size filters
+       if (criteria.MinFileSize > 0)
+     {
+    filtered = filtered.Where(m => m.FileSize >= criteria.MinFileSize);
+    }
+ if (criteria.MaxFileSize < long.MaxValue)
+       {
+   filtered = filtered.Where(m => m.FileSize <= criteria.MaxFileSize);
+}
+        }
+ else
+        {
+        // Apply basic search filter
+      if (!string.IsNullOrWhiteSpace(SearchText))
+         {
+        filtered = filtered.Where(m =>
+    (m.MovieName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+        (m.FileName?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+            (m.SourcePath?.Contains(SearchText, StringComparison.OrdinalIgnoreCase) ?? false));
   }
 
-   // Apply status filter
+            // Apply status filter
         if (StatusFilter.HasValue)
         {
-   filtered = filtered.Where(m => m.Status == StatusFilter.Value);
-    }
+           filtered = filtered.Where(m => m.Status == StatusFilter.Value);
+ }
+        }
 
-   // Update the Movies collection
-   Movies.Clear();
-    foreach (var movie in filtered)
-    {
-   Movies.Add(movie);
-      }
+        // Update the Movies collection
+        Movies.Clear();
+        foreach (var movie in filtered)
+        {
+     Movies.Add(movie);
+        }
+  
+        // Phase 6: Update search result count and statistics
+     SearchViewModel.UpdateResultCount(Movies.Count);
+        StatsViewModel.UpdateMovieStatistics(Movies);
         
         // Refresh command states
-   ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
+      ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
         ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
     }
 
-    /// <summary>
-    /// Command to scan for movies
-    /// </summary>
-    public ICommand ScanCommand { get; }
+    #region Phase 6: Event Handlers
 
-    /// <summary>
-    /// Command to process movies
-    /// </summary>
-    public ICommand ProcessCommand { get; }
+    private void OnSearchChanged(object? sender, EventArgs e)
+    {
+        // Sync search text from SearchViewModel to FilterViewModel
+        FilterViewModel.ApplySearchText(SearchViewModel.SearchText);
+  ApplyFilters();
+    }
 
-    /// <summary>
-    /// Command to remove selected movie
-    /// </summary>
-    public ICommand RemoveSelectedCommand { get; }
+    private void OnFiltersApplied(object? sender, EventArgs e)
+    {
+        ApplyFilters();
+    }
 
-    /// <summary>
-    /// Command to clear all movies
-    /// </summary>
-    public ICommand ClearAllCommand { get; }
+    private void OnFiltersReset(object? sender, EventArgs e)
+    {
+        SearchText = string.Empty;
+        StatusFilter = null;
+        ApplyFilters();
+    }
 
-    /// <summary>
-    /// Command to remove low confidence movies
-/// </summary>
-    public ICommand RemoveLowConfidenceCommand { get; }
+    private void OnStatsRefreshRequested(object? sender, EventArgs e)
+    {
+        StatsViewModel.UpdateMovieStatistics(_allMovies);
+    }
 
-    /// <summary>
-    /// Command to select all movies
-    /// </summary>
-    public ICommand SelectAllCommand { get; }
-
-    /// <summary>
-    /// Command to view movie details
-    /// </summary>
-    public ICommand ViewDetailsCommand { get; }
-
-    /// <summary>
-    /// Command to open movie folder
-    /// </summary>
-    public ICommand OpenFolderCommand { get; }
-
-    /// <summary>
-    /// Command to retry failed movie
-    /// </summary>
-    public ICommand RetryCommand { get; }
-
-    /// <summary>
-    /// Command to open source folder
-    /// </summary>
-    public ICommand OpenSourceFolderCommand { get; }
-
-    /// <summary>
-    /// Command to open destination folder
-  /// </summary>
-    public ICommand OpenDestinationFolderCommand { get; }
-
-    /// <summary>
-    /// Command to copy source path to clipboard
-    /// </summary>
-    public ICommand CopySourcePathCommand { get; }
-
-    /// <summary>
-    /// Command to copy destination path to clipboard
-    /// </summary>
-    public ICommand CopyDestinationPathCommand { get; }
-
-    /// <summary>
-    /// Command to remove all failed movies
-  /// </summary>
-    public ICommand RemoveAllFailedCommand { get; }
-
-    /// <summary>
-    /// Command to remove all completed movies
-    /// </summary>
-  public ICommand RemoveAllCompletedCommand { get; }
+    #endregion
 
     private async Task ScanAsync()
     {

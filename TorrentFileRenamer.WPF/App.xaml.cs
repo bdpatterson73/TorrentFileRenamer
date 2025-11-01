@@ -41,12 +41,16 @@ public partial class App : WpfApplication
         services.AddSingleton<IFileProcessingService, FileProcessingService>();
         services.AddSingleton<IWindowStateService, WindowStateService>();
         services.AddSingleton<IMruService, MruService>();
+        services.AddSingleton<ISearchService, SearchService>();
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
         services.AddTransient<TvEpisodesViewModel>();
         services.AddTransient<MoviesViewModel>();
         services.AddSingleton<AutoMonitorViewModel>();
+        services.AddTransient<SearchViewModel>();
+        services.AddTransient<FilterViewModel>();
+        services.AddTransient<StatsViewModel>();
 
         // Views
         services.AddSingleton<MainWindow>();

@@ -28,8 +28,9 @@
     <Grid>
    <Grid.RowDefinitions>
    <RowDefinition Height="Auto"/> <!-- Toolbar -->
+         <RowDefinition Height="Auto"/> <!-- StatsWidget (Phase 6) -->
    <RowDefinition Height="Auto"/> <!-- View controls -->
-   <RowDefinition Height="*"/>    <!-- Content -->
+   <RowDefinition Height="*"/>    <!-- Content with Filter Panel -->
    <RowDefinition Height="Auto"/> <!-- Status bar -->
   </Grid.RowDefinitions>
 
@@ -59,8 +60,12 @@ Command="{Binding ScanCommand}"
   ToolTip="Remove movies with low detection confidence"/>
         </ToolBar>
 
-    <!-- View Controls: View Mode Selector + Search Box -->
-        <Border Grid.Row="1" 
+  <!-- Phase 6: Statistics Widget -->
+        <controls:StatsWidget Grid.Row="1"
+   DataContext="{Binding StatsViewModel}"/>
+
+        <!-- View Controls: View Mode Selector + Search Box -->
+        <Border Grid.Row="2" 
       Background="#F5F5F5" 
    Padding="16,12"
      BorderBrush="#E0E0E0"
@@ -156,8 +161,15 @@ Margin="0,0,8,0"/>
    </Grid>
   </Border>
 
-  <!-- Content Area: Card View, Compact View, or Grid View -->
-    <Grid Grid.Row="2">
+        <!-- Content Area with Filter Panel (Phase 6) -->
+        <DockPanel Grid.Row="3">
+ <!-- Phase 6: Advanced Filter Panel -->
+   <controls:AdvancedFilterPanel DockPanel.Dock="Right"
+          Width="350"
+         DataContext="{Binding FilterViewModel}"/>
+            
+   <!-- Content Area: Card View, Compact View, or Grid View -->
+    <Grid>
    <!-- Card View -->
    <ScrollViewer VerticalScrollBarVisibility="Auto"
       Visibility="{Binding IsCardViewSelected, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -378,9 +390,10 @@ Command="{Binding ClearAllCommand}">
   </DataGrid.Columns>
         </DataGrid>
         </Grid>
+        </DockPanel>
 
-    <!-- Status Bar -->
-     <StatusBar Grid.Row="3" Style="{StaticResource ModernStatusBar}">
+   <!-- Status Bar -->
+     <StatusBar Grid.Row="4" Style="{StaticResource ModernStatusBar}">
      <StatusBarItem>
      <TextBlock Text="{Binding StatusMessage}"/>
   </StatusBarItem>
@@ -388,5 +401,5 @@ Command="{Binding ClearAllCommand}">
   <TextBlock Text="{Binding Movies.Count, StringFormat='Movies: {0}'}"/>
      </StatusBarItem>
     </StatusBar>
-    </Grid>
+ </Grid>
 </UserControl>

@@ -5,8 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
      Title="Keyboard Shortcuts" 
-        Height="550" Width="600"
-        MinHeight="500" MinWidth="550"
+        Height="650" Width="600"
+        MinHeight="600" MinWidth="550"
         WindowStartupLocation="CenterOwner"
     ResizeMode="CanResize"
    ShowInTaskbar="False"
@@ -344,7 +344,8 @@ Margin="0,0,16,0"/>
        FontSize="12"
        Foreground="{StaticResource TextPrimaryBrush}">
    Most shortcuts are context-aware and will only work when the relevant tab or feature is active.
-   Press F1 anytime to bring up this help window!
+      Use Ctrl+F for quick search and Ctrl+Shift+F for advanced filtering options.
+          Press F1 anytime to bring up this help window!
        </TextBlock>
   </StackPanel>
             </Border>
