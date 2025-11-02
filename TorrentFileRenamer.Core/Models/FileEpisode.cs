@@ -10,88 +10,95 @@ namespace TorrentFileRenamer.Core.Models
     public class FileEpisode
     {
         private string _fullFilePath;
-  public FileEpisode(string fullFilePath, string outputDirectory)
+        public FileEpisode(string fullFilePath, string outputDirectory)
         {
             _fullFilePath = fullFilePath.ToUpper();
-          OutputDirectory= outputDirectory;
-          DirectoryName = Path.GetDirectoryName(_fullFilePath)?.Trim() ?? "";
+            OutputDirectory= outputDirectory;
+            DirectoryName = Path.GetDirectoryName(_fullFilePath)?.Trim() ?? "";
             Extension = Path.GetExtension(_fullFilePath).ToUpper().Trim();
- Filename = _fullFilePath.Replace(DirectoryName, "").Replace("\\", "");
+            Filename = _fullFilePath.Replace(DirectoryName, "").Replace("\\", "");
   
             // Initialize collections for multi-episode support
-            EpisodeNumbers = new List<int>();
+         EpisodeNumbers = new List<int>();
+  
+   ParseFileDetails();
+       
+            // Build paths with year if available - folder name includes year for disambiguation
+            string showFolderName = Year.HasValue ? $"{ShowName} ({Year.Value})" : ShowName;
             
-            ParseFileDetails();
-            //NewFileNamePath = DirectoryName +"\\" + NewFileName;
-       NewFileNamePath = OutputDirectory + "\\" + ShowName + "\\" + "Season " + SeasonNumber.ToString() + "\\" + NewFileName;
-NewDirectoryName = OutputDirectory + "\\" + ShowName + "\\" + "Season " + SeasonNumber.ToString() + "\\";
-}
+        //NewFileNamePath = DirectoryName +"\\" + NewFileName;
+    NewFileNamePath = OutputDirectory + "\\" + showFolderName + "\\" + "Season " + SeasonNumber.ToString() + "\\" + NewFileName;
+          NewDirectoryName = OutputDirectory + "\\" + showFolderName + "\\" + "Season " + SeasonNumber.ToString() + "\\";
+        }
         
         public string FullFilePath
         {
           get { return _fullFilePath; }
         }
 
-      public string OutputDirectory { get; set; }
+        public string OutputDirectory { get; set; }
         public string Extension { get; set; }
         public string Filename { get; set; }
 
-   public string NewDirectoryName { get; set; }
+        public string NewDirectoryName { get; set; }
         public string DirectoryName { get; set; }
-public int SeasonNumber { get; set; }
+        public int SeasonNumber { get; set; }
         public int EpisodeNumber { get; set; }
 
         // New properties for multi-episode support
-    public List<int> EpisodeNumbers { get; set; }
+        public List<int> EpisodeNumbers { get; set; }
         public bool IsMultiEpisode => EpisodeNumbers.Count > 1;
 
- public string ShowName { get; set; } = "";
+        public string ShowName { get; set; } = "";
 
         public string NewFileName { get; set; } = "";
 
         public string NewFileNamePath { get; set; } = "";
 
+        // Year for the show (e.g., 2025 from "Robin Hood 2025" or "Robin Hood (2025)")
+        public int? Year { get; set; }
+
         // Plex compatibility validation result
-      public PlexValidationResult? PlexValidation { get; set; }
+        public PlexValidationResult? PlexValidation { get; set; }
         
         private void ParseFileDetails()
-    {
+        {
             Debug.WriteLine($"Parsing file: {Filename}");
       
-     // Try multiple regex patterns in order of preference
-     if (TryParseSxxExxFormat()) 
-         {
-              Debug.WriteLine($"Successfully parsed with SxxExx format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
-              GenerateNewFileName();
-  }
-            else if (TryParseNumberxNumberFormat())
-     {
-                Debug.WriteLine($"Successfully parsed with xxYYY format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
-      GenerateNewFileName();
-            }
-         else if (TryParseSeasonEpisodeWordsFormat())
+            // Try multiple regex patterns in order of preference
+            if (TryParseSxxExxFormat()) 
             {
-      Debug.WriteLine($"Successfully parsed with Season Episode format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
-          GenerateNewFileName();
-    }
-        else if (TryParseEpisodeOnlyFormat())
-   {
-          Debug.WriteLine($"Successfully parsed with Episode-only format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
-       GenerateNewFileName();
+                Debug.WriteLine($"Successfully parsed with SxxExx format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
+                GenerateNewFileName();
             }
-    else
-  {
+            else if (TryParseNumberxNumberFormat())
+            {
+                Debug.WriteLine($"Successfully parsed with xxYYY format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
+                GenerateNewFileName();
+            }
+            else if (TryParseSeasonEpisodeWordsFormat())
+            {
+                Debug.WriteLine($"Successfully parsed with Season Episode format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
+                GenerateNewFileName();
+            }
+            else if (TryParseEpisodeOnlyFormat())
+            {
+                Debug.WriteLine($"Successfully parsed with Episode-only format: Show='{ShowName}', Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}]");
+                GenerateNewFileName();
+            }
+            else
+            {
                 Debug.WriteLine($"No match found for file: {Filename}");
-            NewFileName = "NO NAME";
- }
+                NewFileName = "NO NAME";
+            }
         }
 
  /// <summary>
    /// Parse SxxExx format (e.g., S01E03, S01E03-04, S1E3, S01 E01)
   /// </summary>
-        private bool TryParseSxxExxFormat()
-        {
-    // Find the main SxxExx pattern - allow optional space between S and E parts
+   private bool TryParseSxxExxFormat()
+ {
+       // Find the main SxxExx pattern - allow optional space between S and E parts
  // Updated to handle: S01E01, S01 E01, S1E3, S1 E3
             Regex mainPattern = new Regex(@"S(?<season>\d{1,2})\s*E(?<episode>\d{1,2})", RegexOptions.IgnoreCase);
   Match mainMatch = mainPattern.Match(Filename);
@@ -147,19 +154,22 @@ public int SeasonNumber { get; set; }
           }
 
             // Extract show name - everything before the SxxExx pattern
-        int matchIndex = mainMatch.Index;
- if (matchIndex > 0)
-        {
-          ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
-       ShowName = Regex.Replace(ShowName, @"\s+", " "); // Replace multiple spaces with single space
-  
-    // Clean up common artifacts
-  ShowName = CleanShowName(ShowName);
-    }
+                int matchIndex = mainMatch.Index;
+      if (matchIndex > 0)
+          {
+            ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
+   ShowName = Regex.Replace(ShowName, @"\s+", " "); // Replace multiple spaces with single space
+           
+     // Extract year BEFORE cleaning the show name
+      Year = ExtractYear(ShowName);
+    
+         // Clean up common artifacts
+         ShowName = CleanShowName(ShowName);
+      }
     else
-         {
+     {
         ShowName = "Unknown Show";
-         }
+     }
 
  Debug.WriteLine($"Parsed SxxExx: Season={SeasonNumber}, Episodes=[{string.Join(",", EpisodeNumbers)}], Show='{ShowName}'");
           return true;
@@ -174,9 +184,9 @@ public int SeasonNumber { get; set; }
         /// <summary>
         /// Parse xxYYY format (e.g., 1x03, 1x03-04, 12x05)
  /// </summary>
-        private bool TryParseNumberxNumberFormat()
-        {
-         // Pattern for xxYYY format with optional multi-episode support
+   private bool TryParseNumberxNumberFormat()
+     {
+     // Pattern for xxYYY format with optional multi-episode support
  // Supports: 1x03, 12x05, 1x03-04, 1x03-1x04
  Regex regex = new Regex(@"(?<season>\d{1,2})\s*[xX]\s*(?<episode>\d{1,2})(?:[-\s]*(?:\d{1,2}[xX])?(?<episode2>\d{1,2}))?(?:[-\s]*(?:\d{1,2}[xX])?(?<episode3>\d{1,2}))?", RegexOptions.IgnoreCase);
 
@@ -213,13 +223,16 @@ public int SeasonNumber { get; set; }
         }
      
       if (matchIndex > 0)
-                {
-            ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
- ShowName = Regex.Replace(ShowName, @"\s+", " "); // Replace multiple spaces with single space
-             
-     // Clean up common artifacts
-   ShowName = CleanShowName(ShowName);
- }
+            {
+        ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
+     ShowName = Regex.Replace(ShowName, @"\s+", " "); // Replace multiple spaces with single space
+  
+   // Extract year BEFORE cleaning the show name
+      Year = ExtractYear(ShowName);
+        
+    // Clean up common artifacts
+          ShowName = CleanShowName(ShowName);
+     }
 
     return true;
       }
@@ -232,9 +245,9 @@ public int SeasonNumber { get; set; }
         }
 
         /// <summary>
-    /// Parse formats with "Season" and "Episode" words
+  /// Parse formats with "Season" and "Episode" words
         /// </summary>
-     private bool TryParseSeasonEpisodeWordsFormat()
+        private bool TryParseSeasonEpisodeWordsFormat()
         {
             // Pattern for Season X Episode Y format
       Regex regex = new Regex(@"Season\s*(?<season>\d{1,2})\s*Episode\s*(?<episode>\d{1,2})(?:[-\s]*(?<episode2>\d{1,2}))?", RegexOptions.IgnoreCase);
@@ -256,13 +269,17 @@ if (match.Groups["episode2"].Success && !string.IsNullOrEmpty(match.Groups["epis
                     }
 
           // Extract show name
-            int matchIndex = Filename.ToUpper().IndexOf("SEASON");
- if (matchIndex > 0)
+           int matchIndex = Filename.ToUpper().IndexOf("SEASON");
+    if (matchIndex > 0)
              {
-       ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
-     ShowName = Regex.Replace(ShowName, @"\s+", " ");
+            ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
+   ShowName = Regex.Replace(ShowName, @"\s+", " ");
+     
+        // Extract year BEFORE cleaning the show name
+   Year = ExtractYear(ShowName);
+  
       ShowName = CleanShowName(ShowName);
-         }
+    }
 
               return true;
        }
@@ -277,25 +294,25 @@ if (match.Groups["episode2"].Success && !string.IsNullOrEmpty(match.Groups["epis
         /// <summary>
  /// Try to parse episode-only formats (fallback when season info might be in folder name)
         /// </summary>
-        private bool TryParseEpisodeOnlyFormat()
+ private bool TryParseEpisodeOnlyFormat()
         {
       // This is a fallback method that tries to extract episode info when season might be unclear
    // Pattern for Episode XX or Ep XX
    Regex regex = new Regex(@"(?:Episode|Ep)\s*(?<episode>\d{1,2})(?:[-\s]*(?<episode2>\d{1,2}))?", RegexOptions.IgnoreCase);
 
        Match match = regex.Match(Filename);
-       if (match.Success)
+   if (match.Success)
  {
-                try
+ try
         {
-        // Try to extract season from directory path or set default to 1
+      // Try to extract season from directory path or set default to 1
    SeasonNumber = ExtractSeasonFromDirectory() ?? 1;
-        
-       EpisodeNumber = Convert.ToInt32(match.Groups["episode"].Value);
+    
+     EpisodeNumber = Convert.ToInt32(match.Groups["episode"].Value);
        EpisodeNumbers.Add(EpisodeNumber);
 
     if (match.Groups["episode2"].Success && !string.IsNullOrEmpty(match.Groups["episode2"].Value))
-            {
+       {
       int ep2 = Convert.ToInt32(match.Groups["episode2"].Value);
      if (!EpisodeNumbers.Contains(ep2))
     EpisodeNumbers.Add(ep2);
@@ -303,62 +320,103 @@ if (match.Groups["episode2"].Success && !string.IsNullOrEmpty(match.Groups["epis
 
    // Extract show name
     int matchIndex = Filename.ToUpper().IndexOf("EPISODE");
-            if (matchIndex == -1)
-            matchIndex = Filename.ToUpper().IndexOf("EP");
+      if (matchIndex == -1)
+        matchIndex = Filename.ToUpper().IndexOf("EP");
    
           if (matchIndex > 0)
   {
         ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
   ShowName = Regex.Replace(ShowName, @"\s+", " ");
-             ShowName = CleanShowName(ShowName);
-        }
+    
+  // Extract year BEFORE cleaning the show name
+     Year = ExtractYear(ShowName);
+     
+        ShowName = CleanShowName(ShowName);
+  }
 
       return true;
-             }
+         }
   catch (Exception e)
      {
         Debug.WriteLine($"Error parsing episode-only format: {e.Message}");
       }
       }
-            return false;
+     return false;
         }
 
- /// <summary>
-/// Try to extract season number from directory path
+      /// <summary>
+        /// Try to extract season number from directory path
         /// </summary>
         private int? ExtractSeasonFromDirectory()
         {
-            try
-            {
-          Regex seasonRegex = new Regex(@"Season\s*(\d{1,2})", RegexOptions.IgnoreCase);
-          Match match = seasonRegex.Match(DirectoryName);
-         if (match.Success)
-        {
- return Convert.ToInt32(match.Groups[1].Value);
+  try
+         {
+ Regex seasonRegex = new Regex(@"Season\s*(\d{1,2})", RegexOptions.IgnoreCase);
+            Match match = seasonRegex.Match(DirectoryName);
+      if (match.Success)
+           {
+       return Convert.ToInt32(match.Groups[1].Value);
+                }
+  }
+            catch (Exception e)
+  {
+           Debug.WriteLine($"Error extracting season from directory: {e.Message}");
         }
-    }
-        catch (Exception e)
-          {
-       Debug.WriteLine($"Error extracting season from directory: {e.Message}");
+            return null;
+        }
+
+        /// <summary>
+  /// Extract year from the show name (supports both "Show 2025" and "Show (2025)" formats)
+    /// </summary>
+        private int? ExtractYear(string name)
+ {
+            if (string.IsNullOrWhiteSpace(name))
+  return null;
+
+     // Try to match year in parentheses first: (2025) or (1999)
+     var yearInParensMatch = Regex.Match(name, @"\((\d{4})\)");
+    if (yearInParensMatch.Success)
+     {
+     if (int.TryParse(yearInParensMatch.Groups[1].Value, out int year))
+   {
+          // Validate it's a reasonable year (1900-2099)
+              if (year >= 1900 && year <= 2099)
+         {
+     Debug.WriteLine($"Extracted year from parentheses: {year}");
+     return year;
+  }
+             }
       }
-return null;
-        }
+
+ // Try to match standalone year: 2025 or 1999
+   var yearMatch = Regex.Match(name, @"\b(19|20)\d{2}\b");
+        if (yearMatch.Success)
+     {
+     if (int.TryParse(yearMatch.Value, out int year))
+ {
+           Debug.WriteLine($"Extracted standalone year: {year}");
+          return year;
+     }
+    }
+
+  return null;
+     }
 
         /// <summary>
         /// Generate the new filename based on parsed information
         /// </summary>
-    private void GenerateNewFileName()
-   {
-  try
-            {
-  if (string.IsNullOrWhiteSpace(ShowName))
-   {
-   ShowName = "Unknown Show";
-                }
+        private void GenerateNewFileName()
+        {
+      try
+         {
+        if (string.IsNullOrWhiteSpace(ShowName))
+        {
+         ShowName = "Unknown Show";
+       }
 
          string episodeString;
-      if (IsMultiEpisode)
-         {
+       if (IsMultiEpisode)
+   {
              // Handle multi-episode files: S01E03-E04 or S01E03E04
    var validEpisodes = EpisodeNumbers.Where(ep => ep >= 0).OrderBy(x => x).ToList(); // Allow episode 0
         
@@ -393,20 +451,29 @@ return null;
        episodeString = $"E{EpisodeNumber:D2}";
      }
 
-     NewFileName = $"{ShowName}.S{SeasonNumber:D2}{episodeString}{Extension}";
-       NewFileName = NewFileName.Replace(" ", ".");
-        
-        // Validate for Plex compatibility
-                ValidateForPlexCompatibility();
+      // Build filename with year if available
+          if (Year.HasValue)
+        {
+          NewFileName = $"{ShowName} ({Year.Value}).S{SeasonNumber:D2}{episodeString}{Extension}";
+          }
+    else
+                {
+    NewFileName = $"{ShowName}.S{SeasonNumber:D2}{episodeString}{Extension}";
+           }
+ 
+      NewFileName = NewFileName.Replace(" ", ".");
     
-     Debug.WriteLine($"Generated filename: {NewFileName}");
-            }
+   // Validate for Plex compatibility
+ValidateForPlexCompatibility();
+
+    Debug.WriteLine($"Generated filename: {NewFileName}");
+         }
             catch (Exception e)
-          {
-       Debug.WriteLine($"Error generating new filename: {e.Message}");
-     NewFileName = "NO NAME";
+     {
+  Debug.WriteLine($"Error generating new filename: {e.Message}");
+         NewFileName = "NO NAME";
             }
-      }
+   }
 
         /// <summary>
         /// Validates the generated filename for Plex compatibility
@@ -450,25 +517,26 @@ Debug.WriteLine("Attempting to auto-fix Plex compatibility issues...");
          // Update the filename if the suggestion is better
                if (!string.Equals(NewFileName, suggestedFilename, StringComparison.OrdinalIgnoreCase))
      {
-        ShowName = fixedShowName;
-           NewFileName = suggestedFilename;
+     ShowName = fixedShowName;
+        NewFileName = suggestedFilename;
    
-      // Regenerate paths with fixed name
-          NewFileNamePath = Path.Combine(OutputDirectory, ShowName, $"Season {SeasonNumber}", NewFileName);
-     NewDirectoryName = Path.Combine(OutputDirectory, ShowName, $"Season {SeasonNumber}") + Path.DirectorySeparatorChar;
-         
-            Debug.WriteLine($"Auto-fixed filename: {NewFileName}");
+     // Regenerate paths with fixed name - include year in folder name if available
+     string showFolderName = Year.HasValue ? $"{ShowName} ({Year.Value})" : ShowName;
+      NewFileNamePath = Path.Combine(OutputDirectory, showFolderName, $"Season {SeasonNumber}", NewFileName);
+            NewDirectoryName = Path.Combine(OutputDirectory, showFolderName, $"Season {SeasonNumber}") + Path.DirectorySeparatorChar;
+    
+ Debug.WriteLine($"Auto-fixed filename: {NewFileName}");
  
- // Re-validate after fixing
-      PlexValidation = PlexCompatibilityValidator.ValidateTVEpisode(
-    ShowName, 
-           SeasonNumber, 
-         EpisodeNumber, 
-           NewFileName, 
-       NewFileNamePath,
-      false
-            );
-      }
+   // Re-validate after fixing
+     PlexValidation = PlexCompatibilityValidator.ValidateTVEpisode(
+      ShowName, 
+ SeasonNumber, 
+      EpisodeNumber, 
+NewFileName, 
+    NewFileNamePath,
+        false
+   );
+     }
      }
 
   Debug.WriteLine($"Plex validation result: Valid={validation.IsValid}, Issues={validation.Issues.Count}, Warnings={validation.Warnings.Count}");
@@ -539,42 +607,184 @@ cleanName = Regex.Replace(cleanName, @"\b\d{3,}\b", "", RegexOptions.IgnoreCase)
         /// </summary>
         public static void TestFilenameParsing(string testFilename, string outputDir)
         {
-            try
-       {
+      try
+        {
        FileEpisode testEpisode = new FileEpisode(testFilename, outputDir);
-   
-    Debug.WriteLine($"=== PARSING TEST ===");
-   Debug.WriteLine($"Original: {testFilename}");
-        Debug.WriteLine($"Show Name: '{testEpisode.ShowName}'");
- Debug.WriteLine($"Season: {testEpisode.SeasonNumber}");
-      Debug.WriteLine($"Episode: {testEpisode.EpisodeNumber}");
-             Debug.WriteLine($"All Episodes: [{string.Join(", ", testEpisode.EpisodeNumbers)}]");
-           Debug.WriteLine($"Is Multi-Episode: {testEpisode.IsMultiEpisode}");
-        Debug.WriteLine($"New Filename: {testEpisode.NewFileName}");
-     Debug.WriteLine($"Full Path: {testEpisode.NewFileNamePath}");
-                Debug.WriteLine($"Episode 0 Support: {(testEpisode.EpisodeNumber == 0 ? "? Working" : "N/A")}");
-                
-          // Plex validation results
+    
+       Debug.WriteLine($"=== PARSING TEST ===");
+            Debug.WriteLine($"Original: {testFilename}");
+                Debug.WriteLine($"Show Name: '{testEpisode.ShowName}'");
+           Debug.WriteLine($"Season: {testEpisode.SeasonNumber}");
+    Debug.WriteLine($"Episode: {testEpisode.EpisodeNumber}");
+       Debug.WriteLine($"All Episodes: [{string.Join(", ", testEpisode.EpisodeNumbers)}]");
+     Debug.WriteLine($"Is Multi-Episode: {testEpisode.IsMultiEpisode}");
+            Debug.WriteLine($"New Filename: {testEpisode.NewFileName}");
+Debug.WriteLine($"Full Path: {testEpisode.NewFileNamePath}");
+      Debug.WriteLine($"Episode 0 Support: {(testEpisode.EpisodeNumber == 0 ? "? Working" : "N/A")}");
+       
+    // Plex validation results
     if (testEpisode.PlexValidation != null)
-       {
-  Debug.WriteLine($"Plex Compatible: {(testEpisode.PlexValidation.IsValid ? "? Yes" : "? No")}");
-       if (testEpisode.PlexValidation.Issues.Any())
  {
-           Debug.WriteLine($"Plex Issues: {string.Join("; ", testEpisode.PlexValidation.Issues)}");
+         Debug.WriteLine($"Plex Compatible: {(testEpisode.PlexValidation.IsValid ? "? Yes" : "? No")}");
+  if (testEpisode.PlexValidation.Issues.Any())
+   {
+            Debug.WriteLine($"Plex Issues: {string.Join("; ", testEpisode.PlexValidation.Issues)}");
         }
-         if (testEpisode.PlexValidation.Warnings.Any())
-  {
-          Debug.WriteLine($"Plex Warnings: {string.Join("; ", testEpisode.PlexValidation.Warnings)}");
-         }
-  Debug.WriteLine($"Suggested Action: {testEpisode.PlexValidation.SuggestedAction}");
-        }
-      
-     Debug.WriteLine($"===================");
+           if (testEpisode.PlexValidation.Warnings.Any())
+   {
+  Debug.WriteLine($"Plex Warnings: {string.Join("; ", testEpisode.PlexValidation.Warnings)}");
+}
+     Debug.WriteLine($"Suggested Action: {testEpisode.PlexValidation.SuggestedAction}");
        }
-     catch (Exception ex)
+      
+    Debug.WriteLine($"===================");
+      }
+         catch (Exception ex)
+       {
+         Debug.WriteLine($"Test parsing error: {ex.Message}");
+          }
+     }
+
+        /// <summary>
+    /// Run comprehensive tests on various filename formats
+  /// </summary>
+        public static void RunAllTests(string outputDir = @"C:\TestOutput")
+        {
+  Console.WriteLine("??????????????????????????????????????????????????????????????????????????????");
+  Console.WriteLine("?   TV EPISODE FILENAME PARSING TEST SUITE             ?");
+      Console.WriteLine("??????????????????????????????????????????????????????????????????????????????");
+          Console.WriteLine();
+
+            var testCases = new[]
             {
-                Debug.WriteLine($"Test parsing error: {ex.Message}");
- }
+                // Year tests - the main reason for this update
+     new { 
+          Name = "Year in filename (2025)", 
+      File = @"C:\temp\Robin.Hood.2025.S01E01.I.See.Him.720P.Web.X265-Minx.mp4" 
+       },
+          new { 
+             Name = "Year in parentheses (2025)", 
+   File = @"C:\temp\Robin.Hood.(2025).S01E01.I.See.Him.720P.Web.X265-Minx.mp4" 
+      },
+    new { 
+         Name = "Year 1999 format", 
+           File = @"C:\temp\Classic.Show.1999.S01E01.Pilot.720p.mkv" 
+       },
+          new { 
+           Name = "Year with 1x01 format", 
+ File = @"C:\temp\New.Series.2024.1x01.Episode.Name.mp4" 
+       },
+           
+      // Standard formats without year
+                new { 
+       Name = "Standard S01E01", 
+         File = @"C:\temp\Show.Name.S01E01.Episode.Title.720p.mp4" 
+       },
+            new { 
+       Name = "Standard 1x01 format", 
+       File = @"C:\temp\Show.Name.1x01.Episode.Title.mp4" 
+     },
+    
+   // Episode description tests
+                new { 
+         Name = "With long episode description", 
+    File = @"C:\temp\The.Walking.Dead.S01E01.Days.Gone.Bye.1080p.BluRay.x264.mp4" 
+ },
+         new { 
+       Name = "No episode description", 
+       File = @"C:\temp\Breaking.Bad.S05E16.1080p.mp4" 
+                },
+   
+            // Multi-episode tests
+   new { 
+         Name = "Multi-episode S01E01-E02", 
+ File = @"C:\temp\Show.Name.S01E01-E02.Double.Episode.mp4" 
+        },
+    new { 
+            Name = "Multi-episode S01E01E02", 
+      File = @"C:\temp\Show.Name.S01E01E02.mp4" 
+   },
+        
+    // Special cases
+       new { 
+        Name = "Episode 0 (pilot/special)", 
+      File = @"C:\temp\Show.Name.S01E00.Pilot.Episode.mkv" 
+        },
+     new { 
+                Name = "Season Episode word format", 
+     File = @"C:\temp\Show.Name.Season.01.Episode.01.mp4" 
+          },
+      new { 
+         Name = "With special characters", 
+         File = @"C:\temp\Show-Name_2023_S01E01.Episode-Title.mp4" 
+       },
+     
+       // Quality indicators
+         new { 
+         Name = "4K HDR format", 
+    File = @"C:\temp\Show.Name.2024.S01E01.4K.HDR.WEB-DL.mp4" 
+  },
+     new { 
+      Name = "Multiple quality tags", 
+   File = @"C:\temp\Show.2025.S01E01.1080p.WEBRip.x265.AAC.HEVC-Group.mkv" 
+        },
+     
+ // Edge cases
+      new { 
+    Name = "Spaces in S E format", 
+  File = @"C:\temp\Show.Name.S01 E01.Episode.mp4" 
+    },
+     new { 
+                 Name = "Year and parentheses mixed", 
+File = @"C:\temp\Doctor.Who.(2005).S01E01.Rose.720p.mp4" 
+   }
+         };
+
+    int testNumber = 1;
+   foreach (var testCase in testCases)
+    {
+        Console.WriteLine($"Test #{testNumber}: {testCase.Name}");
+     Console.WriteLine(new string('?', 80));
+        
+        try
+ {
+              var episode = new FileEpisode(testCase.File, outputDir);
+         
+         Console.WriteLine($"  ?? Original: {Path.GetFileName(testCase.File)}");
+       Console.WriteLine($"  ?? Show:     {episode.ShowName}{(episode.Year.HasValue ? $" ({episode.Year.Value})" : "")}");
+               Console.WriteLine($"  ?? Season:   {episode.SeasonNumber}");
+        Console.WriteLine($"  ?? Episode:  {string.Join(", ", episode.EpisodeNumbers)}");
+         Console.WriteLine($"  ? Result:   {episode.NewFileName}");
+           
+ if (episode.NewFileName == "NO NAME")
+    {
+             Console.ForegroundColor = ConsoleColor.Red;
+   Console.WriteLine($"  ? FAILED TO PARSE");
+       Console.ResetColor();
+         }
+   else
+ {
+           Console.ForegroundColor = ConsoleColor.Green;
+  Console.WriteLine($"  ? SUCCESS");
+      Console.ResetColor();
+          }
+     }
+    catch (Exception ex)
+   {
+          Console.ForegroundColor = ConsoleColor.Red;
+         Console.WriteLine($"  ? ERROR: {ex.Message}");
+              Console.ResetColor();
+            }
+         
+        Console.WriteLine();
+     testNumber++;
+       }
+
+       Console.WriteLine("??????????????????????????????????????????????????????????????????????????????");
+   Console.WriteLine("?               TEST SUITE COMPLETE ?");
+  Console.WriteLine("??????????????????????????????????????????????????????????????????????????????");
+   Console.WriteLine();
+            Console.WriteLine("Press any key to continue...");
         }
     }
 }

@@ -52,6 +52,9 @@ namespace TorrentFileRenamer
 
         public string NewFileNamePath { get; set; } = "";
 
+        // Year for the show (e.g., 2025 from "Robin Hood 2025" or "Robin Hood (2025)")
+        public int? Year { get; set; }
+
         // Plex compatibility validation result
         public PlexValidationResult? PlexValidation { get; set; }
         
@@ -154,6 +157,9 @@ namespace TorrentFileRenamer
                     ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
                     ShowName = Regex.Replace(ShowName, @"\s+", " "); // Replace multiple spaces with single space
                     
+                    // Extract year BEFORE cleaning the show name
+                    Year = ExtractYear(ShowName);
+                
                     // Clean up common artifacts
                     ShowName = CleanShowName(ShowName);
                 }
@@ -218,6 +224,9 @@ namespace TorrentFileRenamer
                         ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
                         ShowName = Regex.Replace(ShowName, @"\s+", " "); // Replace multiple spaces with single space
                         
+                        // Extract year BEFORE cleaning the show name
+                        Year = ExtractYear(ShowName);
+                
                         // Clean up common artifacts
                         ShowName = CleanShowName(ShowName);
                     }
@@ -262,6 +271,10 @@ namespace TorrentFileRenamer
                     {
                         ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
                         ShowName = Regex.Replace(ShowName, @"\s+", " ");
+                        
+                        // Extract year BEFORE cleaning the show name
+                        Year = ExtractYear(ShowName);
+                
                         ShowName = CleanShowName(ShowName);
                     }
 
@@ -284,65 +297,106 @@ namespace TorrentFileRenamer
             // Pattern for Episode XX or Ep XX
             Regex regex = new Regex(@"(?:Episode|Ep)\s*(?<episode>\d{1,2})(?:[-\s]*(?<episode2>\d{1,2}))?", RegexOptions.IgnoreCase);
 
-            Match match = regex.Match(Filename);
+       Match match = regex.Match(Filename);
             if (match.Success)
-            {
-                try
-                {
-                    // Try to extract season from directory path or set default to 1
-                    SeasonNumber = ExtractSeasonFromDirectory() ?? 1;
-                    
-                    EpisodeNumber = Convert.ToInt32(match.Groups["episode"].Value);
-                    EpisodeNumbers.Add(EpisodeNumber);
+      {
+       try
+{
+        // Try to extract season from directory path or set default to 1
+   SeasonNumber = ExtractSeasonFromDirectory() ?? 1;
+                 
+   EpisodeNumber = Convert.ToInt32(match.Groups["episode"].Value);
+            EpisodeNumbers.Add(EpisodeNumber);
 
-                    if (match.Groups["episode2"].Success && !string.IsNullOrEmpty(match.Groups["episode2"].Value))
-                    {
-                        int ep2 = Convert.ToInt32(match.Groups["episode2"].Value);
-                        if (!EpisodeNumbers.Contains(ep2))
-                            EpisodeNumbers.Add(ep2);
-                    }
+  if (match.Groups["episode2"].Success && !string.IsNullOrEmpty(match.Groups["episode2"].Value))
+          {
+   int ep2 = Convert.ToInt32(match.Groups["episode2"].Value);
+               if (!EpisodeNumbers.Contains(ep2))
+      EpisodeNumbers.Add(ep2);
+ }
 
-                    // Extract show name
-                    int matchIndex = Filename.ToUpper().IndexOf("EPISODE");
-                    if (matchIndex == -1)
-                        matchIndex = Filename.ToUpper().IndexOf("EP");
-                        
-                    if (matchIndex > 0)
-                    {
-                        ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
-                        ShowName = Regex.Replace(ShowName, @"\s+", " ");
-                        ShowName = CleanShowName(ShowName);
-                    }
+    // Extract show name
+        int matchIndex = Filename.ToUpper().IndexOf("EPISODE");
+           if (matchIndex == -1)
+   matchIndex = Filename.ToUpper().IndexOf("EP");
+       
+     if (matchIndex > 0)
+      {
+     ShowName = Filename.Substring(0, matchIndex).Replace(".", " ").Replace("-", " ").Replace("_", " ").Trim();
+     ShowName = Regex.Replace(ShowName, @"\s+", " ");
+   
+   // Extract year BEFORE cleaning the show name
+           Year = ExtractYear(ShowName);
+       
+       ShowName = CleanShowName(ShowName);
+        }
 
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine($"Error parsing episode-only format: {e.Message}");
-                }
-            }
-            return false;
+     return true;
+     }
+   catch (Exception e)
+  {
+        Debug.WriteLine($"Error parsing episode-only format: {e.Message}");
+        }
+      }
+     return false;
         }
 
         /// <summary>
         /// Try to extract season number from directory path
-        /// </summary>
+    /// </summary>
         private int? ExtractSeasonFromDirectory()
         {
             try
-            {
-                Regex seasonRegex = new Regex(@"Season\s*(\d{1,2})", RegexOptions.IgnoreCase);
+         {
+           Regex seasonRegex = new Regex(@"Season\s*(\d{1,2})", RegexOptions.IgnoreCase);
                 Match match = seasonRegex.Match(DirectoryName);
-                if (match.Success)
-                {
-                    return Convert.ToInt32(match.Groups[1].Value);
-                }
-            }
-            catch (Exception e)
+    if (match.Success)
+   {
+         return Convert.ToInt32(match.Groups[1].Value);
+          }
+     }
+     catch (Exception e)
+ {
+       Debug.WriteLine($"Error extracting season from directory: {e.Message}");
+        }
+     return null;
+        }
+
+        /// <summary>
+        /// Extract year from the show name (supports both "Show 2025" and "Show (2025)" formats)
+      /// </summary>
+      private int? ExtractYear(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+        return null;
+
+            // Try to match year in parentheses first: (2025) or (1999)
+            var yearInParensMatch = Regex.Match(name, @"\((\d{4})\)");
+     if (yearInParensMatch.Success)
             {
-                Debug.WriteLine($"Error extracting season from directory: {e.Message}");
-            }
-            return null;
+         if (int.TryParse(yearInParensMatch.Groups[1].Value, out int year))
+            {
+          // Validate it's a reasonable year (1900-2099)
+        if (year >= 1900 && year <= 2099)
+            {
+     Debug.WriteLine($"Extracted year from parentheses: {year}");
+      return year;
+              }
+  }
+       }
+
+        // Try to match standalone year: 2025 or 1999
+    var yearMatch = Regex.Match(name, @"\b(19|20)\d{2}\b");
+   if (yearMatch.Success)
+      {
+       if (int.TryParse(yearMatch.Value, out int year))
+     {
+    Debug.WriteLine($"Extracted standalone year: {year}");
+          return year;
+      }
+ }
+
+      return null;
         }
 
         /// <summary>
@@ -350,17 +404,17 @@ namespace TorrentFileRenamer
         /// </summary>
         private void GenerateNewFileName()
         {
-            try
+        try
             {
-                if (string.IsNullOrWhiteSpace(ShowName))
-                {
-                    ShowName = "Unknown Show";
-                }
+if (string.IsNullOrWhiteSpace(ShowName))
+    {
+          ShowName = "Unknown Show";
+       }
 
-                string episodeString;
-                if (IsMultiEpisode)
-                {
-                    // Handle multi-episode files: S01E03-E04 or S01E03E04
+         string episodeString;
+           if (IsMultiEpisode)
+    {
+      // Handle multi-episode files: S01E03-E04 or S01E03E04
                     var validEpisodes = EpisodeNumbers.Where(ep => ep >= 0).OrderBy(x => x).ToList(); // Allow episode 0
                     
                     if (validEpisodes.Count >= 2)
@@ -394,7 +448,16 @@ namespace TorrentFileRenamer
                     episodeString = $"E{EpisodeNumber:D2}";
                 }
 
-                NewFileName = $"{ShowName}.S{SeasonNumber:D2}{episodeString}{Extension}";
+                // Build filename with year if available
+                if (Year.HasValue)
+                {
+                    NewFileName = $"{ShowName} ({Year.Value}).S{SeasonNumber:D2}{episodeString}{Extension}";
+                }
+                else
+                {
+                    NewFileName = $"{ShowName}.S{SeasonNumber:D2}{episodeString}{Extension}";
+                }
+      
                 NewFileName = NewFileName.Replace(" ", ".");
                 
                 // Validate for Plex compatibility
@@ -560,13 +623,9 @@ namespace TorrentFileRenamer
                 {
                     Debug.WriteLine($"Plex Compatible: {(testEpisode.PlexValidation.IsValid ? "✅ Yes" : "❌ No")}");
                     if (testEpisode.PlexValidation.Issues.Any())
-                    {
-                        Debug.WriteLine($"Plex Issues: {string.Join("; ", testEpisode.PlexValidation.Issues)}");
-                    }
+                    Debug.WriteLine($"Plex Issues: {string.Join("; ", testEpisode.PlexValidation.Issues)}");
                     if (testEpisode.PlexValidation.Warnings.Any())
-                    {
-                        Debug.WriteLine($"Plex Warnings: {string.Join("; ", testEpisode.PlexValidation.Warnings)}");
-                    }
+                    Debug.WriteLine($"Plex Warnings: {string.Join("; ", testEpisode.PlexValidation.Warnings)}");
                     Debug.WriteLine($"Suggested Action: {testEpisode.PlexValidation.SuggestedAction}");
                 }
                 

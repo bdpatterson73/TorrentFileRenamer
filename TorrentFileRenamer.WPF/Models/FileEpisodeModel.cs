@@ -43,9 +43,27 @@ public class FileEpisodeModel : ObservableObject
     public string ShowName => _coreEpisode.ShowName;
 
     /// <summary>
+    /// Year of the show (if available)
+    /// </summary>
+    public int? Year => _coreEpisode.Year;
+
+    /// <summary>
+  /// Display name with year (e.g., "Robin Hood (2025)")
+  /// </summary>
+  public string ShowNameWithYear
+  {
+ get
+        {
+        if (_coreEpisode.Year.HasValue)
+      return $"{_coreEpisode.ShowName} ({_coreEpisode.Year.Value})";
+   return _coreEpisode.ShowName;
+      }
+    }
+
+    /// <summary>
     /// Season number
     /// </summary>
-  public int SeasonNumber => _coreEpisode.SeasonNumber;
+    public int SeasonNumber => _coreEpisode.SeasonNumber;
 
     /// <summary>
     /// Primary episode number
