@@ -42,6 +42,7 @@ public partial class App : WpfApplication
         services.AddSingleton<IWindowStateService, WindowStateService>();
         services.AddSingleton<IMruService, MruService>();
         services.AddSingleton<ISearchService, SearchService>();
+        services.AddSingleton<IExportService, ExportService>();  // Phase 7
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
@@ -51,6 +52,7 @@ public partial class App : WpfApplication
         services.AddTransient<SearchViewModel>();
         services.AddTransient<FilterViewModel>();
         services.AddTransient<StatsViewModel>();
+        services.AddTransient<ExportViewModel>();  // Phase 7
 
         // Views
         services.AddSingleton<MainWindow>();

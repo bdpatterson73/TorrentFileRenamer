@@ -4,13 +4,13 @@
    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-     Title="Keyboard Shortcuts" 
+ Title="Keyboard Shortcuts" 
         Height="650" Width="600"
-        MinHeight="600" MinWidth="550"
+      MinHeight="600" MinWidth="550"
         WindowStartupLocation="CenterOwner"
     ResizeMode="CanResize"
    ShowInTaskbar="False"
-      Background="{StaticResource SurfaceBrush}">
+   Background="{StaticResource SurfaceBrush}">
     
     <Window.Resources>
         <!-- Shortcut Item Style -->
@@ -64,7 +64,7 @@
     
         <!-- Header -->
         <Border Grid.Row="0" 
-       Background="{StaticResource PrimaryBrush}"
+   Background="{StaticResource PrimaryBrush}"
   Padding="24,20">
     <Grid>
       <Grid.ColumnDefinitions>
@@ -73,33 +73,33 @@
       </Grid.ColumnDefinitions>
             
      <TextBlock Grid.Column="0"
-       Text="?"
+       Text="&#x2328;"
             FontSize="32"
             Foreground="White"
  VerticalAlignment="Center"
 Margin="0,0,16,0"/>
-         
+   
      <StackPanel Grid.Column="1" VerticalAlignment="Center">
-       <TextBlock Text="Keyboard Shortcuts" 
+     <TextBlock Text="Keyboard Shortcuts" 
     FontSize="24" 
-          FontWeight="SemiBold"
+    FontWeight="SemiBold"
                 Foreground="White"/>
       <TextBlock Text="Quick reference for keyboard commands" 
     FontSize="12"
        Foreground="#E3F2FD"
        Margin="0,4,0,0"/>
     </StackPanel>
-            </Grid>
-      </Border>
+  </Grid>
+ </Border>
         
     <!-- Content -->
         <ScrollViewer Grid.Row="1" 
      VerticalScrollBarVisibility="Auto"
-           Padding="24,20">
-            <StackPanel>
+   Padding="24,20">
+      <StackPanel>
        <!-- General Commands -->
-             <TextBlock Text="?? General" Style="{StaticResource CategoryHeader}"/>
-                
+          <TextBlock Text="&#x2699;&#xFE0F; General" Style="{StaticResource CategoryHeader}"/>
+    
            <Border Style="{StaticResource ShortcutRow}">
          <Grid>
    <Grid.ColumnDefinitions>
@@ -158,7 +158,7 @@ Margin="0,0,16,0"/>
         </Border>
             
     <!-- File Operations -->
-                <TextBlock Text="?? File Operations" Style="{StaticResource CategoryHeader}"/>
+         <TextBlock Text="&#x1F4C1; File Operations" Style="{StaticResource CategoryHeader}"/>
        
                 <Border Style="{StaticResource ShortcutRow}">
       <Grid>
@@ -234,7 +234,7 @@ Margin="0,0,16,0"/>
       </Border>
         
    <!-- Navigation -->
-<TextBlock Text="?? Navigation" Style="{StaticResource CategoryHeader}"/>
+<TextBlock Text="&#x1F9ED; Navigation" Style="{StaticResource CategoryHeader}"/>
                 
             <Border Style="{StaticResource ShortcutRow}">
       <Grid>
@@ -306,8 +306,8 @@ Margin="0,0,16,0"/>
             </Border>
     
        <!-- Selection -->
-   <TextBlock Text="? Selection" Style="{StaticResource CategoryHeader}"/>
-       
+   <TextBlock Text="&#x2705; Selection" Style="{StaticResource CategoryHeader}"/>
+     
    <Border Style="{StaticResource ShortcutRow}">
            <Grid>
         <Grid.ColumnDefinitions>
@@ -355,8 +355,8 @@ Margin="0,0,16,0"/>
   </Border>
       
           <!-- Search & Filter -->
-    <TextBlock Text="?? Search &amp; Filter" Style="{StaticResource CategoryHeader}"/>
-            
+    <TextBlock Text="&#x1F50D; Search &amp; Filter" Style="{StaticResource CategoryHeader}"/>
+        
        <Border Style="{StaticResource ShortcutRow}">
     <Grid>
      <Grid.ColumnDefinitions>
@@ -432,42 +432,42 @@ Style="{StaticResource ShortcutDescription}"/>
      
   <!-- Tips -->
      <Border Background="#E8F5E9"
-          BorderBrush="{StaticResource SuccessBrush}"
+   BorderBrush="{StaticResource SuccessBrush}"
       BorderThickness="1"
         CornerRadius="8"
-        Padding="16"
+ Padding="16"
      Margin="0,24,0,0">
     <StackPanel>
-        <TextBlock Text="?? Pro Tip" 
-               FontSize="14"
+        <TextBlock Text="&#x1F4A1; Pro Tip" 
+   FontSize="14"
            FontWeight="SemiBold"
      Foreground="{StaticResource SuccessBrush}"
-            Margin="0,0,0,8"/>
-                <TextBlock TextWrapping="Wrap" 
-       FontSize="12"
-       Foreground="{StaticResource TextPrimaryBrush}">
+       Margin="0,0,0,8"/>
+      <TextBlock TextWrapping="Wrap" 
+FontSize="12"
+   Foreground="{StaticResource TextPrimaryBrush}">
    Most shortcuts are context-aware and will only work when the relevant tab or feature is active.
       Use Ctrl+F for quick search and Ctrl+Shift+F for advanced filtering options.
-          Press F1 anytime to bring up this help window!
+        Press F1 anytime to bring up this help window!
        </TextBlock>
   </StackPanel>
             </Border>
        </StackPanel>
         </ScrollViewer>
-        
+   
    <!-- Footer -->
  <Border Grid.Row="2" 
     Background="White"
-          BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="0,1,0,0"
+       BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="0,1,0,0"
  Padding="24,16">
  <Button Content="Close" 
-          Style="{StaticResource PrimaryButton}"
+      Style="{StaticResource PrimaryButton}"
       IsDefault="True"
-     IsCancel="True"
+  IsCancel="True"
       Click="CloseButton_Click"
-        HorizontalAlignment="Right"
-        Width="100"/>
+ HorizontalAlignment="Right"
+     Width="100"/>
         </Border>
     </Grid>
 </Window>
