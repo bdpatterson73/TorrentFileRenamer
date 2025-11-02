@@ -223,15 +223,16 @@
           Margin="24,0,0,16"/>
                   
   <TextBlock Text="File Verification Method" Style="{StaticResource SettingLabel}"/>
-             <ComboBox SelectedValue="{Binding FileVerificationMethod}"
-         Style="{StaticResource ModernComboBox}"
+             <ComboBox SelectedValue="{Binding FileVerificationMethod, Mode=TwoWay}"
+     SelectedValuePath="Tag"
+  Style="{StaticResource ModernComboBox}"
 Margin="0,0,0,8">
-           <ComboBoxItem Content="File Size Only (Fast)" Tag="FileSize" IsSelected="True"/>
-       <ComboBoxItem Content="MD5 Checksum (Thorough)" Tag="Checksum"/>
-       </ComboBox>
+           <ComboBoxItem Content="File Size Only (Fast)" Tag="FileSize"/>
+     <ComboBoxItem Content="MD5 Checksum (Thorough)" Tag="Checksum"/>
+     </ComboBox>
     <TextBlock Text="File Size Only: Quick verification by comparing file sizes. MD5 Checksum: Thorough verification using MD5 hash comparison (slower but more accurate for large files)." 
               Style="{StaticResource SettingDescription}"
-               Margin="0,0,0,8"/>
+         Margin="0,0,0,8"/>
           </StackPanel>
          </Border>
       </StackPanel>

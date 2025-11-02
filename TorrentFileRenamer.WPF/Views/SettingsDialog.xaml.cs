@@ -14,18 +14,23 @@ public partial class SettingsDialog : Window
 
     protected override void OnContentRendered(EventArgs e)
     {
-   base.OnContentRendered(e);
+        base.OnContentRendered(e);
 
         // Subscribe to DialogResult changes if ViewModel implements it
-    if (DataContext is ViewModels.SettingsViewModel viewModel)
+        if (DataContext is ViewModels.SettingsViewModel viewModel)
         {
-  viewModel.PropertyChanged += (s, args) =>
-{
-       if (args.PropertyName == nameof(viewModel.DialogResult))
-   {
-      DialogResult = viewModel.DialogResult;
-   }
-     };
+            viewModel.PropertyChanged += (s, args) =>
+    {
+         if (args.PropertyName == nameof(viewModel.DialogResult))
+       {
+    DialogResult = viewModel.DialogResult;
+          // Explicitly close the window
+        if (viewModel.DialogResult.HasValue)
+  {
+   Close();
+       }
+       }
+   };
         }
     }
 }
