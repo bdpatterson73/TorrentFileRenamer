@@ -27,8 +27,8 @@ public class DialogService : IDialogService
 
     public Task<bool> ShowConfirmationAsync(string title, string message)
     {
-   var result = WpfMessageBox.Show(
- message,
+        var result = WpfMessageBox.Show(
+            message,
             title,
             WpfMessageBoxButton.YesNo,
             WpfMessageBoxImage.Question);
@@ -36,23 +36,23 @@ public class DialogService : IDialogService
         return Task.FromResult(result == WpfMessageBoxResult.Yes);
     }
 
-public Task ShowMessageAsync(string title, string message)
+    public Task ShowMessageAsync(string title, string message)
     {
         WpfMessageBox.Show(
             message,
             title,
-        WpfMessageBoxButton.OK,
-        WpfMessageBoxImage.Information);
+            WpfMessageBoxButton.OK,
+            WpfMessageBoxImage.Information);
 
         return Task.CompletedTask;
     }
 
-  public Task ShowErrorAsync(string title, string message)
+    public Task ShowErrorAsync(string title, string message)
     {
-      WpfMessageBox.Show(
+        WpfMessageBox.Show(
             message,
-title,
-   WpfMessageBoxButton.OK,
+            title,
+            WpfMessageBoxButton.OK,
             WpfMessageBoxImage.Error);
 
         return Task.CompletedTask;
@@ -60,25 +60,25 @@ title,
 
     public Task<string?> ShowFolderBrowserAsync(string? initialPath = null)
     {
-   var dialog = new WpfOpenFolderDialog
+        var dialog = new WpfOpenFolderDialog
         {
-        Title = "Select Folder",
- InitialDirectory = initialPath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            Title = "Select Folder",
+            InitialDirectory = initialPath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
         };
 
         var result = dialog.ShowDialog();
-     return Task.FromResult(result == true ? dialog.FolderName : null);
+        return Task.FromResult(result == true ? dialog.FolderName : null);
     }
 
     public Task<string?> ShowOpenFileDialogAsync(string? filter = null)
     {
         var dialog = new WpfOpenFileDialog
         {
-     Filter = filter ?? "All Files (*.*)|*.*",
-  CheckFileExists = true
+            Filter = filter ?? "All Files (*.*)|*.*",
+            CheckFileExists = true
         };
 
-    var result = dialog.ShowDialog();
+        var result = dialog.ShowDialog();
         return Task.FromResult(result == true ? dialog.FileName : null);
     }
 
@@ -88,27 +88,27 @@ title,
     {
         var result = WpfMessageBox.Show(
             message,
-  title,
-    WpfMessageBoxButton.YesNo,
-     WpfMessageBoxImage.Question);
+            title,
+            WpfMessageBoxButton.YesNo,
+            WpfMessageBoxImage.Question);
 
- return result == WpfMessageBoxResult.Yes;
+        return result == WpfMessageBoxResult.Yes;
     }
 
     public void ShowMessage(string title, string message)
- {
+    {
         WpfMessageBox.Show(
-       message,
-  title,
-       WpfMessageBoxButton.OK,
-       WpfMessageBoxImage.Information);
-  }
+            message,
+            title,
+            WpfMessageBoxButton.OK,
+            WpfMessageBoxImage.Information);
+    }
 
- public string? ShowFolderBrowserDialog(string? initialPath = null)
+    public string? ShowFolderBrowserDialog(string? initialPath = null)
     {
         var dialog = new WpfOpenFolderDialog
         {
-        Title = "Select Folder",
+            Title = "Select Folder",
             InitialDirectory = initialPath ?? Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
         };
 
@@ -118,23 +118,23 @@ title,
 
     public string? ShowSaveFileDialog(string? defaultFileName = null, string? filter = null)
     {
-   var dialog = new WpfSaveFileDialog
+        var dialog = new WpfSaveFileDialog
         {
-     FileName = defaultFileName ?? "export.txt",
+            FileName = defaultFileName ?? "export.txt",
             Filter = filter ?? "All Files (*.*)|*.*",
             AddExtension = true
         };
 
         var result = dialog.ShowDialog();
-   return result == true ? dialog.FileName : null;
+        return result == true ? dialog.FileName : null;
     }
 
     public bool? ShowSettingsDialog()
     {
         var viewModel = new SettingsViewModel(_appSettings, this);
-      var dialog = new SettingsDialog
-     {
-   DataContext = viewModel,
+        var dialog = new SettingsDialog
+        {
+            DataContext = viewModel,
             Owner = WpfApplication.Current.MainWindow
         };
 
@@ -146,9 +146,9 @@ title,
         var viewModel = new LogViewerViewModel(this);
         var dialog = new LogViewerDialog
         {
-    DataContext = viewModel,
-          Owner = WpfApplication.Current.MainWindow
-    };
+            DataContext = viewModel,
+            Owner = WpfApplication.Current.MainWindow
+        };
 
         dialog.ShowDialog();
     }
@@ -156,7 +156,7 @@ title,
     public void ShowAboutDialog()
     {
         var dialog = new AboutDialog
-     {
+        {
             Owner = WpfApplication.Current.MainWindow
         };
 

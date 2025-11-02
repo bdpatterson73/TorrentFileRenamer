@@ -31,7 +31,7 @@ namespace TorrentFileRenamer
         public event EventHandler<FileProcessedEventArgs>? FileProcessed;
         public event EventHandler<FileFoundEventArgs>? FileFound;
         public event EventHandler<Exception>? ErrorOccurred;
-        
+
         // New event for file operation progress
         public event EventHandler<FileProgressEventArgs>? FileProgressChanged;
 
@@ -91,10 +91,10 @@ namespace TorrentFileRenamer
                 _isMonitoring = true;
 
                 StatusChanged?.Invoke(this, $"Started monitoring: {WatchFolder}");
-                
+
                 // Check for existing files
                 CheckExistingFiles();
-                
+
                 return true;
             }
             catch (Exception ex)
@@ -115,7 +115,7 @@ namespace TorrentFileRenamer
                 _fileWatcher?.Dispose();
                 _fileWatcher = null;
                 _stabilityTimer?.Stop();
-                
+
                 lock (_lockObject)
                 {
                     _pendingFiles.Clear();
@@ -216,11 +216,11 @@ namespace TorrentFileRenamer
                 lock (_lockObject)
                 {
                     var filesToCheck = _pendingFiles.Where(kvp => kvp.Value <= cutoffTime).ToList();
-                    
+
                     foreach (var kvp in filesToCheck)
                     {
                         string filePath = kvp.Key;
-                        
+
                         if (!File.Exists(filePath))
                         {
                             _pendingFiles.Remove(filePath);
@@ -253,7 +253,7 @@ namespace TorrentFileRenamer
                 return false;
 
             string extension = Path.GetExtension(filePath).ToLower();
-            return FileExtensions.Any(ext => 
+            return FileExtensions.Any(ext =>
                 string.Equals(ext.TrimStart('*'), extension, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -330,7 +330,7 @@ namespace TorrentFileRenamer
                     if (!autoValidation.IsValid && autoValidation.SuggestedAction == PlexValidationAction.SkipInAutoMode)
                     {
                         string issues = string.Join("; ", autoValidation.Issues);
-                        FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, 
+                        FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false,
                             $"Skipped due to Plex compatibility issues: {issues}"));
                         return;
                     }
@@ -359,19 +359,20 @@ namespace TorrentFileRenamer
 
                 // Use the new FileOperationProgress for copying with progress feedback
                 var fileOperation = new FileOperationProgress();
-                fileOperation.ProgressChanged += (sender, args) => {
+                fileOperation.ProgressChanged += (sender, args) =>
+                {
                     FileProgressChanged?.Invoke(this, args);
-                    
+
                     // Update status with progress info
                     if (!args.IsComplete)
                     {
-                        StatusChanged?.Invoke(this, 
+                        StatusChanged?.Invoke(this,
                             $"Copying {Path.GetFileName(filePath)}: {args.FormattedProgress} at {args.FormattedSpeed} - ETA: {args.FormattedTimeRemaining}");
                     }
                 };
 
                 bool success = await fileOperation.CopyFileWithRetryAsync(filePath, episode.NewFileNamePath, maxRetries: 3);
-                
+
                 if (success)
                 {
                     // Verify copy
@@ -379,13 +380,13 @@ namespace TorrentFileRenamer
                     {
                         // Delete original
                         File.Delete(filePath);
-                        
+
                         string successMessage = $"Successfully moved to: {episode.NewFileNamePath}";
                         if (episode.PlexValidation?.Warnings.Any() == true)
                         {
                             successMessage += " (with Plex warnings)";
                         }
-                        
+
                         FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, true, successMessage));
                         StatusChanged?.Invoke(this, $"Completed: {episode.ShowName} S{episode.SeasonNumber:D2}E{episode.EpisodeNumber:D2}");
                     }

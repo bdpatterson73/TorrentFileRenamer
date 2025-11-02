@@ -38,8 +38,8 @@ namespace TorrentFileRenamer
 
             var textRect = new Rectangle(e.Bounds.X + 6, e.Bounds.Y, e.Bounds.Width - 6, e.Bounds.Height);
             TextRenderer.DrawText(e.Graphics, e.Header.Text, new Font("Segoe UI", 9F, FontStyle.Bold),
-                                textRect, Color.FromArgb(60, 60, 60),
-                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                textRect, Color.FromArgb(60, 60, 60),
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
         }
 
         /// <summary>
@@ -75,8 +75,8 @@ namespace TorrentFileRenamer
             var textRect = new Rectangle(e.Bounds.X + 4, e.Bounds.Y, e.Bounds.Width - 4, e.Bounds.Height);
 
             TextRenderer.DrawText(e.Graphics, e.SubItem.Text, new Font("Segoe UI", 9F),
-                                textRect, textColor,
-                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                textRect, textColor,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
             // Draw grid lines
             using (var pen = new Pen(Color.FromArgb(230, 230, 230)))
@@ -153,14 +153,14 @@ Built with intelligent media detection";
             try
             {
                 var logs = LoggingService.GetRecentLogs(maxLogEntries);
-                
+
                 var logForm = new Form
                 {
                     Text = "Application Logs",
                     Size = new Size(800, 600),
                     StartPosition = FormStartPosition.CenterParent
                 };
-                
+
                 var textBox = new TextBox
                 {
                     Multiline = true,
@@ -170,13 +170,13 @@ Built with intelligent media detection";
                     ReadOnly = true,
                     Text = string.Join(Environment.NewLine, logs)
                 };
-                
+
                 logForm.Controls.Add(textBox);
                 logForm.ShowDialog(parentForm);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to show logs: {ex.Message}", "Error", 
+                MessageBox.Show($"Failed to show logs: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

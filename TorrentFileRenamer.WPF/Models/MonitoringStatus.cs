@@ -9,23 +9,23 @@ public enum MonitoringStatus
     /// Monitoring is not running
     /// </summary>
     Stopped,
-    
+
     /// <summary>
     /// Monitoring is starting up
     /// </summary>
     Starting,
-    
+
     /// <summary>
     /// Monitoring is actively running
     /// </summary>
     Running,
-    
+
     /// <summary>
     /// Monitoring is stopping
     /// </summary>
     Stopping,
-    
-/// <summary>
+
+    /// <summary>
     /// An error occurred during monitoring
     /// </summary>
     Error

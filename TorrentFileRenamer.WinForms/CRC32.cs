@@ -45,6 +45,7 @@ namespace TorrentFileRenamer
                 _crc32Table = _buildCRC32Table(polynomial);
                 _crc32TablesCache.Add(polynomial, _crc32Table);
             }
+
             Initialize();
         }
 
@@ -177,6 +178,7 @@ namespace TorrentFileRenamer
             {
                 HashCore(buffer, 0, bytesRead);
             }
+
             return HashFinal();
         }
 
@@ -213,18 +215,22 @@ namespace TorrentFileRenamer
         /// The _all ones
         /// </summary>
         private static uint _allOnes = 0xffffffff;
+
         /// <summary>
         /// The _default CRC
         /// </summary>
         private static readonly CRC32 _defaultCRC;
+
         /// <summary>
         /// The _CRC32 tables cache
         /// </summary>
         private static readonly Hashtable _crc32TablesCache;
+
         /// <summary>
         /// The _CRC32 table
         /// </summary>
         private readonly uint[] _crc32Table;
+
         /// <summary>
         /// The _CRC
         /// </summary>
@@ -252,6 +258,7 @@ namespace TorrentFileRenamer
                     else
                         crc >>= 1;
                 }
+
                 table[i] = crc;
             }
 

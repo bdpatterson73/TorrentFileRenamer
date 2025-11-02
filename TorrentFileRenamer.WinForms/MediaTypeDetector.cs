@@ -22,14 +22,15 @@ namespace TorrentFileRenamer
             string upperFilename = filename.ToUpper();
 
             // Strong TV episode indicators
-            string[] tvPatterns = {
-                @"S\d{1,2}\s*E\d{1,2}",           // S01E01, S1E1, etc.
-                @"\d{1,2}[xX]\d{1,2}",            // 1x01, 12x05, etc.
+            string[] tvPatterns =
+            {
+                @"S\d{1,2}\s*E\d{1,2}", // S01E01, S1E1, etc.
+                @"\d{1,2}[xX]\d{1,2}", // 1x01, 12x05, etc.
                 @"SEASON\s*\d{1,2}\s*EPISODE\s*\d{1,2}", // Season 1 Episode 1
-                @"EP\d{1,2}",                     // EP01, EP1
-                @"EPISODE\s*\d{1,2}",             // Episode 01
-                @"S\d{1,2}",                      // S01 (season only)
-                @"\d{4}\.\d{2}\.\d{2}",           // Date format episodes (2023.01.15)
+                @"EP\d{1,2}", // EP01, EP1
+                @"EPISODE\s*\d{1,2}", // Episode 01
+                @"S\d{1,2}", // S01 (season only)
+                @"\d{4}\.\d{2}\.\d{2}", // Date format episodes (2023.01.15)
             };
 
             foreach (string pattern in tvPatterns)
@@ -39,7 +40,8 @@ namespace TorrentFileRenamer
             }
 
             // Check for common TV show structures in path
-            string[] pathTvIndicators = {
+            string[] pathTvIndicators =
+            {
                 "SEASON", "EPISODE", "EPISODES", "SERIES", "TV", "SHOW"
             };
 
@@ -67,10 +69,11 @@ namespace TorrentFileRenamer
             string upperFilename = filename.ToUpper();
 
             // Movie indicators (years, movie-specific terms)
-            string[] moviePatterns = {
-                @"\(\d{4}\)",                     // (2021)
-                @"\[\d{4}\]",                     // [2021]
-                @"\b(19|20)\d{2}\b",              // 1999, 2021 (standalone year)
+            string[] moviePatterns =
+            {
+                @"\(\d{4}\)", // (2021)
+                @"\[\d{4}\]", // [2021]
+                @"\b(19|20)\d{2}\b", // 1999, 2021 (standalone year)
             };
 
             foreach (string pattern in moviePatterns)
@@ -80,7 +83,8 @@ namespace TorrentFileRenamer
             }
 
             // Movie-specific terms that rarely appear in TV shows
-            string[] movieIndicators = {
+            string[] movieIndicators =
+            {
                 "DVDRIP", "BDRIP", "WEBRIP", "CAMRIP", "HDCAM", "HDTS",
                 "THEATRICAL", "EXTENDED", "DIRECTORS.CUT", "DC",
                 "UNRATED", "REMASTERED", "CRITERION", "LIMITED",

@@ -9,6 +9,6 @@ public partial class AutoMonitorView : WpfUserControl
 {
     public AutoMonitorView()
     {
-  InitializeComponent();
+        InitializeComponent();
     }
 }

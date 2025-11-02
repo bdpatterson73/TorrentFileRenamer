@@ -9,6 +9,6 @@ public partial class TvEpisodesView : WpfUserControl
 {
     public TvEpisodesView()
     {
-    InitializeComponent();
+        InitializeComponent();
     }
 }

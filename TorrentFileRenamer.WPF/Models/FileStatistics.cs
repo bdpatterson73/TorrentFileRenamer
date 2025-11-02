@@ -17,33 +17,33 @@ public class FileStatistics : ObservableObject
     private DateTime _lastUpdated = DateTime.Now;
 
     /// <summary>
-  /// Total number of files
+    /// Total number of files
     /// </summary>
     public int TotalFiles
     {
         get => _totalFiles;
         set
-  {
-     if (SetProperty(ref _totalFiles, value))
-         {
-       OnPropertyChanged(nameof(ProgressPercentage));
-          }
+        {
+            if (SetProperty(ref _totalFiles, value))
+            {
+                OnPropertyChanged(nameof(ProgressPercentage));
+            }
         }
     }
 
     /// <summary>
-  /// Number of successfully processed files
-  /// </summary>
+    /// Number of successfully processed files
+    /// </summary>
     public int ProcessedFiles
     {
         get => _processedFiles;
-   set
+        set
         {
             if (SetProperty(ref _processedFiles, value))
-   {
-     OnPropertyChanged(nameof(ProgressPercentage));
-    }
-  }
+            {
+                OnPropertyChanged(nameof(ProgressPercentage));
+            }
+        }
     }
 
     /// <summary>
@@ -56,12 +56,12 @@ public class FileStatistics : ObservableObject
     }
 
     /// <summary>
-  /// Number of files with errors
+    /// Number of files with errors
     /// </summary>
     public int ErrorFiles
     {
-     get => _errorFiles;
-     set => SetProperty(ref _errorFiles, value);
+        get => _errorFiles;
+        set => SetProperty(ref _errorFiles, value);
     }
 
     /// <summary>
@@ -79,15 +79,15 @@ public class FileStatistics : ObservableObject
     public double AverageConfidence
     {
         get => _averageConfidence;
-  set => SetProperty(ref _averageConfidence, value);
+        set => SetProperty(ref _averageConfidence, value);
     }
 
-/// <summary>
+    /// <summary>
     /// Total file size in bytes
-  /// </summary>
+    /// </summary>
     public long TotalFileSize
     {
-      get => _totalFileSize;
+        get => _totalFileSize;
         set => SetProperty(ref _totalFileSize, value);
     }
 
@@ -96,50 +96,50 @@ public class FileStatistics : ObservableObject
     /// </summary>
     public DateTime LastUpdated
     {
-get => _lastUpdated;
-     set => SetProperty(ref _lastUpdated, value);
+        get => _lastUpdated;
+        set => SetProperty(ref _lastUpdated, value);
     }
 
     /// <summary>
     /// Processing progress percentage
     /// </summary>
-public double ProgressPercentage
+    public double ProgressPercentage
     {
         get
         {
-      if (TotalFiles == 0) return 0;
+            if (TotalFiles == 0) return 0;
             return (double)ProcessedFiles / TotalFiles * 100;
-}
+        }
     }
 
     /// <summary>
-/// Formatted progress text
-/// </summary>
+    /// Formatted progress text
+    /// </summary>
     public string ProgressText => $"{ProcessedFiles}/{TotalFiles} files processed ({ProgressPercentage:F1}%)";
 
     /// <summary>
     /// Formatted file size text
-  /// </summary>
+    /// </summary>
     public string FileSizeText
- {
+    {
         get
         {
-       const long KB = 1024;
-         const long MB = KB * 1024;
-      const long GB = MB * 1024;
+            const long KB = 1024;
+            const long MB = KB * 1024;
+            const long GB = MB * 1024;
             const long TB = GB * 1024;
 
-  if (TotalFileSize >= TB)
-          return $"{TotalFileSize / (double)TB:F2} TB";
-        if (TotalFileSize >= GB)
-      return $"{TotalFileSize / (double)GB:F2} GB";
-       if (TotalFileSize >= MB)
-       return $"{TotalFileSize / (double)MB:F2} MB";
-     if (TotalFileSize >= KB)
-        return $"{TotalFileSize / (double)KB:F2} KB";
-        return $"{TotalFileSize} bytes";
+            if (TotalFileSize >= TB)
+                return $"{TotalFileSize / (double)TB:F2} TB";
+            if (TotalFileSize >= GB)
+                return $"{TotalFileSize / (double)GB:F2} GB";
+            if (TotalFileSize >= MB)
+                return $"{TotalFileSize / (double)MB:F2} MB";
+            if (TotalFileSize >= KB)
+                return $"{TotalFileSize / (double)KB:F2} KB";
+            return $"{TotalFileSize} bytes";
         }
- }
+    }
 
     /// <summary>
     /// Resets all statistics
@@ -148,11 +148,11 @@ public double ProgressPercentage
     {
         TotalFiles = 0;
         ProcessedFiles = 0;
-     PendingFiles = 0;
+        PendingFiles = 0;
         ErrorFiles = 0;
         UnprocessedFiles = 0;
-  AverageConfidence = 0;
-     TotalFileSize = 0;
+        AverageConfidence = 0;
+        TotalFileSize = 0;
         LastUpdated = DateTime.Now;
     }
 }

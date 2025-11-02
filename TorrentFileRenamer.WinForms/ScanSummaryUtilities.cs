@@ -19,18 +19,18 @@ namespace TorrentFileRenamer
         public static async Task ShowTVScanSummary(int totalVideoFiles, int validEpisodes, int unparsedFiles, int likelyMoviesSkipped)
         {
             await Task.Delay(100); // Brief delay for UI responsiveness
-            
+
             string summary = $"TV Scan Results:\n" +
-                           $"Total video files: {totalVideoFiles}\n" +
-                           $"Valid TV episodes: {validEpisodes}\n" +
-                           $"Unparsed files: {unparsedFiles}\n" +
-                           $"Movies skipped: {likelyMoviesSkipped}";
-            
+                             $"Total video files: {totalVideoFiles}\n" +
+                             $"Valid TV episodes: {validEpisodes}\n" +
+                             $"Unparsed files: {unparsedFiles}\n" +
+                             $"Movies skipped: {likelyMoviesSkipped}";
+
             if (unparsedFiles > 0)
             {
                 summary += "\n\nTip: Review unparsed files (gray) and remove them if they're not TV episodes.";
             }
-            
+
             //TODO MessageBox.Show(summary, "TV Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -44,19 +44,19 @@ namespace TorrentFileRenamer
         public static async Task ShowMovieScanSummary(int totalVideoFiles, int validMovies, int unparsedFiles, int likelyTVShowsSkipped)
         {
             await Task.Delay(100); // Brief delay for UI responsiveness
-            
+
             string summary = $"Movie Scan Results:\n" +
-                           $"Total video files: {totalVideoFiles}\n" +
-                           $"Valid movies: {validMovies}\n" +
-                           $"Unparsed files: {unparsedFiles}\n" +
-                           $"TV shows skipped: {likelyTVShowsSkipped}";
-            
+                             $"Total video files: {totalVideoFiles}\n" +
+                             $"Valid movies: {validMovies}\n" +
+                             $"Unparsed files: {unparsedFiles}\n" +
+                             $"TV shows skipped: {likelyTVShowsSkipped}";
+
             if (unparsedFiles > 0)
             {
                 summary += "\n\nTip: Review unparsed files (gray) and remove them if they're not movies.";
             }
-            
-           //TODO  MessageBox.Show(summary, "Movie Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            //TODO  MessageBox.Show(summary, "Movie Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
@@ -70,12 +70,12 @@ namespace TorrentFileRenamer
         public static void ShowTVProcessingCompleteSummary(int totalItems, int successfulCopies, int successfulDeletions, int errors, TimeSpan duration)
         {
             string summary = $"TV Episode Processing Complete!\n\n" +
-                           $"Files processed: {totalItems}\n" +
-                           $"Successfully copied: {successfulCopies}\n" +
-                           $"Original files deleted: {successfulDeletions}\n" +
-                           $"Errors: {errors}\n" +
-                           $"Duration: {duration.Minutes}m {duration.Seconds}s";
-                           
+                             $"Files processed: {totalItems}\n" +
+                             $"Successfully copied: {successfulCopies}\n" +
+                             $"Original files deleted: {successfulDeletions}\n" +
+                             $"Errors: {errors}\n" +
+                             $"Duration: {duration.Minutes}m {duration.Seconds}s";
+
             //MessageBox.Show(summary, "TV Processing Complete", MessageBoxButtons.OK, errors > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
         }
 
@@ -90,14 +90,14 @@ namespace TorrentFileRenamer
         public static void ShowMovieProcessingCompleteSummary(int totalItems, int successfulCopies, int successfulDeletions, int errors, TimeSpan duration)
         {
             string summary = $"Movie Processing Complete!\n\n" +
-                           $"Movies processed: {totalItems}\n" +
-                           $"Successfully copied: {successfulCopies}\n" +
-                           $"Original files deleted: {successfulDeletions}\n" +
-                           $"Errors: {errors}\n" +
-                           $"Duration: {duration.Minutes}m {duration.Seconds}s";
-                           
-            MessageBox.Show(summary, "Movie Processing Complete", 
-                MessageBoxButtons.OK, 
+                             $"Movies processed: {totalItems}\n" +
+                             $"Successfully copied: {successfulCopies}\n" +
+                             $"Original files deleted: {successfulDeletions}\n" +
+                             $"Errors: {errors}\n" +
+                             $"Duration: {duration.Minutes}m {duration.Seconds}s";
+
+            MessageBox.Show(summary, "Movie Processing Complete",
+                MessageBoxButtons.OK,
                 errors > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
         }
     }

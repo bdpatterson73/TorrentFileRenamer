@@ -8,7 +8,7 @@ namespace TorrentFileRenamer.WPF.Services;
 public interface IScanningService
 {
     /// <summary>
- /// Scans a directory for TV episode files
+    /// Scans a directory for TV episode files
     /// </summary>
     /// <param name="sourcePath">Source directory to scan</param>
     /// <param name="destinationPath">Destination directory for processed files</param>
@@ -17,12 +17,12 @@ public interface IScanningService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of scanned file episode models</returns>
     Task<List<FileEpisodeModel>> ScanForTvEpisodesAsync(
-string sourcePath,
+        string sourcePath,
         string destinationPath,
- string[] fileExtensions,
+        string[] fileExtensions,
         IProgress<ScanProgress>? progress = null,
         CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Scans a directory for movie files
     /// </summary>
@@ -36,6 +36,6 @@ string sourcePath,
         string sourcePath,
         string destinationPath,
         string[] fileExtensions,
-     IProgress<ScanProgress>? progress = null,
-   CancellationToken cancellationToken = default);
+        IProgress<ScanProgress>? progress = null,
+        CancellationToken cancellationToken = default);
 }

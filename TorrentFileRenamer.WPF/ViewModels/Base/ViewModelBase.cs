@@ -13,7 +13,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>
-  /// Raises the PropertyChanged event
+    /// Raises the PropertyChanged event
     /// </summary>
     /// <param name="propertyName">Name of the property that changed</param>
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -31,11 +31,11 @@ public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     /// <returns>True if the value changed, false otherwise</returns>
     protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
-  if (EqualityComparer<T>.Default.Equals(field, value))
-   return false;
+        if (EqualityComparer<T>.Default.Equals(field, value))
+            return false;
 
-   field = value;
-     OnPropertyChanged(propertyName);
+        field = value;
+        OnPropertyChanged(propertyName);
         return true;
     }
 
@@ -44,7 +44,7 @@ public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     /// </summary>
     public void Dispose()
     {
-  Dispose(true);
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
@@ -54,13 +54,14 @@ public abstract class ViewModelBase : INotifyPropertyChanged, IDisposable
     /// <param name="disposing">True if disposing managed resources</param>
     protected virtual void Dispose(bool disposing)
     {
-      if (!_disposed)
+        if (!_disposed)
         {
-          if (disposing)
-    {
-         // Dispose managed resources in derived classes
+            if (disposing)
+            {
+                // Dispose managed resources in derived classes
             }
-    _disposed = true;
+
+            _disposed = true;
         }
-  }
+    }
 }

@@ -9,22 +9,22 @@ public enum ProcessingStatus
     /// File has been scanned but not yet processed
     /// </summary>
     Pending,
-    
+
     /// <summary>
     /// File is currently being processed
     /// </summary>
     Processing,
-    
+
     /// <summary>
     /// File was successfully processed
     /// </summary>
     Completed,
-    
+
     /// <summary>
     /// File processing failed
- /// </summary>
+    /// </summary>
     Failed,
-    
+
     /// <summary>
     /// File name could not be parsed
     /// </summary>

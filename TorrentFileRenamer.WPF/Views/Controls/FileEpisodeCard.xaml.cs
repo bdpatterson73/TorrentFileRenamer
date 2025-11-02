@@ -8,7 +8,7 @@ namespace TorrentFileRenamer.WPF.Views.Controls;
 public partial class FileEpisodeCard : System.Windows.Controls.UserControl
 {
     public FileEpisodeCard()
-  {
+    {
         InitializeComponent();
     }
 }

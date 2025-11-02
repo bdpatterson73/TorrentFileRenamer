@@ -17,19 +17,19 @@ public class FilterPreset : ObservableObject
     /// <summary>
     /// Preset name
     /// </summary>
-  public string Name
+    public string Name
     {
-    get => _name;
+        get => _name;
         set => SetProperty(ref _name, value);
     }
 
-  /// <summary>
+    /// <summary>
     /// Preset description
-  /// </summary>
+    /// </summary>
     public string Description
     {
         get => _description;
-     set => SetProperty(ref _description, value);
+        set => SetProperty(ref _description, value);
     }
 
     /// <summary>
@@ -66,71 +66,71 @@ public class FilterPreset : ObservableObject
     {
         get => _isPredefined;
         set => SetProperty(ref _isPredefined, value);
-  }
+    }
 
     /// <summary>
     /// Creates predefined filter presets
     /// </summary>
     public static List<FilterPreset> GetPredefinedPresets()
     {
-     return new List<FilterPreset>
-  {
-    new FilterPreset
-            {
-    Name = "High Confidence Only",
-         Description = "Show only files with 70%+ confidence",
-   IsPredefined = true,
-  Criteria = new SearchCriteria
-     {
-          MinConfidence = 70,
-  MaxConfidence = 100
-            }
-            },
- new FilterPreset
-      {
-            Name = "Needs Review",
-          Description = "Files with low confidence or errors",
-      IsPredefined = true,
-      Criteria = new SearchCriteria
-                {
-        MaxConfidence = 40,
-      SelectedStatuses = new List<ProcessingStatus> 
-         { 
-            ProcessingStatus.Failed,
-         ProcessingStatus.Unparsed
-   }
-              }
-       },
-     new FilterPreset
-            {
-                Name = "Large Files (>1GB)",
-         Description = "Show only files larger than 1GB",
-       IsPredefined = true,
-     Criteria = new SearchCriteria
-  {
-   MinFileSize = 1024L * 1024L * 1024L // 1GB in bytes
-       }
-  },
-       new FilterPreset
- {
-   Name = "MKV Files",
-    Description = "Show only MKV format files",
-                IsPredefined = true,
-Criteria = new SearchCriteria
-     {
-         SelectedExtensions = new List<string> { ".mkv" }
-     }
-          },
+        return new List<FilterPreset>
+        {
             new FilterPreset
             {
-      Name = "Processed Successfully",
+                Name = "High Confidence Only",
+                Description = "Show only files with 70%+ confidence",
+                IsPredefined = true,
+                Criteria = new SearchCriteria
+                {
+                    MinConfidence = 70,
+                    MaxConfidence = 100
+                }
+            },
+            new FilterPreset
+            {
+                Name = "Needs Review",
+                Description = "Files with low confidence or errors",
+                IsPredefined = true,
+                Criteria = new SearchCriteria
+                {
+                    MaxConfidence = 40,
+                    SelectedStatuses = new List<ProcessingStatus>
+                    {
+                        ProcessingStatus.Failed,
+                        ProcessingStatus.Unparsed
+                    }
+                }
+            },
+            new FilterPreset
+            {
+                Name = "Large Files (>1GB)",
+                Description = "Show only files larger than 1GB",
+                IsPredefined = true,
+                Criteria = new SearchCriteria
+                {
+                    MinFileSize = 1024L * 1024L * 1024L // 1GB in bytes
+                }
+            },
+            new FilterPreset
+            {
+                Name = "MKV Files",
+                Description = "Show only MKV format files",
+                IsPredefined = true,
+                Criteria = new SearchCriteria
+                {
+                    SelectedExtensions = new List<string> { ".mkv" }
+                }
+            },
+            new FilterPreset
+            {
+                Name = "Processed Successfully",
                 Description = "Files that completed successfully",
-       IsPredefined = true,
-    Criteria = new SearchCriteria
-       {
-SelectedStatuses = new List<ProcessingStatus> { ProcessingStatus.Completed }
-       }
-    }
-    };
+                IsPredefined = true,
+                Criteria = new SearchCriteria
+                {
+                    SelectedStatuses = new List<ProcessingStatus> { ProcessingStatus.Completed }
+                }
+            }
+        };
     }
 }

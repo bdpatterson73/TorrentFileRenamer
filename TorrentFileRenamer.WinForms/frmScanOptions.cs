@@ -25,10 +25,7 @@ namespace TorrentFileRenamer
 
         public string VideoPath
         {
-            get
-            {
-                return txtVideoPath.Text;
-            }
+            get { return txtVideoPath.Text; }
         }
 
         public string FileExtension
@@ -42,10 +39,7 @@ namespace TorrentFileRenamer
 
         public string OutputDirectory
         {
-            get
-            {
-                return txtOutputDirectory.Text;
-            }
+            get { return txtOutputDirectory.Text; }
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -63,7 +57,7 @@ namespace TorrentFileRenamer
             var sourceValidation = PathValidator.ValidateSourcePath(txtVideoPath.Text);
             if (!sourceValidation.IsValid)
             {
-                MessageBox.Show($"Source Path Error: {sourceValidation.Message}", 
+                MessageBox.Show($"Source Path Error: {sourceValidation.Message}",
                     "Invalid Source Path", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtVideoPath.Focus();
                 return false;
@@ -74,7 +68,7 @@ namespace TorrentFileRenamer
             var destValidation = PathValidator.ValidateDestinationPath(txtOutputDirectory.Text, estimatedSpace);
             if (!destValidation.IsValid)
             {
-                MessageBox.Show($"Destination Path Error: {destValidation.Message}", 
+                MessageBox.Show($"Destination Path Error: {destValidation.Message}",
                     "Invalid Destination Path", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtOutputDirectory.Focus();
                 return false;
@@ -84,17 +78,17 @@ namespace TorrentFileRenamer
             var extValidation = PathValidator.ValidateFileExtension(txtExtension.Text);
             if (!extValidation.IsValid)
             {
-                MessageBox.Show($"File Extension Error: {extValidation.Message}", 
+                MessageBox.Show($"File Extension Error: {extValidation.Message}",
                     "Invalid File Extension", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtExtension.Focus();
                 return false;
             }
 
             // Check if paths are the same
-            if (string.Equals(Path.GetFullPath(txtVideoPath.Text), 
-                Path.GetFullPath(txtOutputDirectory.Text), StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Path.GetFullPath(txtVideoPath.Text),
+                    Path.GetFullPath(txtOutputDirectory.Text), StringComparison.OrdinalIgnoreCase))
             {
-                var result = MessageBox.Show("Source and destination paths are the same. This will move files within the same directory structure. Continue?", 
+                var result = MessageBox.Show("Source and destination paths are the same. This will move files within the same directory structure. Continue?",
                     "Same Path Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (result != DialogResult.Yes)
                     return false;
@@ -137,22 +131,22 @@ namespace TorrentFileRenamer
             fbd.Description = "Select the destination path for TV episodes";
             fbd.RootFolder = Environment.SpecialFolder.Desktop;
             fbd.ShowNewFolderButton = true;
-            
+
             if (!string.IsNullOrWhiteSpace(txtOutputDirectory.Text) && Directory.Exists(txtOutputDirectory.Text))
             {
                 fbd.SelectedPath = txtOutputDirectory.Text;
             }
-            
+
             DialogResult dr = fbd.ShowDialog();
             if (dr == DialogResult.OK)
             {
                 txtOutputDirectory.Text = fbd.SelectedPath;
-                
+
                 // Validate the selected path immediately
                 var validation = PathValidator.ValidateDestinationPath(fbd.SelectedPath);
                 if (!validation.IsValid)
                 {
-                    MessageBox.Show($"Warning: {validation.Message}", 
+                    MessageBox.Show($"Warning: {validation.Message}",
                         "Path Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
@@ -164,22 +158,22 @@ namespace TorrentFileRenamer
             fbd.Description = "Select the source path containing video files";
             fbd.RootFolder = Environment.SpecialFolder.Desktop;
             fbd.ShowNewFolderButton = true;
-            
+
             if (!string.IsNullOrWhiteSpace(txtVideoPath.Text) && Directory.Exists(txtVideoPath.Text))
             {
                 fbd.SelectedPath = txtVideoPath.Text;
             }
-            
+
             DialogResult dr = fbd.ShowDialog();
             if (dr == DialogResult.OK)
             {
                 txtVideoPath.Text = fbd.SelectedPath;
-                
+
                 // Validate the selected path immediately
                 var validation = PathValidator.ValidateSourcePath(fbd.SelectedPath);
                 if (!validation.IsValid)
                 {
-                    MessageBox.Show($"Warning: {validation.Message}", 
+                    MessageBox.Show($"Warning: {validation.Message}",
                         "Path Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }

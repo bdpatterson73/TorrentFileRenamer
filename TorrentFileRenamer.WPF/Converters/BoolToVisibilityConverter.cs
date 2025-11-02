@@ -12,20 +12,20 @@ public class BoolToVisibilityConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         if (value is bool boolValue)
-      {
- bool invert = parameter?.ToString()?.ToLower() == "invert";
-     bool result = invert ? !boolValue : boolValue;
-       return result ? Visibility.Visible : Visibility.Collapsed;
- }
+        {
+            bool invert = parameter?.ToString()?.ToLower() == "invert";
+            bool result = invert ? !boolValue : boolValue;
+            return result ? Visibility.Visible : Visibility.Collapsed;
+        }
 
- return Visibility.Collapsed;
+        return Visibility.Collapsed;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
- {
-  if (value is Visibility visibility)
+    {
+        if (value is Visibility visibility)
         {
- return visibility == Visibility.Visible;
+            return visibility == Visibility.Visible;
         }
 
         return false;

@@ -76,11 +76,11 @@ namespace TorrentFileRenamer
                 {
                     if (requiredSpaceBytes > 0 && spaceInfo.Value.FreeBytes < requiredSpaceBytes)
                     {
-                        return new ValidationResult(false, 
+                        return new ValidationResult(false,
                             $"Insufficient disk space. Required: {FormatBytes(requiredSpaceBytes)}, Available: {FormatBytes(spaceInfo.Value.FreeBytes)}");
                     }
-                    
-                    return new ValidationResult(true, 
+
+                    return new ValidationResult(true,
                         $"Destination path is valid. Available space: {FormatBytes(spaceInfo.Value.FreeBytes)}");
                 }
 

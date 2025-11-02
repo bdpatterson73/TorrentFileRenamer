@@ -19,14 +19,14 @@ public class SearchViewModel : ViewModelBase
 
     public SearchViewModel(ISearchService searchService)
     {
-  _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+        _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
 
 // Commands
         SearchCommand = new RelayCommand(ExecuteSearch, CanExecuteSearch);
-   ClearSearchCommand = new RelayCommand(ExecuteClearSearch, _ => !string.IsNullOrWhiteSpace(SearchText));
+        ClearSearchCommand = new RelayCommand(ExecuteClearSearch, _ => !string.IsNullOrWhiteSpace(SearchText));
         ToggleSearchVisibilityCommand = new RelayCommand(_ => IsSearchVisible = !IsSearchVisible);
         SelectHistoryCommand = new RelayCommand(ExecuteSelectHistory);
-   ClearHistoryCommand = new RelayCommand(ExecuteClearHistory, _ => SearchHistory.Count > 0);
+        ClearHistoryCommand = new RelayCommand(ExecuteClearHistory, _ => SearchHistory.Count > 0);
     }
 
     #region Properties
@@ -34,23 +34,23 @@ public class SearchViewModel : ViewModelBase
     /// <summary>
     /// Current search text
     /// </summary>
-  public string SearchText
+    public string SearchText
     {
         get => _searchText;
         set
         {
-         if (SetProperty(ref _searchText, value))
-    {
-        ((RelayCommand)SearchCommand).RaiseCanExecuteChanged();
+            if (SetProperty(ref _searchText, value))
+            {
+                ((RelayCommand)SearchCommand).RaiseCanExecuteChanged();
                 ((RelayCommand)ClearSearchCommand).RaiseCanExecuteChanged();
-         
+
                 // Auto-search on text change (with debounce in real implementation)
-    if (!string.IsNullOrWhiteSpace(value))
-     {
-      SearchCommand.Execute(null);
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    SearchCommand.Execute(null);
                 }
-       }
-  }
+            }
+        }
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public class SearchViewModel : ViewModelBase
     public bool IsSearchVisible
     {
         get => _isSearchVisible;
-  set => SetProperty(ref _isSearchVisible, value);
+        set => SetProperty(ref _isSearchVisible, value);
     }
 
     /// <summary>
@@ -67,12 +67,12 @@ public class SearchViewModel : ViewModelBase
     /// </summary>
     public List<string> SearchHistory
     {
-      get => _searchHistory;
+        get => _searchHistory;
         set => SetProperty(ref _searchHistory, value);
     }
 
     /// <summary>
-  /// Number of search results
+    /// Number of search results
     /// </summary>
     public int ResultCount
     {
@@ -111,7 +111,7 @@ public class SearchViewModel : ViewModelBase
     /// </summary>
     public event EventHandler? SearchChanged;
 
- #endregion
+    #endregion
 
     #region Command Implementations
 
@@ -122,24 +122,25 @@ public class SearchViewModel : ViewModelBase
 
     private void ExecuteSearch(object? parameter)
     {
-    // Add to history if not already present
+        // Add to history if not already present
         if (!string.IsNullOrWhiteSpace(SearchText) && !SearchHistory.Contains(SearchText))
         {
-       var history = new List<string>(SearchHistory) { SearchText };
-      if (history.Count > 10) // Keep last 10 searches
-   {
-          history.RemoveAt(0);
-          }
+            var history = new List<string>(SearchHistory) { SearchText };
+            if (history.Count > 10) // Keep last 10 searches
+            {
+                history.RemoveAt(0);
+            }
+
             SearchHistory = history;
         }
 
         // Notify listeners
-      SearchChanged?.Invoke(this, EventArgs.Empty);
+        SearchChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void ExecuteClearSearch(object? parameter)
     {
-    SearchText = string.Empty;
+        SearchText = string.Empty;
         ResultCount = 0;
         SearchChanged?.Invoke(this, EventArgs.Empty);
     }
@@ -147,8 +148,8 @@ public class SearchViewModel : ViewModelBase
     private void ExecuteSelectHistory(object? parameter)
     {
         if (parameter is string searchText && !string.IsNullOrWhiteSpace(searchText))
-  {
-        SearchText = searchText;
+        {
+            SearchText = searchText;
         }
     }
 
@@ -168,7 +169,7 @@ public class SearchViewModel : ViewModelBase
     {
         ResultCount = count;
         OnPropertyChanged(nameof(HasResults));
-     OnPropertyChanged(nameof(ResultSummary));
+        OnPropertyChanged(nameof(ResultSummary));
     }
 
     /// <summary>
@@ -176,15 +177,15 @@ public class SearchViewModel : ViewModelBase
     /// </summary>
     public void LoadSearchHistory(List<string> history)
     {
-      SearchHistory = history ?? new List<string>();
-  }
+        SearchHistory = history ?? new List<string>();
+    }
 
     /// <summary>
     /// Gets current search history for saving
     /// </summary>
     public List<string> GetSearchHistory()
     {
-return new List<string>(SearchHistory);
+        return new List<string>(SearchHistory);
     }
 
     #endregion

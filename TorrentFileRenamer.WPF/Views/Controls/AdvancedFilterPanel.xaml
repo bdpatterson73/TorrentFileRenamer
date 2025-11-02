@@ -1,186 +1,186 @@
 <UserControl x:Class="TorrentFileRenamer.WPF.Views.Controls.AdvancedFilterPanel"
-       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:viewmodels="clr-namespace:TorrentFileRenamer.WPF.ViewModels"
-  xmlns:models="clr-namespace:TorrentFileRenamer.WPF.Models"
-             mc:Ignorable="d" 
-      d:DataContext="{d:DesignInstance Type=viewmodels:FilterViewModel}"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewmodels="clr-namespace:TorrentFileRenamer.WPF.ViewModels"
+             xmlns:models="clr-namespace:TorrentFileRenamer.WPF.Models"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=viewmodels:FilterViewModel}"
              d:DesignHeight="400" d:DesignWidth="350">
 
     <Border Style="{StaticResource CardContainer}"
-   Margin="8"
-     Visibility="{Binding IsPanelVisible, Converter={StaticResource BoolToVisibilityConverter}}">
-      
+            Margin="8"
+            Visibility="{Binding IsPanelVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+
         <ScrollViewer VerticalScrollBarVisibility="Auto">
-   <StackPanel>
- <!-- Header -->
-              <Grid Margin="0,0,0,16">
-       <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="Auto"/>
-     <ColumnDefinition Width="*"/>
-   <ColumnDefinition Width="Auto"/>
-       </Grid.ColumnDefinitions>
+            <StackPanel>
+                <!-- Header -->
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
 
-  <TextBlock Grid.Column="0"
-   Text="?? Advanced Filters"
-       Style="{StaticResource CardTitle}"
-    VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="0"
+                               Text="?? Advanced Filters"
+                               Style="{StaticResource CardTitle}"
+                               VerticalAlignment="Center" />
 
-       <!-- Active Filter Count Badge -->
-        <Border Grid.Column="1"
- Background="{StaticResource PrimaryBrush}"
-        CornerRadius="10"
-  Padding="8,2"
-  Margin="12,0,0,0"
-                HorizontalAlignment="Left"
-VerticalAlignment="Center"
-     Visibility="{Binding HasActiveFilters, Converter={StaticResource BoolToVisibilityConverter}}">
-           <TextBlock Text="{Binding ActiveFilterCount, StringFormat='{}{0} active'}"
- Foreground="White"
-            FontSize="11"
-    FontWeight="SemiBold"/>
-       </Border>
+                    <!-- Active Filter Count Badge -->
+                    <Border Grid.Column="1"
+                            Background="{StaticResource PrimaryBrush}"
+                            CornerRadius="10"
+                            Padding="8,2"
+                            Margin="12,0,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding HasActiveFilters, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <TextBlock Text="{Binding ActiveFilterCount, StringFormat='{}{0} active'}"
+                                   Foreground="White"
+                                   FontSize="11"
+                                   FontWeight="SemiBold" />
+                    </Border>
 
-     <!-- Close Button -->
-  <Button Grid.Column="2"
-   Content="?"
-     Command="{Binding TogglePanelVisibilityCommand}"
-            Style="{StaticResource SecondaryButton}"
-   Padding="8,4"
-  FontSize="14"
-    ToolTip="Close filter panel"/>
-            </Grid>
+                    <!-- Close Button -->
+                    <Button Grid.Column="2"
+                            Content="?"
+                            Command="{Binding TogglePanelVisibilityCommand}"
+                            Style="{StaticResource SecondaryButton}"
+                            Padding="8,4"
+                            FontSize="14"
+                            ToolTip="Close filter panel" />
+                </Grid>
 
-         <!-- Confidence Range -->
-       <TextBlock Text="Confidence Range"
-           Style="{StaticResource CardSubtitle}"
-    Margin="0,0,0,8"/>
+                <!-- Confidence Range -->
+                <TextBlock Text="Confidence Range"
+                           Style="{StaticResource CardSubtitle}"
+                           Margin="0,0,0,8" />
 
-            <Grid Margin="0,0,0,16">
-         <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="*"/>
-         <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
-  </Grid.ColumnDefinitions>
-       
-  <StackPanel Grid.Column="0">
-       <TextBlock Text="Min"
-     Style="{StaticResource CardMetadata}"
-      Margin="0,0,0,4"/>
-   <Slider Value="{Binding CurrentCriteria.MinConfidence}"
-    Minimum="0" Maximum="100"
-  TickFrequency="10"
-   IsSnapToTickEnabled="True"/>
-  <TextBlock Text="{Binding CurrentCriteria.MinConfidence, StringFormat='{}{0}%'}"
-        Style="{StaticResource CardMetadata}"
-       HorizontalAlignment="Center"/>
-           </StackPanel>
+                <Grid Margin="0,0,0,16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-     <TextBlock Grid.Column="1" Text="-" 
-       VerticalAlignment="Center"
-   Margin="8,0"/>
-      
-  <StackPanel Grid.Column="2">
-          <TextBlock Text="Max"
-       Style="{StaticResource CardMetadata}"
-    Margin="0,0,0,4"/>
-    <Slider Value="{Binding CurrentCriteria.MaxConfidence}"
-    Minimum="0" Maximum="100"
-             TickFrequency="10"
-        IsSnapToTickEnabled="True"/>
-         <TextBlock Text="{Binding CurrentCriteria.MaxConfidence, StringFormat='{}{0}%'}"
-    Style="{StaticResource CardMetadata}"
-  HorizontalAlignment="Center"/>
-        </StackPanel>
-   </Grid>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="Min"
+                                   Style="{StaticResource CardMetadata}"
+                                   Margin="0,0,0,4" />
+                        <Slider Value="{Binding CurrentCriteria.MinConfidence}"
+                                Minimum="0" Maximum="100"
+                                TickFrequency="10"
+                                IsSnapToTickEnabled="True" />
+                        <TextBlock Text="{Binding CurrentCriteria.MinConfidence, StringFormat='{}{0}%'}"
+                                   Style="{StaticResource CardMetadata}"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
 
-    <!-- File Extensions -->
-    <TextBlock Text="File Extensions"
-   Style="{StaticResource CardSubtitle}"
-    Margin="0,0,0,8"/>
-   
-            <ListBox ItemsSource="{Binding AvailableExtensions}"
-       SelectionMode="Multiple"
-      MaxHeight="120"
-    Margin="0,0,0,16">
-       <ListBox.ItemContainerStyle>
-    <Style TargetType="ListBoxItem">
-             <Setter Property="IsSelected" 
-           Value="{Binding IsSelected, Mode=TwoWay}"/>
-    </Style>
- </ListBox.ItemContainerStyle>
-       </ListBox>
+                    <TextBlock Grid.Column="1" Text="-"
+                               VerticalAlignment="Center"
+                               Margin="8,0" />
 
-   <!-- Processing Status -->
-       <TextBlock Text="Processing Status"
- Style="{StaticResource CardSubtitle}"
-      Margin="0,0,0,8"/>
- 
-   <StackPanel Margin="0,0,0,16">
- <CheckBox Content="Pending"
-    IsChecked="{Binding IsPendingSelected}"
-        Margin="0,0,0,4"/>
-    <CheckBox Content="Processing"
-IsChecked="{Binding IsProcessingSelected}"
-        Margin="0,0,0,4"/>
-     <CheckBox Content="Completed"
-          IsChecked="{Binding IsCompletedSelected}"
-  Margin="0,0,0,4"/>
-      <CheckBox Content="Failed"
-    IsChecked="{Binding IsFailedSelected}"
-      Margin="0,0,0,4"/>
-      <CheckBox Content="Unparsed"
-  IsChecked="{Binding IsUnparsedSelected}"/>
-       </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Max"
+                                   Style="{StaticResource CardMetadata}"
+                                   Margin="0,0,0,4" />
+                        <Slider Value="{Binding CurrentCriteria.MaxConfidence}"
+                                Minimum="0" Maximum="100"
+                                TickFrequency="10"
+                                IsSnapToTickEnabled="True" />
+                        <TextBlock Text="{Binding CurrentCriteria.MaxConfidence, StringFormat='{}{0}%'}"
+                                   Style="{StaticResource CardMetadata}"
+                                   HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Grid>
 
-   <!-- Saved Presets -->
- <TextBlock Text="Filter Presets"
-          Style="{StaticResource CardSubtitle}"
-    Margin="0,0,0,8"/>
-       
-     <ComboBox ItemsSource="{Binding Presets}"
-        SelectedItem="{Binding SelectedPreset}"
- DisplayMemberPath="Name"
-    Style="{StaticResource ModernComboBox}"
-       Margin="0,0,0,8"/>
-            
-     <Button Content="Apply Preset"
-          Command="{Binding ApplyPresetCommand}"
-           CommandParameter="{Binding SelectedPreset}"
-         Style="{StaticResource PrimaryButton}"
-         HorizontalAlignment="Stretch"
-                Margin="0,0,0,8"/>
-  
-          <Button Content="?? Save Current as Preset"
-     Command="{Binding SavePresetCommand}"
-  Style="{StaticResource SecondaryButton}"
-       HorizontalAlignment="Stretch"
-      Margin="0,0,0,16"/>
+                <!-- File Extensions -->
+                <TextBlock Text="File Extensions"
+                           Style="{StaticResource CardSubtitle}"
+                           Margin="0,0,0,8" />
 
-            <!-- Action Buttons -->
-    <Grid>
-         <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+                <ListBox ItemsSource="{Binding AvailableExtensions}"
+                         SelectionMode="Multiple"
+                         MaxHeight="120"
+                         Margin="0,0,0,16">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="IsSelected"
+                                    Value="{Binding IsSelected, Mode=TwoWay}" />
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
 
-         <Button Grid.Column="0"
-    Content="Apply Filters"
-  Command="{Binding ApplyFilterCommand}"
-           Style="{StaticResource PrimaryButton}"
-      HorizontalAlignment="Stretch"
-         Margin="0,0,4,0"/>
+                <!-- Processing Status -->
+                <TextBlock Text="Processing Status"
+                           Style="{StaticResource CardSubtitle}"
+                           Margin="0,0,0,8" />
 
-     <Button Grid.Column="1"
-         Content="Reset"
-         Command="{Binding ResetFilterCommand}"
-      Style="{StaticResource SecondaryButton}"
-       HorizontalAlignment="Stretch"
-      Margin="4,0,0,0"/>
-   </Grid>
-     </StackPanel>
- </ScrollViewer>
+                <StackPanel Margin="0,0,0,16">
+                    <CheckBox Content="Pending"
+                              IsChecked="{Binding IsPendingSelected}"
+                              Margin="0,0,0,4" />
+                    <CheckBox Content="Processing"
+                              IsChecked="{Binding IsProcessingSelected}"
+                              Margin="0,0,0,4" />
+                    <CheckBox Content="Completed"
+                              IsChecked="{Binding IsCompletedSelected}"
+                              Margin="0,0,0,4" />
+                    <CheckBox Content="Failed"
+                              IsChecked="{Binding IsFailedSelected}"
+                              Margin="0,0,0,4" />
+                    <CheckBox Content="Unparsed"
+                              IsChecked="{Binding IsUnparsedSelected}" />
+                </StackPanel>
+
+                <!-- Saved Presets -->
+                <TextBlock Text="Filter Presets"
+                           Style="{StaticResource CardSubtitle}"
+                           Margin="0,0,0,8" />
+
+                <ComboBox ItemsSource="{Binding Presets}"
+                          SelectedItem="{Binding SelectedPreset}"
+                          DisplayMemberPath="Name"
+                          Style="{StaticResource ModernComboBox}"
+                          Margin="0,0,0,8" />
+
+                <Button Content="Apply Preset"
+                        Command="{Binding ApplyPresetCommand}"
+                        CommandParameter="{Binding SelectedPreset}"
+                        Style="{StaticResource PrimaryButton}"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,8" />
+
+                <Button Content="?? Save Current as Preset"
+                        Command="{Binding SavePresetCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        HorizontalAlignment="Stretch"
+                        Margin="0,0,0,16" />
+
+                <!-- Action Buttons -->
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Button Grid.Column="0"
+                            Content="Apply Filters"
+                            Command="{Binding ApplyFilterCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,0,4,0" />
+
+                    <Button Grid.Column="1"
+                            Content="Reset"
+                            Command="{Binding ResetFilterCommand}"
+                            Style="{StaticResource SecondaryButton}"
+                            HorizontalAlignment="Stretch"
+                            Margin="4,0,0,0" />
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
     </Border>
 </UserControl>

@@ -1,473 +1,473 @@
 <Window x:Class="TorrentFileRenamer.WPF.Views.KeyboardShortcutsDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
- Title="Keyboard Shortcuts" 
+        mc:Ignorable="d"
+        Title="Keyboard Shortcuts"
         Height="650" Width="600"
-      MinHeight="600" MinWidth="550"
+        MinHeight="600" MinWidth="550"
         WindowStartupLocation="CenterOwner"
-    ResizeMode="CanResize"
-   ShowInTaskbar="False"
-   Background="{StaticResource SurfaceBrush}">
-    
+        ResizeMode="CanResize"
+        ShowInTaskbar="False"
+        Background="{StaticResource SurfaceBrush}">
+
     <Window.Resources>
         <!-- Shortcut Item Style -->
-      <Style x:Key="ShortcutRow" TargetType="Border">
-         <Setter Property="Background" Value="White"/>
-      <Setter Property="Padding" Value="16,12"/>
-            <Setter Property="Margin" Value="0,0,0,2"/>
+        <Style x:Key="ShortcutRow" TargetType="Border">
+            <Setter Property="Background" Value="White" />
+            <Setter Property="Padding" Value="16,12" />
+            <Setter Property="Margin" Value="0,0,0,2" />
             <Style.Triggers>
-     <Trigger Property="IsMouseOver" Value="True">
- <Setter Property="Background" Value="#F5F5F5"/>
-     </Trigger>
- </Style.Triggers>
-    </Style>
- 
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#F5F5F5" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="CategoryHeader" TargetType="TextBlock">
-    <Setter Property="FontSize" Value="16"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-   <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}"/>
-            <Setter Property="Margin" Value="0,16,0,8"/>
-  </Style>
-        
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
+            <Setter Property="Margin" Value="0,16,0,8" />
+        </Style>
+
         <Style x:Key="ShortcutKey" TargetType="Border">
-            <Setter Property="Background" Value="#E0E0E0"/>
-            <Setter Property="BorderBrush" Value="#BDBDBD"/>
-            <Setter Property="BorderThickness" Value="1"/>
-         <Setter Property="CornerRadius" Value="4"/>
-     <Setter Property="Padding" Value="8,4"/>
-     <Setter Property="Margin" Value="0,0,4,0"/>
-     </Style>
-     
-     <Style x:Key="ShortcutKeyText" TargetType="TextBlock">
-     <Setter Property="FontSize" Value="12"/>
-      <Setter Property="FontWeight" Value="SemiBold"/>
-         <Setter Property="FontFamily" Value="Consolas, Courier New"/>
-     <Setter Property="Foreground" Value="#424242"/>
-   </Style>
- 
+            <Setter Property="Background" Value="#E0E0E0" />
+            <Setter Property="BorderBrush" Value="#BDBDBD" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+        </Style>
+
+        <Style x:Key="ShortcutKeyText" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontFamily" Value="Consolas, Courier New" />
+            <Setter Property="Foreground" Value="#424242" />
+        </Style>
+
         <Style x:Key="ShortcutDescription" TargetType="TextBlock">
-         <Setter Property="FontSize" Value="13"/>
-      <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
     </Window.Resources>
-    
+
     <Grid>
         <Grid.RowDefinitions>
-         <RowDefinition Height="Auto"/> <!-- Header -->
-       <RowDefinition Height="*"/>  <!-- Content -->
-        <RowDefinition Height="Auto"/> <!-- Footer -->
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="*" />  <!-- Content -->
+            <RowDefinition Height="Auto" /> <!-- Footer -->
         </Grid.RowDefinitions>
-    
+
         <!-- Header -->
-        <Border Grid.Row="0" 
-   Background="{StaticResource PrimaryBrush}"
-  Padding="24,20">
-    <Grid>
-      <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
-      </Grid.ColumnDefinitions>
-            
-     <TextBlock Grid.Column="0"
-       Text="&#x2328;"
-            FontSize="32"
-            Foreground="White"
- VerticalAlignment="Center"
-Margin="0,0,16,0"/>
-   
-     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-     <TextBlock Text="Keyboard Shortcuts" 
-    FontSize="24" 
-    FontWeight="SemiBold"
-                Foreground="White"/>
-      <TextBlock Text="Quick reference for keyboard commands" 
-    FontSize="12"
-       Foreground="#E3F2FD"
-       Margin="0,4,0,0"/>
-    </StackPanel>
-  </Grid>
- </Border>
-        
-    <!-- Content -->
-        <ScrollViewer Grid.Row="1" 
-     VerticalScrollBarVisibility="Auto"
-   Padding="24,20">
-      <StackPanel>
-       <!-- General Commands -->
-          <TextBlock Text="&#x2699;&#xFE0F; General" Style="{StaticResource CategoryHeader}"/>
-    
-           <Border Style="{StaticResource ShortcutRow}">
-         <Grid>
-   <Grid.ColumnDefinitions>
-    <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="Auto"/>
-         </Grid.ColumnDefinitions>
-     
-<TextBlock Grid.Column="0" 
-          Text="Open Settings" 
-         Style="{StaticResource ShortcutDescription}"/>
-          
- <StackPanel Grid.Column="1" Orientation="Horizontal">
- <Border Style="{StaticResource ShortcutKey}">
-       <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-              </Border>
-       <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-       <Border Style="{StaticResource ShortcutKey}">
-              <TextBlock Text="," Style="{StaticResource ShortcutKeyText}"/>
-       </Border>
-         </StackPanel>
-    </Grid>
-      </Border>
-             
-         <Border Style="{StaticResource ShortcutRow}">
-  <Grid>
-        <Grid.ColumnDefinitions>
-  <ColumnDefinition Width="*"/>
-           <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-                    
-        <TextBlock Grid.Column="0" 
-      Text="Show Help (this window)" 
-       Style="{StaticResource ShortcutDescription}"/>
-        
-       <Border Style="{StaticResource ShortcutKey}">
-        <TextBlock Text="F1" Style="{StaticResource ShortcutKeyText}"/>
-   </Border>
-        </Grid>
-</Border>
-  
-                <Border Style="{StaticResource ShortcutRow}">
-<Grid>
-  <Grid.ColumnDefinitions>
-     <ColumnDefinition Width="*"/>
-          <ColumnDefinition Width="Auto"/>
-         </Grid.ColumnDefinitions>
-        
-                <TextBlock Grid.Column="0" 
-           Text="Refresh Current View" 
-    Style="{StaticResource ShortcutDescription}"/>
-  
-<Border Style="{StaticResource ShortcutKey}">
- <TextBlock Text="F5" Style="{StaticResource ShortcutKeyText}"/>
-    </Border>
- </Grid>
+        <Border Grid.Row="0"
+                Background="{StaticResource PrimaryBrush}"
+                Padding="24,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="&#x2328;"
+                           FontSize="32"
+                           Foreground="White"
+                           VerticalAlignment="Center"
+                           Margin="0,0,16,0" />
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Keyboard Shortcuts"
+                               FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="White" />
+                    <TextBlock Text="Quick reference for keyboard commands"
+                               FontSize="12"
+                               Foreground="#E3F2FD"
+                               Margin="0,4,0,0" />
+                </StackPanel>
+            </Grid>
         </Border>
-            
-    <!-- File Operations -->
-         <TextBlock Text="&#x1F4C1; File Operations" Style="{StaticResource CategoryHeader}"/>
-       
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      Padding="24,20">
+            <StackPanel>
+                <!-- General Commands -->
+                <TextBlock Text="&#x2699;&#xFE0F; General" Style="{StaticResource CategoryHeader}" />
+
                 <Border Style="{StaticResource ShortcutRow}">
-      <Grid>
-    <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="*"/>
-       <ColumnDefinition Width="Auto"/>
-          </Grid.ColumnDefinitions>
-      
-      <TextBlock Grid.Column="0" 
-   Text="Scan for Files" 
-         Style="{StaticResource ShortcutDescription}"/>
-       
-               <StackPanel Grid.Column="1" Orientation="Horizontal">
-      <Border Style="{StaticResource ShortcutKey}">
-         <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-          </Border>
- <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-  <Border Style="{StaticResource ShortcutKey}">
-       <TextBlock Text="S" Style="{StaticResource ShortcutKeyText}"/>
-  </Border>
-        </StackPanel>
-               </Grid>
-    </Border>
-      
- <Border Style="{StaticResource ShortcutRow}">
-       <Grid>
-                 <Grid.ColumnDefinitions>
-     <ColumnDefinition Width="*"/>
-  <ColumnDefinition Width="Auto"/>
-       </Grid.ColumnDefinitions>
-        
-             <TextBlock Grid.Column="0" 
-                 Text="Process Files" 
-               Style="{StaticResource ShortcutDescription}"/>
-              
-               <StackPanel Grid.Column="1" Orientation="Horizontal">
-  <Border Style="{StaticResource ShortcutKey}">
-           <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-     </Border>
-         <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-              <Border Style="{StaticResource ShortcutKey}">
-        <TextBlock Text="P" Style="{StaticResource ShortcutKeyText}"/>
-   </Border>
-        </StackPanel>
-               </Grid>
-    </Border>
-        
-   <Border Style="{StaticResource ShortcutRow}">
-    <Grid>
-      <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="Auto"/>
-               </Grid.ColumnDefinitions>
-       
-  <TextBlock Grid.Column="0" 
-       Text="Export Data to File" 
-         Style="{StaticResource ShortcutDescription}"/>
-    
- <StackPanel Grid.Column="1" Orientation="Horizontal">
-<Border Style="{StaticResource ShortcutKey}">
-            <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-   </Border>
-     <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-                 <Border Style="{StaticResource ShortcutKey}">
-        <TextBlock Text="Shift" Style="{StaticResource ShortcutKeyText}"/>
-   </Border>
-    <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-           <Border Style="{StaticResource ShortcutKey}">
-            <TextBlock Text="E" Style="{StaticResource ShortcutKeyText}"/>
-        </Border>
-  </StackPanel>
-</Grid>
-      </Border>
-        
-   <!-- Navigation -->
-<TextBlock Text="&#x1F9ED; Navigation" Style="{StaticResource CategoryHeader}"/>
-                
-            <Border Style="{StaticResource ShortcutRow}">
-      <Grid>
-          <Grid.ColumnDefinitions>
-   <ColumnDefinition Width="*"/>
-           <ColumnDefinition Width="Auto"/>
-       </Grid.ColumnDefinitions>
-      
-          <TextBlock Grid.Column="0" 
-     Text="Switch to TV Episodes Tab" 
-              Style="{StaticResource ShortcutDescription}"/>
-    
-    <StackPanel Grid.Column="1" Orientation="Horizontal">
-     <Border Style="{StaticResource ShortcutKey}">
-     <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-    </Border>
-      <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-    <Border Style="{StaticResource ShortcutKey}">
-   <TextBlock Text="1" Style="{StaticResource ShortcutKeyText}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Open Settings"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="," Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
                 </Border>
-       </StackPanel>
-        </Grid>
-          </Border>
-        
-      <Border Style="{StaticResource ShortcutRow}">
-   <Grid>
-         <Grid.ColumnDefinitions>
-              <ColumnDefinition Width="*"/>
-       <ColumnDefinition Width="Auto"/>
-         </Grid.ColumnDefinitions>
-  
- <TextBlock Grid.Column="0" 
-     Text="Switch to Movies Tab" 
-     Style="{StaticResource ShortcutDescription}"/>
-    
-   <StackPanel Grid.Column="1" Orientation="Horizontal">
-  <Border Style="{StaticResource ShortcutKey}">
-   <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-    </Border>
-               <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-    <Border Style="{StaticResource ShortcutKey}">
-         <TextBlock Text="2" Style="{StaticResource ShortcutKeyText}"/>
-         </Border>
-        </StackPanel>
-    </Grid>
-      </Border>
-              
-       <Border Style="{StaticResource ShortcutRow}">
-       <Grid>
-          <Grid.ColumnDefinitions>
-      <ColumnDefinition Width="*"/>
-  <ColumnDefinition Width="Auto"/>
-   </Grid.ColumnDefinitions>
-                
-      <TextBlock Grid.Column="0" 
-       Text="Switch to Auto-Monitor Tab" 
-         Style="{StaticResource ShortcutDescription}"/>
-    
-      <StackPanel Grid.Column="1" Orientation="Horizontal">
-           <Border Style="{StaticResource ShortcutKey}">
-             <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-      </Border>
-    <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-     <Border Style="{StaticResource ShortcutKey}">
- <TextBlock Text="3" Style="{StaticResource ShortcutKeyText}"/>
-           </Border>
-  </StackPanel>
-         </Grid>
-            </Border>
-    
-       <!-- Selection -->
-   <TextBlock Text="&#x2705; Selection" Style="{StaticResource CategoryHeader}"/>
-     
-   <Border Style="{StaticResource ShortcutRow}">
-           <Grid>
-        <Grid.ColumnDefinitions>
-           <ColumnDefinition Width="*"/>
-    <ColumnDefinition Width="Auto"/>
-             </Grid.ColumnDefinitions>
-      
- <TextBlock Grid.Column="0" 
-     Text="Select All Items" 
-      Style="{StaticResource ShortcutDescription}"/>
-     
-          <StackPanel Grid.Column="1" Orientation="Horizontal">
-         <Border Style="{StaticResource ShortcutKey}">
-       <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-         </Border>
-       <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-      <Border Style="{StaticResource ShortcutKey}">
-    <TextBlock Text="A" Style="{StaticResource ShortcutKeyText}"/>
-  </Border>
- </StackPanel>
-          </Grid>
-     </Border>
-     
-     <Border Style="{StaticResource ShortcutRow}">
-       <Grid>
-        <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="*"/>
-      <ColumnDefinition Width="Auto"/>
-       </Grid.ColumnDefinitions>
- 
-    <TextBlock Grid.Column="0" 
-   Text="Clear Selection" 
-    Style="{StaticResource ShortcutDescription}"/>
-   
-      <StackPanel Grid.Column="1" Orientation="Horizontal">
-  <Border Style="{StaticResource ShortcutKey}">
-      <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-            </Border>
-         <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-           <Border Style="{StaticResource ShortcutKey}">
-        <TextBlock Text="D" Style="{StaticResource ShortcutKeyText}"/>
-    </Border>
-    </StackPanel>
-     </Grid>
-  </Border>
-      
-          <!-- Search & Filter -->
-    <TextBlock Text="&#x1F50D; Search &amp; Filter" Style="{StaticResource CategoryHeader}"/>
-        
-       <Border Style="{StaticResource ShortcutRow}">
-    <Grid>
-     <Grid.ColumnDefinitions>
-     <ColumnDefinition Width="*"/>
-   <ColumnDefinition Width="Auto"/>
-   </Grid.ColumnDefinitions>
-        
- <TextBlock Grid.Column="0" 
- Text="Toggle Search Panel" 
-    Style="{StaticResource ShortcutDescription}"/>
-        
- <StackPanel Grid.Column="1" Orientation="Horizontal">
-        <Border Style="{StaticResource ShortcutKey}">
-   <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-    </Border>
-   <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-      <Border Style="{StaticResource ShortcutKey}">
-      <TextBlock Text="F" Style="{StaticResource ShortcutKeyText}"/>
-      </Border>
-       </StackPanel>
-     </Grid>
-        </Border>
-     
-       <Border Style="{StaticResource ShortcutRow}">
-      <Grid>
-     <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="*"/>
-   <ColumnDefinition Width="Auto"/>
-     </Grid.ColumnDefinitions>
-      
-    <TextBlock Grid.Column="0" 
-  Text="Toggle Advanced Filters" 
-Style="{StaticResource ShortcutDescription}"/>
-       
-  <StackPanel Grid.Column="1" Orientation="Horizontal">
-      <Border Style="{StaticResource ShortcutKey}">
-<TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-   </Border>
-     <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-     <Border Style="{StaticResource ShortcutKey}">
-      <TextBlock Text="Shift" Style="{StaticResource ShortcutKeyText}"/>
-    </Border>
-       <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-     <Border Style="{StaticResource ShortcutKey}">
-           <TextBlock Text="F" Style="{StaticResource ShortcutKeyText}"/>
- </Border>
-  </StackPanel>
-     </Grid>
-  </Border>
-   
-     <Border Style="{StaticResource ShortcutRow}">
-   <Grid>
-<Grid.ColumnDefinitions>
-     <ColumnDefinition Width="*"/>
-       <ColumnDefinition Width="Auto"/>
-</Grid.ColumnDefinitions>
-   
-       <TextBlock Grid.Column="0" 
-       Text="Focus Search Box" 
-    Style="{StaticResource ShortcutDescription}"/>
-   
-    <StackPanel Grid.Column="1" Orientation="Horizontal">
-<Border Style="{StaticResource ShortcutKey}">
-  <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}"/>
-     </Border>
-    <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center"/>
-      <Border Style="{StaticResource ShortcutKey}">
-     <TextBlock Text="E" Style="{StaticResource ShortcutKeyText}"/>
-     </Border>
-  </StackPanel>
- </Grid>
-      </Border>
-     
-  <!-- Tips -->
-     <Border Background="#E8F5E9"
-   BorderBrush="{StaticResource SuccessBrush}"
-      BorderThickness="1"
-        CornerRadius="8"
- Padding="16"
-     Margin="0,24,0,0">
-    <StackPanel>
-        <TextBlock Text="&#x1F4A1; Pro Tip" 
-   FontSize="14"
-           FontWeight="SemiBold"
-     Foreground="{StaticResource SuccessBrush}"
-       Margin="0,0,0,8"/>
-      <TextBlock TextWrapping="Wrap" 
-FontSize="12"
-   Foreground="{StaticResource TextPrimaryBrush}">
-   Most shortcuts are context-aware and will only work when the relevant tab or feature is active.
-      Use Ctrl+F for quick search and Ctrl+Shift+F for advanced filtering options.
-        Press F1 anytime to bring up this help window!
-       </TextBlock>
-  </StackPanel>
-            </Border>
-       </StackPanel>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Show Help (this window)"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <Border Style="{StaticResource ShortcutKey}">
+                            <TextBlock Text="F1" Style="{StaticResource ShortcutKeyText}" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Refresh Current View"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <Border Style="{StaticResource ShortcutKey}">
+                            <TextBlock Text="F5" Style="{StaticResource ShortcutKeyText}" />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- File Operations -->
+                <TextBlock Text="&#x1F4C1; File Operations" Style="{StaticResource CategoryHeader}" />
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Scan for Files"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="S" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Process Files"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="P" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Export Data to File"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Shift" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="E" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Navigation -->
+                <TextBlock Text="&#x1F9ED; Navigation" Style="{StaticResource CategoryHeader}" />
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Switch to TV Episodes Tab"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="1" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Switch to Movies Tab"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="2" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Switch to Auto-Monitor Tab"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="3" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Selection -->
+                <TextBlock Text="&#x2705; Selection" Style="{StaticResource CategoryHeader}" />
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Select All Items"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="A" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Clear Selection"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="D" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Search & Filter -->
+                <TextBlock Text="&#x1F50D; Search &amp; Filter" Style="{StaticResource CategoryHeader}" />
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Toggle Search Panel"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="F" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Toggle Advanced Filters"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Shift" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="F" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Border Style="{StaticResource ShortcutRow}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0"
+                                   Text="Focus Search Box"
+                                   Style="{StaticResource ShortcutDescription}" />
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="Ctrl" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                            <TextBlock Text="+" Margin="4,0" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource ShortcutKey}">
+                                <TextBlock Text="E" Style="{StaticResource ShortcutKeyText}" />
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Tips -->
+                <Border Background="#E8F5E9"
+                        BorderBrush="{StaticResource SuccessBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="16"
+                        Margin="0,24,0,0">
+                    <StackPanel>
+                        <TextBlock Text="&#x1F4A1; Pro Tip"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource SuccessBrush}"
+                                   Margin="0,0,0,8" />
+                        <TextBlock TextWrapping="Wrap"
+                                   FontSize="12"
+                                   Foreground="{StaticResource TextPrimaryBrush}">
+                            Most shortcuts are context-aware and will only work when the relevant tab or feature is active.
+                            Use Ctrl+F for quick search and Ctrl+Shift+F for advanced filtering options.
+                            Press F1 anytime to bring up this help window!
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </ScrollViewer>
-   
-   <!-- Footer -->
- <Border Grid.Row="2" 
-    Background="White"
-       BorderBrush="{StaticResource BorderBrush}"
-            BorderThickness="0,1,0,0"
- Padding="24,16">
- <Button Content="Close" 
-      Style="{StaticResource PrimaryButton}"
-      IsDefault="True"
-  IsCancel="True"
-      Click="CloseButton_Click"
- HorizontalAlignment="Right"
-     Width="100"/>
+
+        <!-- Footer -->
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="24,16">
+            <Button Content="Close"
+                    Style="{StaticResource PrimaryButton}"
+                    IsDefault="True"
+                    IsCancel="True"
+                    Click="CloseButton_Click"
+                    HorizontalAlignment="Right"
+                    Width="100" />
         </Border>
     </Grid>
 </Window>

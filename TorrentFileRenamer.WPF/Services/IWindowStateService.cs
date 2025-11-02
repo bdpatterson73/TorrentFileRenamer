@@ -8,13 +8,13 @@ namespace TorrentFileRenamer.WPF.Services;
 public interface IWindowStateService
 {
     /// <summary>
-  /// Saves the window state (position, size, maximized state)
- /// </summary>
+    /// Saves the window state (position, size, maximized state)
+    /// </summary>
     void SaveWindowState(Window window, string windowKey);
 
     /// <summary>
     /// Restores the window state
- /// </summary>
+    /// </summary>
     void RestoreWindowState(Window window, string windowKey);
 
     /// <summary>

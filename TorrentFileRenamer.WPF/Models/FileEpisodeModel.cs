@@ -14,13 +14,13 @@ public class FileEpisodeModel : ObservableObject
 
     public FileEpisodeModel(FileEpisode coreEpisode)
     {
-      _coreEpisode = coreEpisode;
-      
+        _coreEpisode = coreEpisode;
+
         // Set initial status based on whether parsing succeeded
         _status = string.IsNullOrEmpty(coreEpisode.ShowName) || coreEpisode.NewFileName == "NO NAME"
-    ? ProcessingStatus.Unparsed
+            ? ProcessingStatus.Unparsed
             : ProcessingStatus.Pending;
- }
+    }
 
     /// <summary>
     /// The underlying Core FileEpisode
@@ -48,16 +48,16 @@ public class FileEpisodeModel : ObservableObject
     public int? Year => _coreEpisode.Year;
 
     /// <summary>
-  /// Display name with year (e.g., "Robin Hood (2025)")
-  /// </summary>
-  public string ShowNameWithYear
-  {
- get
+    /// Display name with year (e.g., "Robin Hood (2025)")
+    /// </summary>
+    public string ShowNameWithYear
+    {
+        get
         {
-        if (_coreEpisode.Year.HasValue)
-      return $"{_coreEpisode.ShowName} ({_coreEpisode.Year.Value})";
-   return _coreEpisode.ShowName;
-      }
+            if (_coreEpisode.Year.HasValue)
+                return $"{_coreEpisode.ShowName} ({_coreEpisode.Year.Value})";
+            return _coreEpisode.ShowName;
+        }
     }
 
     /// <summary>
@@ -75,12 +75,13 @@ public class FileEpisodeModel : ObservableObject
     /// </summary>
     public string EpisodeNumbers
     {
-  get
+        get
         {
-         if (_coreEpisode.IsMultiEpisode && _coreEpisode.EpisodeNumbers.Count > 1)
-     {
-    return string.Join(", ", _coreEpisode.EpisodeNumbers);
-        }
+            if (_coreEpisode.IsMultiEpisode && _coreEpisode.EpisodeNumbers.Count > 1)
+            {
+                return string.Join(", ", _coreEpisode.EpisodeNumbers);
+            }
+
             return _coreEpisode.EpisodeNumber.ToString();
         }
     }
@@ -105,14 +106,14 @@ public class FileEpisodeModel : ObservableObject
     /// </summary>
     public ProcessingStatus Status
     {
-    get => _status;
-    set
-   {
+        get => _status;
+        set
+        {
             if (SetProperty(ref _status, value))
-          {
-   OnPropertyChanged(nameof(StatusText));
-    }
-  }
+            {
+                OnPropertyChanged(nameof(StatusText));
+            }
+        }
     }
 
     /// <summary>
@@ -126,7 +127,7 @@ public class FileEpisodeModel : ObservableObject
     public string ErrorMessage
     {
         get => _errorMessage;
-      set => SetProperty(ref _errorMessage, value);
+        set => SetProperty(ref _errorMessage, value);
     }
 
     /// <summary>
@@ -140,21 +141,21 @@ public class FileEpisodeModel : ObservableObject
     public string PlexValidation
     {
         get
-     {
-     if (_coreEpisode.PlexValidation == null)
-   return string.Empty;
+        {
+            if (_coreEpisode.PlexValidation == null)
+                return string.Empty;
 
-   var validation = _coreEpisode.PlexValidation;
-     if (validation.IsValid)
-     return "? Plex Compatible";
+            var validation = _coreEpisode.PlexValidation;
+            if (validation.IsValid)
+                return "? Plex Compatible";
 
-     var messages = new List<string>();
-    if (validation.Issues.Count > 0)
-  messages.AddRange(validation.Issues);
-  if (validation.Warnings.Count > 0)
-   messages.AddRange(validation.Warnings);
+            var messages = new List<string>();
+            if (validation.Issues.Count > 0)
+                messages.AddRange(validation.Issues);
+            if (validation.Warnings.Count > 0)
+                messages.AddRange(validation.Warnings);
 
-       return string.Join("; ", messages);
- }
+            return string.Join("; ", messages);
+        }
     }
 }

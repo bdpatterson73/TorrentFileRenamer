@@ -11,7 +11,7 @@ public interface IMruService
     void AddRecentPath(string category, string path);
 
     /// <summary>
- /// Gets the recent paths for a category
+    /// Gets the recent paths for a category
     /// </summary>
     IEnumerable<string> GetRecentPaths(string category, int maxCount = 10);
 

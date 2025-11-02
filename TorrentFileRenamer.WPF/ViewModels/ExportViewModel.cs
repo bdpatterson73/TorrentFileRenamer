@@ -21,17 +21,17 @@ public class ExportViewModel : ViewModelBase
     public ExportViewModel(IExportService exportService, IDialogService dialogService)
     {
         _exportService = exportService ?? throw new ArgumentNullException(nameof(exportService));
-  _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
         // Commands
         ExportCommand = new AsyncRelayCommand(ExecuteExportAsync, () => !IsExporting);
-     BrowseOutputPathCommand = new RelayCommand(ExecuteBrowseOutputPath);
-    SelectDefaultOptionsCommand = new RelayCommand(_ => Options = ExportOptions.Default);
-   SelectMinimalOptionsCommand = new RelayCommand(_ => Options = ExportOptions.Minimal);
-   SelectDetailedOptionsCommand = new RelayCommand(_ => Options = ExportOptions.Detailed);
+        BrowseOutputPathCommand = new RelayCommand(ExecuteBrowseOutputPath);
+        SelectDefaultOptionsCommand = new RelayCommand(_ => Options = ExportOptions.Default);
+        SelectMinimalOptionsCommand = new RelayCommand(_ => Options = ExportOptions.Minimal);
+        SelectDetailedOptionsCommand = new RelayCommand(_ => Options = ExportOptions.Detailed);
     }
 
-#region Properties
+    #region Properties
 
     /// <summary>
     /// Export options
@@ -47,16 +47,16 @@ public class ExportViewModel : ViewModelBase
     /// </summary>
     public ExportFormat SelectedFormat
     {
-   get => _selectedFormat;
-   set
- {
-       if (SetProperty(ref _selectedFormat, value))
-       {
-     Options.Format = value;
-         OnPropertyChanged(nameof(FileExtension));
-OnPropertyChanged(nameof(FileFilter));
+        get => _selectedFormat;
+        set
+        {
+            if (SetProperty(ref _selectedFormat, value))
+            {
+                Options.Format = value;
+                OnPropertyChanged(nameof(FileExtension));
+                OnPropertyChanged(nameof(FileFilter));
+            }
         }
-  }
     }
 
     /// <summary>
@@ -64,22 +64,22 @@ OnPropertyChanged(nameof(FileFilter));
     /// </summary>
     public bool IsExporting
     {
-    get => _isExporting;
+        get => _isExporting;
         set
         {
-   if (SetProperty(ref _isExporting, value))
-  {
-    ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
-  }
+            if (SetProperty(ref _isExporting, value))
+            {
+                ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
+            }
         }
     }
 
-  /// <summary>
+    /// <summary>
     /// Export progress (0-100)
     /// </summary>
     public int ExportProgress
     {
-     get => _exportProgress;
+        get => _exportProgress;
         set => SetProperty(ref _exportProgress, value);
     }
 
@@ -87,8 +87,8 @@ OnPropertyChanged(nameof(FileFilter));
     /// Status message
     /// </summary>
     public string StatusMessage
- {
-    get => _statusMessage;
+    {
+        get => _statusMessage;
         set => SetProperty(ref _statusMessage, value);
     }
 
@@ -132,32 +132,32 @@ OnPropertyChanged(nameof(FileFilter));
 
     private async Task ExecuteExportAsync()
     {
-   // This method will be called from parent ViewModels with actual data
+        // This method will be called from parent ViewModels with actual data
         // Here we just validate and prepare
-   
+
         if (string.IsNullOrWhiteSpace(Options.OutputPath))
         {
-    ExecuteBrowseOutputPath(null);
-      }
-        
+            ExecuteBrowseOutputPath(null);
+        }
+
         if (string.IsNullOrWhiteSpace(Options.OutputPath))
-   {
-       StatusMessage = "Export cancelled - no output path selected";
-return;
+        {
+            StatusMessage = "Export cancelled - no output path selected";
+            return;
         }
 
         // Parent ViewModel will handle actual export
-      await Task.CompletedTask;
+        await Task.CompletedTask;
     }
 
     private void ExecuteBrowseOutputPath(object? parameter)
     {
-     var defaultFileName = $"export_{DateTime.Now:yyyyMMdd_HHmmss}{FileExtension}";
+        var defaultFileName = $"export_{DateTime.Now:yyyyMMdd_HHmmss}{FileExtension}";
         var filePath = _dialogService.ShowSaveFileDialog(defaultFileName, FileFilter);
-     
+
         if (!string.IsNullOrWhiteSpace(filePath))
         {
-     Options.OutputPath = filePath;
+            Options.OutputPath = filePath;
             OnPropertyChanged(nameof(Options));
         }
     }
@@ -173,41 +173,41 @@ return;
     {
         try
         {
-     IsExporting = true;
+            IsExporting = true;
             ExportProgress = 0;
-     StatusMessage = "Exporting movies...";
+            StatusMessage = "Exporting movies...";
 
-    var progress = new Progress<int>(p =>
-   {
-          ExportProgress = p;
-      StatusMessage = $"Exporting... {p}%";
-   });
-
-      var success = await _exportService.ExportMoviesAsync(movies, Options, progress);
-   
-            if (success)
-    {
-    StatusMessage = $"Export completed: {Options.OutputPath}";
-   ExportCompleted?.Invoke(this, EventArgs.Empty);
-     }
-       else
+            var progress = new Progress<int>(p =>
             {
-        StatusMessage = "Export failed";
-           ExportFailed?.Invoke(this, "Export operation failed");
-     }
-  
-  return success;
+                ExportProgress = p;
+                StatusMessage = $"Exporting... {p}%";
+            });
+
+            var success = await _exportService.ExportMoviesAsync(movies, Options, progress);
+
+            if (success)
+            {
+                StatusMessage = $"Export completed: {Options.OutputPath}";
+                ExportCompleted?.Invoke(this, EventArgs.Empty);
+            }
+            else
+            {
+                StatusMessage = "Export failed";
+                ExportFailed?.Invoke(this, "Export operation failed");
+            }
+
+            return success;
         }
-    catch (Exception ex)
-    {
-    StatusMessage = $"Export error: {ex.Message}";
-     ExportFailed?.Invoke(this, ex.Message);
-   return false;
-   }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Export error: {ex.Message}";
+            ExportFailed?.Invoke(this, ex.Message);
+            return false;
+        }
         finally
         {
             IsExporting = false;
-          ExportProgress = 0;
+            ExportProgress = 0;
         }
     }
 
@@ -216,43 +216,43 @@ return;
     /// </summary>
     public async Task<bool> ExportEpisodesAsync(IEnumerable<FileEpisodeModel> episodes)
     {
-   try
+        try
         {
-      IsExporting = true;
-       ExportProgress = 0;
-    StatusMessage = "Exporting episodes...";
+            IsExporting = true;
+            ExportProgress = 0;
+            StatusMessage = "Exporting episodes...";
 
             var progress = new Progress<int>(p =>
-        {
-         ExportProgress = p;
-      StatusMessage = $"Exporting... {p}%";
- });
-
-          var success = await _exportService.ExportEpisodesAsync(episodes, Options, progress);
-            
-     if (success)
-     {
-         StatusMessage = $"Export completed: {Options.OutputPath}";
-    ExportCompleted?.Invoke(this, EventArgs.Empty);
-            }
-          else
             {
-    StatusMessage = "Export failed";
-ExportFailed?.Invoke(this, "Export operation failed");
+                ExportProgress = p;
+                StatusMessage = $"Exporting... {p}%";
+            });
+
+            var success = await _exportService.ExportEpisodesAsync(episodes, Options, progress);
+
+            if (success)
+            {
+                StatusMessage = $"Export completed: {Options.OutputPath}";
+                ExportCompleted?.Invoke(this, EventArgs.Empty);
             }
-     
-return success;
-}
+            else
+            {
+                StatusMessage = "Export failed";
+                ExportFailed?.Invoke(this, "Export operation failed");
+            }
+
+            return success;
+        }
         catch (Exception ex)
         {
-StatusMessage = $"Export error: {ex.Message}";
-     ExportFailed?.Invoke(this, ex.Message);
-      return false;
-     }
-   finally
-  {
-  IsExporting = false;
-        ExportProgress = 0;
+            StatusMessage = $"Export error: {ex.Message}";
+            ExportFailed?.Invoke(this, ex.Message);
+            return false;
+        }
+        finally
+        {
+            IsExporting = false;
+            ExportProgress = 0;
         }
     }
 
@@ -261,8 +261,8 @@ StatusMessage = $"Export error: {ex.Message}";
     /// </summary>
     public async Task<string> GenerateMovieSummaryAsync(
         IEnumerable<MovieFileModel> movies,
-    FileStatistics statistics)
-  {
+        FileStatistics statistics)
+    {
         return await _exportService.GenerateMovieSummaryAsync(movies, statistics);
     }
 
@@ -270,7 +270,7 @@ StatusMessage = $"Export error: {ex.Message}";
     /// Generates summary report for episodes
     /// </summary>
     public async Task<string> GenerateEpisodeSummaryAsync(
-   IEnumerable<FileEpisodeModel> episodes,
+        IEnumerable<FileEpisodeModel> episodes,
         FileStatistics statistics)
     {
         return await _exportService.GenerateEpisodeSummaryAsync(episodes, statistics);
@@ -281,9 +281,9 @@ StatusMessage = $"Export error: {ex.Message}";
     /// </summary>
     public void ResetToDefaults()
     {
-     Options = ExportOptions.Default;
+        Options = ExportOptions.Default;
         SelectedFormat = ExportFormat.Csv;
-  ExportProgress = 0;
+        ExportProgress = 0;
         StatusMessage = string.Empty;
     }
 

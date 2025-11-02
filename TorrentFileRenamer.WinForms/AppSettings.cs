@@ -50,9 +50,9 @@ namespace TorrentFileRenamer
 
         public static void LogDebug(string message, string? context = null)
         {
-            #if DEBUG
+#if DEBUG
             WriteLog("DEBUG", message, context);
-            #endif
+#endif
         }
 
         private static void WriteLog(string level, string message, string? context)
@@ -60,10 +60,10 @@ namespace TorrentFileRenamer
             try
             {
                 string logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{level}] {context ?? "General"}: {message}";
-                
+
                 // Write to debug output
                 Debug.WriteLine(logEntry);
-                
+
                 // Write to file (async to avoid blocking UI)
                 Task.Run(() =>
                 {
@@ -175,7 +175,7 @@ namespace TorrentFileRenamer
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 var json = JsonSerializer.Serialize(this, options);
                 File.WriteAllText(SettingsFilePath, json);
-                
+
                 LoggingService.LogInfo("Settings saved successfully", "AppSettings");
             }
             catch (Exception ex)

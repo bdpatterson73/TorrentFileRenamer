@@ -9,21 +9,21 @@ public partial class LogViewerDialog : Window
 {
     public LogViewerDialog()
     {
-     InitializeComponent();
+        InitializeComponent();
     }
 
-  protected override void OnContentRendered(EventArgs e)
+    protected override void OnContentRendered(EventArgs e)
     {
-  base.OnContentRendered(e);
+        base.OnContentRendered(e);
 
-      // Subscribe to DialogResult changes if ViewModel implements it
- if (DataContext is ViewModels.LogViewerViewModel viewModel)
+        // Subscribe to DialogResult changes if ViewModel implements it
+        if (DataContext is ViewModels.LogViewerViewModel viewModel)
         {
-  viewModel.PropertyChanged += (s, args) =>
-     {
-  if (args.PropertyName == nameof(viewModel.DialogResult))
-      {
-        DialogResult = viewModel.DialogResult;
+            viewModel.PropertyChanged += (s, args) =>
+            {
+                if (args.PropertyName == nameof(viewModel.DialogResult))
+                {
+                    DialogResult = viewModel.DialogResult;
                 }
             };
         }

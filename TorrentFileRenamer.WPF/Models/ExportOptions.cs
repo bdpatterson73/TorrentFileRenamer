@@ -5,8 +5,8 @@ namespace TorrentFileRenamer.WPF.Models;
 /// </summary>
 public enum ExportFormat
 {
- Csv,
-  Json,
+    Csv,
+    Json,
     Xml,
     Excel
 }
@@ -42,9 +42,9 @@ public class ExportOptions
     public bool IncludeMediaName { get; set; } = true;
 
     /// <summary>
- /// Include year information
+    /// Include year information
     /// </summary>
- public bool IncludeYear { get; set; } = true;
+    public bool IncludeYear { get; set; } = true;
 
     /// <summary>
     /// Include season/episode numbers (TV only)
@@ -58,7 +58,7 @@ public class ExportOptions
 
     /// <summary>
     /// Include status information
- /// </summary>
+    /// </summary>
     public bool IncludeStatus { get; set; } = true;
 
     /// <summary>
@@ -73,12 +73,12 @@ public class ExportOptions
 
     /// <summary>
     /// Include full file paths
-/// </summary>
+    /// </summary>
     public bool IncludeFullPaths { get; set; } = false;
 
-  /// <summary>
+    /// <summary>
     /// Include error messages
-  /// </summary>
+    /// </summary>
     public bool IncludeErrors { get; set; } = true;
 
     /// <summary>
@@ -93,7 +93,7 @@ public class ExportOptions
 
     /// <summary>
     /// Creates default export options
-  /// </summary>
+    /// </summary>
     public static ExportOptions Default => new ExportOptions();
 
     /// <summary>
@@ -101,14 +101,14 @@ public class ExportOptions
     /// </summary>
     public static ExportOptions Minimal => new ExportOptions
     {
-     IncludeFileName = true,
+        IncludeFileName = true,
         IncludeNewFileName = true,
         IncludeMediaName = true,
         IncludeYear = false,
-    IncludeSeasonEpisode = false,
+        IncludeSeasonEpisode = false,
         IncludeConfidence = false,
         IncludeStatus = true,
-    IncludeFileSize = false,
+        IncludeFileSize = false,
         IncludeExtension = false,
         IncludeFullPaths = false,
         IncludeErrors = false,
@@ -117,20 +117,20 @@ public class ExportOptions
 
     /// <summary>
     /// Creates detailed export options (all fields)
-  /// </summary>
+    /// </summary>
     public static ExportOptions Detailed => new ExportOptions
-  {
+    {
         IncludeFileName = true,
         IncludeNewFileName = true,
         IncludeMediaName = true,
         IncludeYear = true,
-    IncludeSeasonEpisode = true,
+        IncludeSeasonEpisode = true,
         IncludeConfidence = true,
-     IncludeStatus = true,
- IncludeFileSize = true,
+        IncludeStatus = true,
+        IncludeFileSize = true,
         IncludeExtension = true,
         IncludeFullPaths = true,
-    IncludeErrors = true,
+        IncludeErrors = true,
         IncludeTimestamp = true
     };
 }

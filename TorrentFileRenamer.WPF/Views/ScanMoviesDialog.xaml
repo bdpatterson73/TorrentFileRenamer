@@ -1,8 +1,8 @@
 <Window x:Class="TorrentFileRenamer.WPF.Views.ScanMoviesDialog"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:TorrentFileRenamer.WPF.ViewModels"
-  Title="Scan Movies" 
+        Title="Scan Movies"
         Height="Auto"
         MinHeight="400"
         Width="600"
@@ -12,126 +12,126 @@
         MinWidth="500"
         MaxHeight="600"
         ShowInTaskbar="False">
- 
+
     <Window.Resources>
         <Style TargetType="Label">
-  <Setter Property="Padding" Value="5,5,5,2"/>
-  </Style>
-    <Style TargetType="TextBox">
-   <Setter Property="Padding" Value="5"/>
-         <Setter Property="Height" Value="28"/>
-   </Style>
-  <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-        <Setter Property="MinWidth" Value="80"/>
-      <Setter Property="Height" Value="28"/>
-     <Setter Property="Margin" Value="5"/>
-      </Style>
+            <Setter Property="Padding" Value="5,5,5,2" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Padding" Value="5" />
+            <Setter Property="Height" Value="28" />
+        </Style>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="MinWidth" Value="80" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Margin" Value="5" />
+        </Style>
     </Window.Resources>
-    
-  <Grid Margin="10">
+
+    <Grid Margin="10">
         <Grid.RowDefinitions>
-     <RowDefinition Height="Auto"/>
-          <RowDefinition Height="Auto"/>
-       <RowDefinition Height="Auto"/>
- <RowDefinition Height="Auto"/>
-    <RowDefinition Height="10"/>
- <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-   
+
         <!-- Source Path -->
-      <Grid Grid.Row="0">
-   <Grid.ColumnDefinitions>
-     <ColumnDefinition Width="*"/>
-       <ColumnDefinition Width="Auto"/>
-         </Grid.ColumnDefinitions>
-  <Grid.RowDefinitions>
-      <RowDefinition Height="Auto"/>
-    <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-      
-       <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Source Folder:"/>
-<TextBox Grid.Row="1" Grid.Column="0" 
-       Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}"
-         Margin="0,0,5,0"/>
-     <Button Grid.Row="1" Grid.Column="1" 
- Content="Browse..." 
-  Command="{Binding BrowseSourceCommand}"
-   Width="80"/>
-        </Grid>
-   
-    <!-- Destination Path -->
-      <Grid Grid.Row="1" Margin="0,10,0,0">
- <Grid.ColumnDefinitions>
-       <ColumnDefinition Width="*"/>
-       <ColumnDefinition Width="Auto"/>
-</Grid.ColumnDefinitions>
-      <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-         <RowDefinition Height="Auto"/>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-   
-  <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Destination Folder:"/>
-       <TextBox Grid.Row="1" Grid.Column="0" 
-       Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
-      Margin="0,0,5,0"/>
-     <Button Grid.Row="1" Grid.Column="1" 
-  Content="Browse..." 
-      Command="{Binding BrowseDestinationCommand}"
-        Width="80"/>
-     </Grid>
-   
+
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Source Folder:" />
+            <TextBox Grid.Row="1" Grid.Column="0"
+                     Text="{Binding SourcePath, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,5,0" />
+            <Button Grid.Row="1" Grid.Column="1"
+                    Content="Browse..."
+                    Command="{Binding BrowseSourceCommand}"
+                    Width="80" />
+        </Grid>
+
+        <!-- Destination Path -->
+        <Grid Grid.Row="1" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Destination Folder:" />
+            <TextBox Grid.Row="1" Grid.Column="0"
+                     Text="{Binding DestinationPath, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,5,0" />
+            <Button Grid.Row="1" Grid.Column="1"
+                    Content="Browse..."
+                    Command="{Binding BrowseDestinationCommand}"
+                    Width="80" />
+        </Grid>
+
         <!-- File Extensions -->
         <StackPanel Grid.Row="2" Margin="0,10,0,0">
-         <Label Content="File Extensions (comma-separated):"/>
-        <TextBox Text="{Binding FileExtensions, UpdateSourceTrigger=PropertyChanged}"/>
-   <TextBlock Text="Example: .mkv, .mp4, .avi, .m4v" 
-      FontSize="10" 
-     Foreground="Gray"
-     Margin="5,2,0,0"/>
+            <Label Content="File Extensions (comma-separated):" />
+            <TextBox Text="{Binding FileExtensions, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBlock Text="Example: .mkv, .mp4, .avi, .m4v"
+                       FontSize="10"
+                       Foreground="Gray"
+                       Margin="5,2,0,0" />
         </StackPanel>
-   
-  <!-- Confidence Threshold -->
+
+        <!-- Confidence Threshold -->
         <StackPanel Grid.Row="3" Margin="0,10,0,0">
-         <Label Content="Minimum Confidence Threshold:"/>
-    <Grid>
+            <Label Content="Minimum Confidence Threshold:" />
+            <Grid>
                 <Grid.ColumnDefinitions>
-     <ColumnDefinition Width="*"/>
-         <ColumnDefinition Width="Auto"/>
-    </Grid.ColumnDefinitions>
-    <Slider Grid.Column="0" 
-   Minimum="0" 
- Maximum="100" 
-     TickFrequency="10"
-   IsSnapToTickEnabled="True"
-  Value="{Binding MinimumConfidence}"
-    VerticalAlignment="Center"/>
-        <TextBlock Grid.Column="1" 
-           Text="{Binding MinimumConfidence, StringFormat={}{0}%}" 
-  Width="50"
-      TextAlignment="Right"
-  VerticalAlignment="Center"
-   Margin="10,0,0,0"/>
-     </Grid>
-     <TextBlock Text="Files with lower confidence will still be scanned but can be filtered." 
-       FontSize="10" 
-           Foreground="Gray"
-       Margin="5,2,0,0"
- TextWrapping="Wrap"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Slider Grid.Column="0"
+                        Minimum="0"
+                        Maximum="100"
+                        TickFrequency="10"
+                        IsSnapToTickEnabled="True"
+                        Value="{Binding MinimumConfidence}"
+                        VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="{Binding MinimumConfidence, StringFormat={}{0}%}"
+                           Width="50"
+                           TextAlignment="Right"
+                           VerticalAlignment="Center"
+                           Margin="10,0,0,0" />
+            </Grid>
+            <TextBlock Text="Files with lower confidence will still be scanned but can be filtered."
+                       FontSize="10"
+                       Foreground="Gray"
+                       Margin="5,2,0,0"
+                       TextWrapping="Wrap" />
         </StackPanel>
-     
+
         <!-- Buttons -->
-        <StackPanel Grid.Row="5" 
-          Orientation="Horizontal" 
- HorizontalAlignment="Right"
-        Margin="0,10,0,0">
-            <Button Content="Scan" 
-          IsDefault="True"
-      Click="OkButton_Click"
-       IsEnabled="{Binding IsValid}"
-        Style="{StaticResource PrimaryButton}"/>
-     <Button Content="Cancel" 
-      IsCancel="True"
-           Click="CancelButton_Click"/>
+        <StackPanel Grid.Row="5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,10,0,0">
+            <Button Content="Scan"
+                    IsDefault="True"
+                    Click="OkButton_Click"
+                    IsEnabled="{Binding IsValid}"
+                    Style="{StaticResource PrimaryButton}" />
+            <Button Content="Cancel"
+                    IsCancel="True"
+                    Click="CancelButton_Click" />
         </StackPanel>
     </Grid>
 </Window>

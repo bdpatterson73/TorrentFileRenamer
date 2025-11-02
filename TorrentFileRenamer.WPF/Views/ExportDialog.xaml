@@ -1,219 +1,219 @@
 <Window x:Class="TorrentFileRenamer.WPF.Views.ExportDialog"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-    xmlns:viewmodels="clr-namespace:TorrentFileRenamer.WPF.ViewModels"
-        mc:Ignorable="d" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:viewmodels="clr-namespace:TorrentFileRenamer.WPF.ViewModels"
+        mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=viewmodels:ExportViewModel}"
-  Title="Export Data" 
-  Height="600" Width="500"
-  WindowStartupLocation="CenterOwner"
+        Title="Export Data"
+        Height="600" Width="500"
+        WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="{StaticResource SurfaceBrush}">
 
     <Grid>
-   <Grid.RowDefinitions>
-     <RowDefinition Height="Auto"/> <!-- Header -->
-    <RowDefinition Height="*"/>    <!-- Content -->
-       <RowDefinition Height="Auto"/> <!-- Progress -->
-       <RowDefinition Height="Auto"/> <!-- Buttons -->
- </Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header -->
+            <RowDefinition Height="*" />    <!-- Content -->
+            <RowDefinition Height="Auto" /> <!-- Progress -->
+            <RowDefinition Height="Auto" /> <!-- Buttons -->
+        </Grid.RowDefinitions>
 
-     <!-- Header -->
+        <!-- Header -->
         <Border Grid.Row="0"
-         Background="{StaticResource PrimaryBrush}"
-         Padding="20">
-        <StackPanel>
-       <TextBlock Text="?? Export Data"
-         FontSize="24"
-FontWeight="SemiBold"
-     Foreground="White"/>
-       <TextBlock Text="Choose export format and options"
-     FontSize="14"
-   Foreground="White"
-   Opacity="0.9"
-      Margin="0,4,0,0"/>
-    </StackPanel>
-  </Border>
+                Background="{StaticResource PrimaryBrush}"
+                Padding="20">
+            <StackPanel>
+                <TextBlock Text="?? Export Data"
+                           FontSize="24"
+                           FontWeight="SemiBold"
+                           Foreground="White" />
+                <TextBlock Text="Choose export format and options"
+                           FontSize="14"
+                           Foreground="White"
+                           Opacity="0.9"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
 
         <!-- Content -->
- <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20">
-       <StackPanel>
-    <!-- Export Format -->
-       <Border Style="{StaticResource CardContainer}" Margin="0,0,0,16">
-  <StackPanel>
-    <TextBlock Text="Export Format"
-      Style="{StaticResource CardTitle}"
-  Margin="0,0,0,12"/>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20">
+            <StackPanel>
+                <!-- Export Format -->
+                <Border Style="{StaticResource CardContainer}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Export Format"
+                                   Style="{StaticResource CardTitle}"
+                                   Margin="0,0,0,12" />
 
- <RadioButton Content="CSV (Comma Separated Values)"
-     IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Csv}"
-     Margin="0,0,0,8"/>
- <RadioButton Content="JSON (JavaScript Object Notation)"
-  IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Json}"
-        Margin="0,0,0,8"/>
-  <RadioButton Content="XML (Extensible Markup Language)"
-       IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Xml}"
-        Margin="0,0,0,8"/>
-     <RadioButton Content="Excel Spreadsheet (.xlsx)"
-       IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Excel}"
-           IsEnabled="False"
-    ToolTip="Excel export coming soon"/>
-     </StackPanel>
-     </Border>
+                        <RadioButton Content="CSV (Comma Separated Values)"
+                                     IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Csv}"
+                                     Margin="0,0,0,8" />
+                        <RadioButton Content="JSON (JavaScript Object Notation)"
+                                     IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Json}"
+                                     Margin="0,0,0,8" />
+                        <RadioButton Content="XML (Extensible Markup Language)"
+                                     IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Xml}"
+                                     Margin="0,0,0,8" />
+                        <RadioButton Content="Excel Spreadsheet (.xlsx)"
+                                     IsChecked="{Binding SelectedFormat, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Excel}"
+                                     IsEnabled="False"
+                                     ToolTip="Excel export coming soon" />
+                    </StackPanel>
+                </Border>
 
-       <!-- Output Path -->
-       <Border Style="{StaticResource CardContainer}" Margin="0,0,0,16">
-          <StackPanel>
-             <TextBlock Text="Output File"
-     Style="{StaticResource CardTitle}"
-  Margin="0,0,0,12"/>
+                <!-- Output Path -->
+                <Border Style="{StaticResource CardContainer}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Output File"
+                                   Style="{StaticResource CardTitle}"
+                                   Margin="0,0,0,12" />
 
-       <Grid>
-   <Grid.ColumnDefinitions>
-         <ColumnDefinition Width="*"/>
-     <ColumnDefinition Width="Auto"/>
-      </Grid.ColumnDefinitions>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-  <TextBox Grid.Column="0"
-      Text="{Binding Options.OutputPath, UpdateSourceTrigger=PropertyChanged}"
-Style="{StaticResource ModernTextBox}"
-       IsReadOnly="True"/>
-   <Button Grid.Column="1"
-         Content="Browse..."
-      Command="{Binding BrowseOutputPathCommand}"
-  Style="{StaticResource SecondaryButton}"
-         Margin="8,0,0,0"
-           Width="90"/>
-      </Grid>
+                            <TextBox Grid.Column="0"
+                                     Text="{Binding Options.OutputPath, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource ModernTextBox}"
+                                     IsReadOnly="True" />
+                            <Button Grid.Column="1"
+                                    Content="Browse..."
+                                    Command="{Binding BrowseOutputPathCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Margin="8,0,0,0"
+                                    Width="90" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Export Options -->
+                <Border Style="{StaticResource CardContainer}" Margin="0,0,0,16">
+                    <StackPanel>
+                        <TextBlock Text="Export Options"
+                                   Style="{StaticResource CardTitle}"
+                                   Margin="0,0,0,12" />
+
+                        <!-- Quick Presets -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Button Content="Default"
+                                    Command="{Binding SelectDefaultOptionsCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="8,4"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Minimal"
+                                    Command="{Binding SelectMinimalOptionsCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="8,4"
+                                    Margin="0,0,8,0" />
+                            <Button Content="Detailed"
+                                    Command="{Binding SelectDetailedOptionsCommand}"
+                                    Style="{StaticResource SecondaryButton}"
+                                    Padding="8,4" />
+                        </StackPanel>
+
+                        <!-- Field Selection -->
+                        <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                            <StackPanel>
+                                <CheckBox Content="File Name"
+                                          IsChecked="{Binding Options.IncludeFileName}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="New File Name"
+                                          IsChecked="{Binding Options.IncludeNewFileName}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Media Name (Movie/Show)"
+                                          IsChecked="{Binding Options.IncludeMediaName}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Year"
+                                          IsChecked="{Binding Options.IncludeYear}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Season/Episode Numbers"
+                                          IsChecked="{Binding Options.IncludeSeasonEpisode}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Confidence Score"
+                                          IsChecked="{Binding Options.IncludeConfidence}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Processing Status"
+                                          IsChecked="{Binding Options.IncludeStatus}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="File Size"
+                                          IsChecked="{Binding Options.IncludeFileSize}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="File Extension"
+                                          IsChecked="{Binding Options.IncludeExtension}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Full File Paths"
+                                          IsChecked="{Binding Options.IncludeFullPaths}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Error Messages"
+                                          IsChecked="{Binding Options.IncludeErrors}"
+                                          Margin="0,0,0,4" />
+                                <CheckBox Content="Export Timestamp"
+                                          IsChecked="{Binding Options.IncludeTimestamp}" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </StackPanel>
+                </Border>
+
+                <!-- Export Scope -->
+                <Border Style="{StaticResource CardContainer}">
+                    <StackPanel>
+                        <TextBlock Text="Export Scope"
+                                   Style="{StaticResource CardTitle}"
+                                   Margin="0,0,0,12" />
+
+                        <RadioButton Content="Export All Items (Filtered)"
+                                     IsChecked="{Binding Options.ExportSelectedOnly, Converter={StaticResource InverseBoolConverter}}"
+                                     Margin="0,0,0,8" />
+                        <RadioButton Content="Export Selected Items Only"
+                                     IsChecked="{Binding Options.ExportSelectedOnly}"
+                                     IsEnabled="False"
+                                     ToolTip="Selection feature coming soon" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
-    </Border>
-
-     <!-- Export Options -->
-      <Border Style="{StaticResource CardContainer}" Margin="0,0,0,16">
-      <StackPanel>
-    <TextBlock Text="Export Options"
-     Style="{StaticResource CardTitle}"
-     Margin="0,0,0,12"/>
-
-         <!-- Quick Presets -->
-    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-        <Button Content="Default"
-    Command="{Binding SelectDefaultOptionsCommand}"
-       Style="{StaticResource SecondaryButton}"
-           Padding="8,4"
-    Margin="0,0,8,0"/>
-    <Button Content="Minimal"
-           Command="{Binding SelectMinimalOptionsCommand}"
-    Style="{StaticResource SecondaryButton}"
-      Padding="8,4"
-         Margin="0,0,8,0"/>
-   <Button Content="Detailed"
-  Command="{Binding SelectDetailedOptionsCommand}"
-  Style="{StaticResource SecondaryButton}"
-       Padding="8,4"/>
-       </StackPanel>
-
-  <!-- Field Selection -->
-   <ScrollViewer MaxHeight="200" VerticalScrollBarVisibility="Auto">
-      <StackPanel>
-   <CheckBox Content="File Name"
- IsChecked="{Binding Options.IncludeFileName}"
-      Margin="0,0,0,4"/>
-     <CheckBox Content="New File Name"
-IsChecked="{Binding Options.IncludeNewFileName}"
-         Margin="0,0,0,4"/>
-  <CheckBox Content="Media Name (Movie/Show)"
-     IsChecked="{Binding Options.IncludeMediaName}"
-    Margin="0,0,0,4"/>
-     <CheckBox Content="Year"
-  IsChecked="{Binding Options.IncludeYear}"
-         Margin="0,0,0,4"/>
- <CheckBox Content="Season/Episode Numbers"
-  IsChecked="{Binding Options.IncludeSeasonEpisode}"
-  Margin="0,0,0,4"/>
-<CheckBox Content="Confidence Score"
-     IsChecked="{Binding Options.IncludeConfidence}"
-      Margin="0,0,0,4"/>
-     <CheckBox Content="Processing Status"
-      IsChecked="{Binding Options.IncludeStatus}"
-     Margin="0,0,0,4"/>
-      <CheckBox Content="File Size"
-   IsChecked="{Binding Options.IncludeFileSize}"
-Margin="0,0,0,4"/>
-   <CheckBox Content="File Extension"
-   IsChecked="{Binding Options.IncludeExtension}"
- Margin="0,0,0,4"/>
-   <CheckBox Content="Full File Paths"
-    IsChecked="{Binding Options.IncludeFullPaths}"
-   Margin="0,0,0,4"/>
-       <CheckBox Content="Error Messages"
-  IsChecked="{Binding Options.IncludeErrors}"
-        Margin="0,0,0,4"/>
-     <CheckBox Content="Export Timestamp"
-      IsChecked="{Binding Options.IncludeTimestamp}"/>
-   </StackPanel>
-    </ScrollViewer>
- </StackPanel>
- </Border>
-
-   <!-- Export Scope -->
-      <Border Style="{StaticResource CardContainer}">
-  <StackPanel>
-   <TextBlock Text="Export Scope"
-        Style="{StaticResource CardTitle}"
-       Margin="0,0,0,12"/>
-
-  <RadioButton Content="Export All Items (Filtered)"
-   IsChecked="{Binding Options.ExportSelectedOnly, Converter={StaticResource InverseBoolConverter}}"
-  Margin="0,0,0,8"/>
-      <RadioButton Content="Export Selected Items Only"
-   IsChecked="{Binding Options.ExportSelectedOnly}"
-    IsEnabled="False"
-       ToolTip="Selection feature coming soon"/>
-      </StackPanel>
-  </Border>
-     </StackPanel>
         </ScrollViewer>
 
-  <!-- Progress Bar -->
-        <Border Grid.Row="2" 
-          Background="White"
-       BorderBrush="{StaticResource DividerBrush}"
-        BorderThickness="0,1,0,0"
-    Padding="20,12"
-   Visibility="{Binding IsExporting, Converter={StaticResource BoolToVisibilityConverter}}">
-       <StackPanel>
-    <TextBlock Text="{Binding StatusMessage}"
-       Style="{StaticResource BodyTextBlock}"
-        Margin="0,0,0,8"/>
-     <ProgressBar Value="{Binding ExportProgress}"
-      Maximum="100"
-  Height="6"
-   Style="{StaticResource ModernProgressBar}"/>
-        </StackPanel>
-  </Border>
+        <!-- Progress Bar -->
+        <Border Grid.Row="2"
+                Background="White"
+                BorderBrush="{StaticResource DividerBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="20,12"
+                Visibility="{Binding IsExporting, Converter={StaticResource BoolToVisibilityConverter}}">
+            <StackPanel>
+                <TextBlock Text="{Binding StatusMessage}"
+                           Style="{StaticResource BodyTextBlock}"
+                           Margin="0,0,0,8" />
+                <ProgressBar Value="{Binding ExportProgress}"
+                             Maximum="100"
+                             Height="6"
+                             Style="{StaticResource ModernProgressBar}" />
+            </StackPanel>
+        </Border>
 
         <!-- Buttons -->
-   <Border Grid.Row="3"
-        Background="White"
-      BorderBrush="{StaticResource DividerBrush}"
-     BorderThickness="0,1,0,0"
-       Padding="20">
-      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-        <Button Content="Export"
-Command="{Binding ExportCommand}"
-    Style="{StaticResource PrimaryButton}"
-   Width="100"
-         Margin="0,0,8,0"
-   IsDefault="True"/>
-     <Button Content="Cancel"
-        Click="CancelButton_Click"
-         Style="{StaticResource SecondaryButton}"
-       Width="100"
-  IsCancel="True"/>
-      </StackPanel>
-  </Border>
+        <Border Grid.Row="3"
+                Background="White"
+                BorderBrush="{StaticResource DividerBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="20">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Export"
+                        Command="{Binding ExportCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Width="100"
+                        Margin="0,0,8,0"
+                        IsDefault="True" />
+                <Button Content="Cancel"
+                        Click="CancelButton_Click"
+                        Style="{StaticResource SecondaryButton}"
+                        Width="100"
+                        IsCancel="True" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

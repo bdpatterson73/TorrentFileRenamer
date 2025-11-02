@@ -39,7 +39,7 @@ public class MainViewModel : ViewModelBase
         ProcessCommand = new RelayCommand(ExecuteProcess, _ => SelectedTabIndex <= 1);
         RefreshCommand = new RelayCommand(ExecuteRefresh);
         ShowDocumentationCommand = new RelayCommand(ExecuteShowDocumentation);
-        
+
         // Phase 5 commands
         ShowKeyboardShortcutsCommand = new RelayCommand(ExecuteShowKeyboardShortcuts);
         ScanTvCommand = new RelayCommand(ExecuteScanTv);
@@ -47,12 +47,12 @@ public class MainViewModel : ViewModelBase
         SwitchToTvTabCommand = new RelayCommand(_ => SelectedTabIndex = 0);
         SwitchToMoviesTabCommand = new RelayCommand(_ => SelectedTabIndex = 1);
         SwitchToAutoMonitorTabCommand = new RelayCommand(_ => SelectedTabIndex = 2);
-        
+
         // Phase 6: Search & Filter commands
         ToggleSearchCommand = new RelayCommand(ExecuteToggleSearch);
         ToggleAdvancedFilterCommand = new RelayCommand(ExecuteToggleAdvancedFilter);
         FocusSearchCommand = new RelayCommand(ExecuteFocusSearch);
-        
+
         // Phase 7: Export command
         ShowExportCommand = new RelayCommand(ExecuteShowExport);
     }
@@ -138,7 +138,7 @@ public class MainViewModel : ViewModelBase
     public ICommand ProcessCommand { get; }
     public ICommand RefreshCommand { get; }
     public ICommand ShowDocumentationCommand { get; }
-    
+
     // Phase 5 commands
     public ICommand ShowKeyboardShortcutsCommand { get; }
     public ICommand ScanTvCommand { get; }
@@ -151,7 +151,7 @@ public class MainViewModel : ViewModelBase
     public ICommand ToggleSearchCommand { get; }
     public ICommand ToggleAdvancedFilterCommand { get; }
     public ICommand FocusSearchCommand { get; }
-    
+
     // Phase 7: Export command
     public ICommand ShowExportCommand { get; }
 
@@ -282,7 +282,7 @@ public class MainViewModel : ViewModelBase
     {
         IsSearchPanelVisible = !IsSearchPanelVisible;
         StatusMessage = IsSearchPanelVisible ? "Search panel opened" : "Search panel closed";
-      
+
         if (IsSearchPanelVisible)
         {
             // Focus will be handled by the view
@@ -299,16 +299,16 @@ public class MainViewModel : ViewModelBase
         if (SelectedTabIndex == 0 && _tvEpisodesViewModel != null)
         {
             _tvEpisodesViewModel.FilterViewModel.TogglePanelVisibilityCommand.Execute(null);
-            StatusMessage = _tvEpisodesViewModel.FilterViewModel.IsPanelVisible 
-        ? "Advanced filters opened" 
-    : "Advanced filters closed";
+            StatusMessage = _tvEpisodesViewModel.FilterViewModel.IsPanelVisible
+                ? "Advanced filters opened"
+                : "Advanced filters closed";
         }
         else if (SelectedTabIndex == 1 && _moviesViewModel != null)
         {
             _moviesViewModel.FilterViewModel.TogglePanelVisibilityCommand.Execute(null);
-            StatusMessage = _moviesViewModel.FilterViewModel.IsPanelVisible 
-        ? "Advanced filters opened" 
-   : "Advanced filters closed";
+            StatusMessage = _moviesViewModel.FilterViewModel.IsPanelVisible
+                ? "Advanced filters opened"
+                : "Advanced filters closed";
         }
     }
 
@@ -321,6 +321,7 @@ public class MainViewModel : ViewModelBase
         {
             IsSearchPanelVisible = true;
         }
+
         StatusMessage = "Search focused";
         // Focus will be handled by the view
     }
@@ -333,16 +334,16 @@ public class MainViewModel : ViewModelBase
         // Route command to the active tab's ViewModel
         if (SelectedTabIndex == 0 && _tvEpisodesViewModel?.ExportCommand.CanExecute(null) == true)
         {
-     _tvEpisodesViewModel.ExportCommand.Execute(null);
-    }
+            _tvEpisodesViewModel.ExportCommand.Execute(null);
+        }
         else if (SelectedTabIndex == 1 && _moviesViewModel?.ExportCommand.CanExecute(null) == true)
         {
-_moviesViewModel.ExportCommand.Execute(null);
-   }
-  else
-{
+            _moviesViewModel.ExportCommand.Execute(null);
+        }
+        else
+        {
             StatusMessage = "No data available to export";
-}
+        }
     }
 
     #endregion

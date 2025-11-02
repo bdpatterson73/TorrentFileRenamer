@@ -22,42 +22,42 @@ public class FilterViewModel : ViewModelBase
 
     public FilterViewModel(ISearchService searchService, IDialogService dialogService)
     {
-_searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+        _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
         // Load predefined presets
         foreach (var preset in FilterPreset.GetPredefinedPresets())
         {
-         Presets.Add(preset);
+            Presets.Add(preset);
         }
 
         // Commands
-     ApplyFilterCommand = new RelayCommand(ExecuteApplyFilter);
-     ResetFilterCommand = new RelayCommand(ExecuteResetFilter, _ => CurrentCriteria.HasActiveFilters);
-    TogglePanelVisibilityCommand = new RelayCommand(_ => IsPanelVisible = !IsPanelVisible);
-   SavePresetCommand = new RelayCommand(ExecuteSavePreset, _ => CurrentCriteria.HasActiveFilters);
-    DeletePresetCommand = new RelayCommand(ExecuteDeletePreset, _ => SelectedPreset != null && !SelectedPreset.IsPredefined);
-    ApplyPresetCommand = new RelayCommand(ExecuteApplyPreset);
+        ApplyFilterCommand = new RelayCommand(ExecuteApplyFilter);
+        ResetFilterCommand = new RelayCommand(ExecuteResetFilter, _ => CurrentCriteria.HasActiveFilters);
+        TogglePanelVisibilityCommand = new RelayCommand(_ => IsPanelVisible = !IsPanelVisible);
+        SavePresetCommand = new RelayCommand(ExecuteSavePreset, _ => CurrentCriteria.HasActiveFilters);
+        DeletePresetCommand = new RelayCommand(ExecuteDeletePreset, _ => SelectedPreset != null && !SelectedPreset.IsPredefined);
+        ApplyPresetCommand = new RelayCommand(ExecuteApplyPreset);
     }
 
     #region Properties
 
     /// <summary>
- /// Current search/filter criteria
+    /// Current search/filter criteria
     /// </summary>
     public SearchCriteria CurrentCriteria
     {
         get => _currentCriteria;
         set
         {
-        if (SetProperty(ref _currentCriteria, value))
-   {
+            if (SetProperty(ref _currentCriteria, value))
+            {
                 OnPropertyChanged(nameof(HasActiveFilters));
-      OnPropertyChanged(nameof(ActiveFilterCount));
-     ((RelayCommand)ResetFilterCommand).RaiseCanExecuteChanged();
-       ((RelayCommand)SavePresetCommand).RaiseCanExecuteChanged();
-         }
-    }
+                OnPropertyChanged(nameof(ActiveFilterCount));
+                ((RelayCommand)ResetFilterCommand).RaiseCanExecuteChanged();
+                ((RelayCommand)SavePresetCommand).RaiseCanExecuteChanged();
+            }
+        }
     }
 
     /// <summary>
@@ -66,31 +66,31 @@ _searchService = searchService ?? throw new ArgumentNullException(nameof(searchS
     public bool IsPanelVisible
     {
         get => _isPanelVisible;
-      set => SetProperty(ref _isPanelVisible, value);
+        set => SetProperty(ref _isPanelVisible, value);
     }
 
- /// <summary>
+    /// <summary>
     /// Available filter presets
     /// </summary>
     public ObservableCollection<FilterPreset> Presets
     {
-     get => _presets;
+        get => _presets;
         set => SetProperty(ref _presets, value);
     }
 
     /// <summary>
     /// Selected preset
-  /// </summary>
+    /// </summary>
     public FilterPreset? SelectedPreset
     {
-    get => _selectedPreset;
+        get => _selectedPreset;
         set
-    {
+        {
             if (SetProperty(ref _selectedPreset, value))
- {
-          ((RelayCommand)DeletePresetCommand).RaiseCanExecuteChanged();
-     }
-     }
+            {
+                ((RelayCommand)DeletePresetCommand).RaiseCanExecuteChanged();
+            }
+        }
     }
 
     /// <summary>
@@ -108,8 +108,8 @@ _searchService = searchService ?? throw new ArgumentNullException(nameof(searchS
     public ObservableCollection<string> SelectedExtensions
     {
         get => _selectedExtensions;
-    set => SetProperty(ref _selectedExtensions, value);
-}
+        set => SetProperty(ref _selectedExtensions, value);
+    }
 
     /// <summary>
     /// Whether any filters are active
@@ -123,15 +123,15 @@ _searchService = searchService ?? throw new ArgumentNullException(nameof(searchS
     {
         get
         {
-    int count = 0;
+            int count = 0;
             if (!string.IsNullOrWhiteSpace(CurrentCriteria.SearchText)) count++;
-      if (CurrentCriteria.MinConfidence > 0 || CurrentCriteria.MaxConfidence < 100) count++;
-        if (CurrentCriteria.MinFileSize > 0 || CurrentCriteria.MaxFileSize < long.MaxValue) count++;
-      if (CurrentCriteria.DateAddedFrom.HasValue || CurrentCriteria.DateAddedTo.HasValue) count++;
+            if (CurrentCriteria.MinConfidence > 0 || CurrentCriteria.MaxConfidence < 100) count++;
+            if (CurrentCriteria.MinFileSize > 0 || CurrentCriteria.MaxFileSize < long.MaxValue) count++;
+            if (CurrentCriteria.DateAddedFrom.HasValue || CurrentCriteria.DateAddedTo.HasValue) count++;
             if (CurrentCriteria.SelectedExtensions.Count > 0) count++;
-     if (CurrentCriteria.SelectedStatuses.Count > 0) count++;
-    return count;
-   }
+            if (CurrentCriteria.SelectedStatuses.Count > 0) count++;
+            return count;
+        }
     }
 
     #endregion
@@ -163,76 +163,76 @@ _searchService = searchService ?? throw new ArgumentNullException(nameof(searchS
 
     #region Command Implementations
 
-private void ExecuteApplyFilter(object? parameter)
+    private void ExecuteApplyFilter(object? parameter)
     {
         // Sync selected extensions to criteria
-   CurrentCriteria.SelectedExtensions = SelectedExtensions.ToList();
-      
+        CurrentCriteria.SelectedExtensions = SelectedExtensions.ToList();
+
         FiltersApplied?.Invoke(this, EventArgs.Empty);
         OnPropertyChanged(nameof(HasActiveFilters));
-      OnPropertyChanged(nameof(ActiveFilterCount));
+        OnPropertyChanged(nameof(ActiveFilterCount));
     }
 
     private void ExecuteResetFilter(object? parameter)
     {
         CurrentCriteria.Reset();
         SelectedExtensions.Clear();
-  
- FiltersReset?.Invoke(this, EventArgs.Empty);
-     OnPropertyChanged(nameof(HasActiveFilters));
+
+        FiltersReset?.Invoke(this, EventArgs.Empty);
+        OnPropertyChanged(nameof(HasActiveFilters));
         OnPropertyChanged(nameof(ActiveFilterCount));
-   
-  ((RelayCommand)ResetFilterCommand).RaiseCanExecuteChanged();
-      ((RelayCommand)SavePresetCommand).RaiseCanExecuteChanged();
+
+        ((RelayCommand)ResetFilterCommand).RaiseCanExecuteChanged();
+        ((RelayCommand)SavePresetCommand).RaiseCanExecuteChanged();
     }
 
     private void ExecuteSavePreset(object? parameter)
     {
         // TODO: Show dialog to get preset name and description
         var presetName = $"Custom Filter {DateTime.Now:yyyy-MM-dd HH:mm}";
-        
-    var preset = new FilterPreset
+
+        var preset = new FilterPreset
         {
             Name = presetName,
-         Description = "Custom filter preset",
-     Criteria = CurrentCriteria.Clone(),
+            Description = "Custom filter preset",
+            Criteria = CurrentCriteria.Clone(),
             IsPredefined = false
         };
-        
-   Presets.Add(preset);
-    _dialogService.ShowMessage("Filter Preset Saved", $"Preset '{presetName}' has been saved.");
+
+        Presets.Add(preset);
+        _dialogService.ShowMessage("Filter Preset Saved", $"Preset '{presetName}' has been saved.");
     }
 
     private void ExecuteDeletePreset(object? parameter)
     {
         if (SelectedPreset == null || SelectedPreset.IsPredefined)
-       return;
-    
-        if (_dialogService.ShowConfirmation("Delete Preset", 
-  $"Are you sure you want to delete the preset '{SelectedPreset.Name}'?"))
- {
-  Presets.Remove(SelectedPreset);
-SelectedPreset = null;
+            return;
+
+        if (_dialogService.ShowConfirmation("Delete Preset",
+                $"Are you sure you want to delete the preset '{SelectedPreset.Name}'?"))
+        {
+            Presets.Remove(SelectedPreset);
+            SelectedPreset = null;
         }
     }
 
     private void ExecuteApplyPreset(object? parameter)
     {
-    if (parameter is FilterPreset preset)
+        if (parameter is FilterPreset preset)
         {
-      CurrentCriteria = preset.Criteria.Clone();
-   
-        // Update selected extensions
-    SelectedExtensions.Clear();
-   foreach (var ext in CurrentCriteria.SelectedExtensions)
- {
-     SelectedExtensions.Add(ext);
-     }
-   
-        // Update last used date
-     preset.LastUsedDate = DateTime.Now;
-      
-        ExecuteApplyFilter(null);
+            CurrentCriteria = preset.Criteria.Clone();
+
+            // Update selected extensions
+            SelectedExtensions.Clear();
+            foreach (var ext in CurrentCriteria.SelectedExtensions)
+            {
+                SelectedExtensions.Add(ext);
+            }
+
+            // Update last used date
+            preset.LastUsedDate = DateTime.Now;
+
+            ExecuteApplyFilter(null);
         }
     }
 
@@ -241,19 +241,19 @@ SelectedPreset = null;
     #region Public Methods
 
     /// <summary>
-/// Updates available extensions based on current files
-/// </summary>
+    /// Updates available extensions based on current files
+    /// </summary>
     public void UpdateAvailableExtensions(List<string> extensions)
     {
         AvailableExtensions.Clear();
         foreach (var ext in extensions.OrderBy(e => e))
-   {
+        {
             AvailableExtensions.Add(ext);
         }
     }
 
     /// <summary>
-  /// Gets the current filter criteria
+    /// Gets the current filter criteria
     /// </summary>
     public SearchCriteria GetCurrentCriteria()
     {
@@ -267,7 +267,7 @@ SelectedPreset = null;
     public void ApplySearchText(string searchText)
     {
         CurrentCriteria.SearchText = searchText;
-  ExecuteApplyFilter(null);
+        ExecuteApplyFilter(null);
     }
 
     #endregion

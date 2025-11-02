@@ -20,7 +20,7 @@ public partial class FolderMonitorConfigDialog : Window
     {
         DialogResult = true;
         Close();
-  }
+    }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {

@@ -9,6 +9,6 @@ public partial class FileEpisodeCompactCard : System.Windows.Controls.UserContro
 {
     public FileEpisodeCompactCard()
     {
-      InitializeComponent();
+        InitializeComponent();
     }
 }

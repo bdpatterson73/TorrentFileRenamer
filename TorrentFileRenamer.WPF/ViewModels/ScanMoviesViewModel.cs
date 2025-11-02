@@ -176,7 +176,7 @@ public class ScanMoviesViewModel : ViewModelBase
     private void ValidatePaths()
     {
         IsValid = !string.IsNullOrWhiteSpace(SourcePath) &&
-                   !string.IsNullOrWhiteSpace(DestinationPath) &&
-                   Directory.Exists(SourcePath);
+                  !string.IsNullOrWhiteSpace(DestinationPath) &&
+                  Directory.Exists(SourcePath);
     }
 }

@@ -28,7 +28,7 @@ namespace TorrentFileRenamer
         /// <summary>
         /// Validates TV episode naming for Plex compatibility
         /// </summary>
-        public static PlexValidationResult ValidateTVEpisode(string showName, int seasonNumber, int episodeNumber, 
+        public static PlexValidationResult ValidateTVEpisode(string showName, int seasonNumber, int episodeNumber,
             string fileName, string fullPath, bool isAutoMode = false)
         {
             var issues = new List<string>();
@@ -65,6 +65,7 @@ namespace TorrentFileRenamer
             {
                 issues.Add($"Invalid season number: {seasonNumber}");
             }
+
             if (episodeNumber < 0)
             {
                 issues.Add($"Invalid episode number: {episodeNumber}");
@@ -143,12 +144,12 @@ namespace TorrentFileRenamer
         /// <summary>
         /// Suggests a Plex-compatible filename for TV episodes
         /// </summary>
-        public static string SuggestPlexTVFilename(string showName, int seasonNumber, int episodeNumber, 
+        public static string SuggestPlexTVFilename(string showName, int seasonNumber, int episodeNumber,
             string extension, List<int>? additionalEpisodes = null)
         {
             string cleanShowName = FixShowNameForPlex(showName).Replace(" ", ".");
             string seasonPart = $"S{seasonNumber:D2}";
-            
+
             string episodePart;
             if (additionalEpisodes != null && additionalEpisodes.Count > 0)
             {
@@ -156,7 +157,7 @@ namespace TorrentFileRenamer
                 var allEpisodes = new List<int> { episodeNumber };
                 allEpisodes.AddRange(additionalEpisodes);
                 allEpisodes = allEpisodes.Distinct().OrderBy(x => x).ToList();
-                
+
                 if (allEpisodes.Count == 2 && allEpisodes[1] - allEpisodes[0] == 1)
                 {
                     // Consecutive episodes: S01E01-E02
@@ -216,7 +217,7 @@ namespace TorrentFileRenamer
                 @"^(The\s+)*Unknown", // Variations of "Unknown"
             };
 
-            return problematicPatterns.Any(pattern => 
+            return problematicPatterns.Any(pattern =>
                 Regex.IsMatch(showName, pattern, RegexOptions.IgnoreCase));
         }
 
@@ -240,7 +241,7 @@ namespace TorrentFileRenamer
             {
                 return isAutoMode ? PlexValidationAction.SkipInAutoMode : PlexValidationAction.PromptUser;
             }
-            
+
             if (warnings.Count > 0)
             {
                 return isAutoMode ? PlexValidationAction.ProcessWithWarnings : PlexValidationAction.ShowWarnings;
@@ -252,8 +253,8 @@ namespace TorrentFileRenamer
         private static bool CanAutoFixIssues(List<string> issues)
         {
             // We can auto-fix character issues, but not missing show names or invalid numbers
-            return issues.All(issue => 
-                issue.Contains("invalid characters") || 
+            return issues.All(issue =>
+                issue.Contains("invalid characters") ||
                 issue.Contains("naming convention") ||
                 issue.Contains("encoding issues"));
         }

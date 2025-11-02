@@ -8,7 +8,7 @@ namespace TorrentFileRenamer.WPF.Services;
 public interface ISearchService
 {
     /// <summary>
-/// Searches movie files based on criteria
+    /// Searches movie files based on criteria
     /// </summary>
     IEnumerable<MovieFileModel> SearchMovies(
         IEnumerable<MovieFileModel> movies,
@@ -21,7 +21,7 @@ public interface ISearchService
         IEnumerable<FileEpisodeModel> episodes,
         SearchCriteria criteria);
 
-  /// <summary>
+    /// <summary>
     /// Calculates statistics for a collection of movie files
     /// </summary>
     FileStatistics CalculateMovieStatistics(IEnumerable<MovieFileModel> movies);
@@ -38,11 +38,11 @@ public interface ISearchService
 
     /// <summary>
     /// Gets all unique file extensions from TV episode files
-  /// </summary>
+    /// </summary>
     List<string> GetEpisodeExtensions(IEnumerable<FileEpisodeModel> episodes);
 
     /// <summary>
- /// Highlights search text within a string
+    /// Highlights search text within a string
     /// </summary>
     string HighlightSearchText(string text, string searchText);
 }

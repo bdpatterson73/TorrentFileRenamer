@@ -18,18 +18,18 @@ public class StatsViewModel : ViewModelBase
 
     public StatsViewModel(ISearchService searchService)
     {
-   _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
+        _searchService = searchService ?? throw new ArgumentNullException(nameof(searchService));
 
         // Commands
-   RefreshCommand = new RelayCommand(ExecuteRefresh);
-    ToggleVisibilityCommand = new RelayCommand(_ => IsVisible = !IsVisible);
+        RefreshCommand = new RelayCommand(ExecuteRefresh);
+        ToggleVisibilityCommand = new RelayCommand(_ => IsVisible = !IsVisible);
         ToggleExpandCommand = new RelayCommand(_ => IsExpanded = !IsExpanded);
     }
 
     #region Properties
 
     /// <summary>
- /// Current statistics
+    /// Current statistics
     /// </summary>
     public FileStatistics Statistics
     {
@@ -39,35 +39,35 @@ public class StatsViewModel : ViewModelBase
 
     /// <summary>
     /// Whether the widget is visible
- /// </summary>
+    /// </summary>
     public bool IsVisible
-  {
+    {
         get => _isVisible;
         set => SetProperty(ref _isVisible, value);
-  }
+    }
 
     /// <summary>
     /// Whether the widget is expanded
     /// </summary>
     public bool IsExpanded
     {
-   get => _isExpanded;
+        get => _isExpanded;
         set => SetProperty(ref _isExpanded, value);
     }
 
     /// <summary>
- /// When statistics were last refreshed
+    /// When statistics were last refreshed
     /// </summary>
     public DateTime LastRefresh
     {
-      get => _lastRefresh;
- set
+        get => _lastRefresh;
+        set
         {
-       if (SetProperty(ref _lastRefresh, value))
-         {
-       OnPropertyChanged(nameof(LastRefreshText));
-    }
-    }
+            if (SetProperty(ref _lastRefresh, value))
+            {
+                OnPropertyChanged(nameof(LastRefreshText));
+            }
+        }
     }
 
     /// <summary>
@@ -75,16 +75,16 @@ public class StatsViewModel : ViewModelBase
     /// </summary>
     public string LastRefreshText
     {
-     get
-  {
+        get
+        {
             var elapsed = DateTime.Now - LastRefresh;
-    if (elapsed.TotalSeconds < 60)
-     return "just now";
-   if (elapsed.TotalMinutes < 60)
-       return $"{(int)elapsed.TotalMinutes} minute{((int)elapsed.TotalMinutes != 1 ? "s" : "")} ago";
-       if (elapsed.TotalHours < 24)
-   return $"{(int)elapsed.TotalHours} hour{((int)elapsed.TotalHours != 1 ? "s" : "")} ago";
-   return LastRefresh.ToString("yyyy-MM-dd HH:mm");
+            if (elapsed.TotalSeconds < 60)
+                return "just now";
+            if (elapsed.TotalMinutes < 60)
+                return $"{(int)elapsed.TotalMinutes} minute{((int)elapsed.TotalMinutes != 1 ? "s" : "")} ago";
+            if (elapsed.TotalHours < 24)
+                return $"{(int)elapsed.TotalHours} hour{((int)elapsed.TotalHours != 1 ? "s" : "")} ago";
+            return LastRefresh.ToString("yyyy-MM-dd HH:mm");
         }
     }
 
@@ -94,21 +94,21 @@ public class StatsViewModel : ViewModelBase
     public double SuccessRate
     {
         get
-{
-       if (Statistics.TotalFiles == 0) return 0;
-return (double)Statistics.ProcessedFiles / Statistics.TotalFiles * 100;
-  }
+        {
+            if (Statistics.TotalFiles == 0) return 0;
+            return (double)Statistics.ProcessedFiles / Statistics.TotalFiles * 100;
+        }
     }
 
     /// <summary>
-/// Error rate percentage
-/// </summary>
-public double ErrorRate
+    /// Error rate percentage
+    /// </summary>
+    public double ErrorRate
     {
         get
         {
-      if (Statistics.TotalFiles == 0) return 0;
-   return (double)Statistics.ErrorFiles / Statistics.TotalFiles * 100;
+            if (Statistics.TotalFiles == 0) return 0;
+            return (double)Statistics.ErrorFiles / Statistics.TotalFiles * 100;
         }
     }
 
@@ -118,9 +118,9 @@ public double ErrorRate
 
     public ICommand RefreshCommand { get; }
     public ICommand ToggleVisibilityCommand { get; }
-  public ICommand ToggleExpandCommand { get; }
+    public ICommand ToggleExpandCommand { get; }
 
- #endregion
+    #endregion
 
     #region Events
 
@@ -129,7 +129,7 @@ public double ErrorRate
     /// </summary>
     public event EventHandler? RefreshRequested;
 
-#endregion
+    #endregion
 
     #region Command Implementations
 
@@ -150,19 +150,19 @@ public double ErrorRate
     {
         Statistics = _searchService.CalculateMovieStatistics(movies);
         LastRefresh = DateTime.Now;
-   OnPropertyChanged(nameof(SuccessRate));
+        OnPropertyChanged(nameof(SuccessRate));
         OnPropertyChanged(nameof(ErrorRate));
     }
 
     /// <summary>
     /// Updates statistics for TV episode files
-/// </summary>
+    /// </summary>
     public void UpdateEpisodeStatistics(IEnumerable<FileEpisodeModel> episodes)
     {
         Statistics = _searchService.CalculateEpisodeStatistics(episodes);
-   LastRefresh = DateTime.Now;
+        LastRefresh = DateTime.Now;
         OnPropertyChanged(nameof(SuccessRate));
-   OnPropertyChanged(nameof(ErrorRate));
+        OnPropertyChanged(nameof(ErrorRate));
     }
 
     /// <summary>
@@ -171,20 +171,20 @@ public double ErrorRate
     public void Reset()
     {
         Statistics.Reset();
-     LastRefresh = DateTime.Now;
-      OnPropertyChanged(nameof(SuccessRate));
- OnPropertyChanged(nameof(ErrorRate));
+        LastRefresh = DateTime.Now;
+        OnPropertyChanged(nameof(SuccessRate));
+        OnPropertyChanged(nameof(ErrorRate));
     }
 
     /// <summary>
-  /// Gets a summary text for display
+    /// Gets a summary text for display
     /// </summary>
     public string GetSummaryText()
     {
-  return $"{Statistics.TotalFiles} files | " +
-            $"{Statistics.ProcessedFiles} processed | " +
-$"{Statistics.ErrorFiles} errors | " +
-    $"{Statistics.FileSizeText}";
+        return $"{Statistics.TotalFiles} files | " +
+               $"{Statistics.ProcessedFiles} processed | " +
+               $"{Statistics.ErrorFiles} errors | " +
+               $"{Statistics.FileSizeText}";
     }
 
     #endregion

@@ -14,7 +14,7 @@ public class RecentActivityModel : ObservableObject
     private string _message = string.Empty;
     private bool _isSuccess;
 
-  public DateTime Timestamp
+    public DateTime Timestamp
     {
         get => _timestamp;
         set => SetProperty(ref _timestamp, value);
@@ -29,7 +29,7 @@ public class RecentActivityModel : ObservableObject
     public string ActivityType
     {
         get => _activityType;
-   set => SetProperty(ref _activityType, value);
+        set => SetProperty(ref _activityType, value);
     }
 
     public string Status
@@ -40,7 +40,7 @@ public class RecentActivityModel : ObservableObject
 
     public string Message
     {
- get => _message;
+        get => _message;
         set => SetProperty(ref _message, value);
     }
 

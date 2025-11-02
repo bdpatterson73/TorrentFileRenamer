@@ -6,23 +6,23 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/Colors.xaml"/>
-                <ResourceDictionary Source="Resources/Styles.xaml"/>
-                <ResourceDictionary Source="Resources/CardStyles.xaml"/>
-                <ResourceDictionary Source="Resources/Animations.xaml"/>
+                <ResourceDictionary Source="Resources/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles.xaml" />
+                <ResourceDictionary Source="Resources/CardStyles.xaml" />
+                <ResourceDictionary Source="Resources/Animations.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Global Converters -->
-            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-            <converters:StatusToBrushConverter x:Key="StatusToBrushConverter"/>
-            <converters:StatusToIconConverter x:Key="StatusToIconConverter"/>
-            <converters:FileSizeConverter x:Key="FileSizeConverter"/>
-            <converters:DateTimeToRelativeConverter x:Key="DateTimeToRelativeConverter"/>
-            <converters:StatusToRetryVisibilityConverter x:Key="StatusToRetryVisibilityConverter"/>
-            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
-            <converters:BoolToStringConverter x:Key="BoolToStringConverter"/>
-            <converters:EnumToBoolConverter x:Key="EnumToBoolConverter"/>
-            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <converters:StatusToBrushConverter x:Key="StatusToBrushConverter" />
+            <converters:StatusToIconConverter x:Key="StatusToIconConverter" />
+            <converters:FileSizeConverter x:Key="FileSizeConverter" />
+            <converters:DateTimeToRelativeConverter x:Key="DateTimeToRelativeConverter" />
+            <converters:StatusToRetryVisibilityConverter x:Key="StatusToRetryVisibilityConverter" />
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+            <converters:BoolToStringConverter x:Key="BoolToStringConverter" />
+            <converters:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

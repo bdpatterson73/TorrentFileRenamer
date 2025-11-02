@@ -20,7 +20,7 @@ public class AsyncRelayCommand : ICommand
     public event EventHandler? CanExecuteChanged
     {
         add => CommandManager.RequerySuggested += value;
-   remove => CommandManager.RequerySuggested -= value;
+        remove => CommandManager.RequerySuggested -= value;
     }
 
     public bool CanExecute(object? parameter) => !_isExecuting && (_canExecute?.Invoke() ?? true);
@@ -28,24 +28,24 @@ public class AsyncRelayCommand : ICommand
     public async void Execute(object? parameter)
     {
         if (!CanExecute(parameter))
-       return;
+            return;
 
         _isExecuting = true;
         RaiseCanExecuteChanged();
 
         try
         {
-         await _execute();
+            await _execute();
         }
         catch (Exception ex)
- {
+        {
             // Log error - in production, inject a logger
-      System.Diagnostics.Debug.WriteLine($"AsyncRelayCommand error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"AsyncRelayCommand error: {ex.Message}");
         }
- finally
-   {
-  _isExecuting = false;
-     RaiseCanExecuteChanged();
+        finally
+        {
+            _isExecuting = false;
+            RaiseCanExecuteChanged();
         }
     }
 
@@ -54,7 +54,7 @@ public class AsyncRelayCommand : ICommand
     /// </summary>
     public void RaiseCanExecuteChanged()
     {
-    CommandManager.InvalidateRequerySuggested();
+        CommandManager.InvalidateRequerySuggested();
     }
 }
 
@@ -66,7 +66,7 @@ public class AsyncRelayCommand<T> : ICommand
 {
     private readonly Func<T?, Task> _execute;
     private readonly Func<T?, bool>? _canExecute;
- private bool _isExecuting;
+    private bool _isExecuting;
 
     public AsyncRelayCommand(Func<T?, Task> execute, Func<T?, bool>? canExecute = null)
     {
@@ -75,7 +75,7 @@ public class AsyncRelayCommand<T> : ICommand
     }
 
     public event EventHandler? CanExecuteChanged
- {
+    {
         add => CommandManager.RequerySuggested += value;
         remove => CommandManager.RequerySuggested -= value;
     }
@@ -94,24 +94,24 @@ public class AsyncRelayCommand<T> : ICommand
     public async void Execute(object? parameter)
     {
         if (!CanExecute(parameter))
-    return;
+            return;
 
- _isExecuting = true;
+        _isExecuting = true;
         RaiseCanExecuteChanged();
 
         try
- {
-   T? typedParam = parameter is T t ? t : default;
-        await _execute(typedParam);
-        }
-     catch (Exception ex)
         {
-    System.Diagnostics.Debug.WriteLine($"AsyncRelayCommand<T> error: {ex.Message}");
-      }
+            T? typedParam = parameter is T t ? t : default;
+            await _execute(typedParam);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"AsyncRelayCommand<T> error: {ex.Message}");
+        }
         finally
-    {
+        {
             _isExecuting = false;
-   RaiseCanExecuteChanged();
+            RaiseCanExecuteChanged();
         }
     }
 

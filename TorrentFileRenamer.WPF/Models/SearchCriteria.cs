@@ -37,12 +37,12 @@ public class SearchCriteria : ObservableObject
     {
         get => _searchInFileName;
         set => SetProperty(ref _searchInFileName, value);
-  }
+    }
 
     /// <summary>
     /// Whether to search in movie names
     /// </summary>
-  public bool SearchInMovieName
+    public bool SearchInMovieName
     {
         get => _searchInMovieName;
         set => SetProperty(ref _searchInMovieName, value);
@@ -72,7 +72,7 @@ public class SearchCriteria : ObservableObject
     public int MinConfidence
     {
         get => _minConfidence;
-    set => SetProperty(ref _minConfidence, value);
+        set => SetProperty(ref _minConfidence, value);
     }
 
     /// <summary>
@@ -80,26 +80,26 @@ public class SearchCriteria : ObservableObject
     /// </summary>
     public int MaxConfidence
     {
-  get => _maxConfidence;
-    set => SetProperty(ref _maxConfidence, value);
+        get => _maxConfidence;
+        set => SetProperty(ref _maxConfidence, value);
     }
 
- /// <summary>
+    /// <summary>
     /// Minimum file size in bytes
     /// </summary>
     public long MinFileSize
     {
-  get => _minFileSize;
+        get => _minFileSize;
         set => SetProperty(ref _minFileSize, value);
-}
+    }
 
     /// <summary>
     /// Maximum file size in bytes
     /// </summary>
     public long MaxFileSize
     {
-     get => _maxFileSize;
-      set => SetProperty(ref _maxFileSize, value);
+        get => _maxFileSize;
+        set => SetProperty(ref _maxFileSize, value);
     }
 
     /// <summary>
@@ -107,21 +107,21 @@ public class SearchCriteria : ObservableObject
     /// </summary>
     public DateTime? DateAddedFrom
     {
-     get => _dateAddedFrom;
-   set => SetProperty(ref _dateAddedFrom, value);
+        get => _dateAddedFrom;
+        set => SetProperty(ref _dateAddedFrom, value);
     }
 
     /// <summary>
-  /// Filter by date added (to)
+    /// Filter by date added (to)
     /// </summary>
     public DateTime? DateAddedTo
     {
-  get => _dateAddedTo;
+        get => _dateAddedTo;
         set => SetProperty(ref _dateAddedTo, value);
     }
 
     /// <summary>
- /// Selected file extensions to filter by
+    /// Selected file extensions to filter by
     /// </summary>
     public List<string> SelectedExtensions
     {
@@ -134,8 +134,8 @@ public class SearchCriteria : ObservableObject
     /// </summary>
     public List<ProcessingStatus> SelectedStatuses
     {
-     get => _selectedStatuses;
- set => SetProperty(ref _selectedStatuses, value);
+        get => _selectedStatuses;
+        set => SetProperty(ref _selectedStatuses, value);
     }
 
     /// <summary>
@@ -162,10 +162,10 @@ public class SearchCriteria : ObservableObject
         SearchInMovieName = true;
         SearchInShowName = true;
         SearchInYear = false;
-   MinConfidence = 0;
+        MinConfidence = 0;
         MaxConfidence = 100;
         MinFileSize = 0;
-  MaxFileSize = long.MaxValue;
+        MaxFileSize = long.MaxValue;
         DateAddedFrom = null;
         DateAddedTo = null;
         SelectedExtensions.Clear();
@@ -176,20 +176,20 @@ public class SearchCriteria : ObservableObject
     /// Creates a copy of the search criteria
     /// </summary>
     public SearchCriteria Clone()
- {
+    {
         return new SearchCriteria
         {
-       SearchText = SearchText,
+            SearchText = SearchText,
             SearchInFileName = SearchInFileName,
-     SearchInMovieName = SearchInMovieName,
+            SearchInMovieName = SearchInMovieName,
             SearchInShowName = SearchInShowName,
-   SearchInYear = SearchInYear,
+            SearchInYear = SearchInYear,
             MinConfidence = MinConfidence,
-        MaxConfidence = MaxConfidence,
-       MinFileSize = MinFileSize,
-  MaxFileSize = MaxFileSize,
-   DateAddedFrom = DateAddedFrom,
-      DateAddedTo = DateAddedTo,
+            MaxConfidence = MaxConfidence,
+            MinFileSize = MinFileSize,
+            MaxFileSize = MaxFileSize,
+            DateAddedFrom = DateAddedFrom,
+            DateAddedTo = DateAddedTo,
             SelectedExtensions = new List<string>(SelectedExtensions),
             SelectedStatuses = new List<ProcessingStatus>(SelectedStatuses)
         };

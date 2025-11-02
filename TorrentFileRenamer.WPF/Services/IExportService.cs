@@ -11,7 +11,7 @@ public interface IExportService
     /// Exports movie files to the specified format
     /// </summary>
     Task<bool> ExportMoviesAsync(
-  IEnumerable<MovieFileModel> movies,
+        IEnumerable<MovieFileModel> movies,
         ExportOptions options,
         IProgress<int>? progress = null);
 
@@ -19,7 +19,7 @@ public interface IExportService
     /// Exports TV episode files to the specified format
     /// </summary>
     Task<bool> ExportEpisodesAsync(
-  IEnumerable<FileEpisodeModel> episodes,
+        IEnumerable<FileEpisodeModel> episodes,
         ExportOptions options,
         IProgress<int>? progress = null);
 
@@ -35,11 +35,11 @@ public interface IExportService
     /// </summary>
     Task<string> GenerateEpisodeSummaryAsync(
         IEnumerable<FileEpisodeModel> episodes,
-      FileStatistics statistics);
+        FileStatistics statistics);
 
     /// <summary>
     /// Gets the default file extension for the export format
-/// </summary>
+    /// </summary>
     string GetFileExtension(ExportFormat format);
 
     /// <summary>

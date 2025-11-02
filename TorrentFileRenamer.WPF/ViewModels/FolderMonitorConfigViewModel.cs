@@ -26,30 +26,30 @@ public class FolderMonitorConfigViewModel : ViewModelBase
     {
         get => _watchFolder;
         set
- {
+        {
             if (SetProperty(ref _watchFolder, value))
-       {
-      OnPropertyChanged(nameof(IsValid));
- }
+            {
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
- }
+    }
 
     public string DestinationFolder
     {
         get => _destinationFolder;
-   set
+        set
         {
             if (SetProperty(ref _destinationFolder, value))
             {
-          OnPropertyChanged(nameof(IsValid));
-  }
+                OnPropertyChanged(nameof(IsValid));
+            }
         }
     }
 
     public string FileExtensions
-  {
+    {
         get => _fileExtensions;
-set => SetProperty(ref _fileExtensions, value);
+        set => SetProperty(ref _fileExtensions, value);
     }
 
     public int StabilityDelay
@@ -60,13 +60,13 @@ set => SetProperty(ref _fileExtensions, value);
 
     public bool AutoStart
     {
-     get => _autoStart;
+        get => _autoStart;
         set => SetProperty(ref _autoStart, value);
     }
 
     public bool IsValid =>
         !string.IsNullOrWhiteSpace(WatchFolder) &&
-  Directory.Exists(WatchFolder) &&
+        Directory.Exists(WatchFolder) &&
         !string.IsNullOrWhiteSpace(DestinationFolder);
 
     public RelayCommand BrowseWatchFolderCommand { get; }
@@ -76,15 +76,15 @@ set => SetProperty(ref _fileExtensions, value);
     {
         var dialog = new OpenFolderDialog
         {
-  Title = "Select Watch Folder",
+            Title = "Select Watch Folder",
             InitialDirectory = !string.IsNullOrWhiteSpace(WatchFolder) && Directory.Exists(WatchFolder)
-   ? WatchFolder
-   : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+                ? WatchFolder
+                : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
         };
 
-     if (dialog.ShowDialog() == true)
+        if (dialog.ShowDialog() == true)
         {
-WatchFolder = dialog.FolderName;
+            WatchFolder = dialog.FolderName;
         }
     }
 
@@ -93,14 +93,14 @@ WatchFolder = dialog.FolderName;
         var dialog = new OpenFolderDialog
         {
             Title = "Select Destination Folder",
-        InitialDirectory = !string.IsNullOrWhiteSpace(DestinationFolder) && Directory.Exists(DestinationFolder)
-          ? DestinationFolder
-: Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            InitialDirectory = !string.IsNullOrWhiteSpace(DestinationFolder) && Directory.Exists(DestinationFolder)
+                ? DestinationFolder
+                : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
         };
 
         if (dialog.ShowDialog() == true)
         {
             DestinationFolder = dialog.FolderName;
-   }
+        }
     }
 }

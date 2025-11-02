@@ -79,6 +79,7 @@ namespace TorrentFileRenamer
                     Thread.Sleep(5000);
                 }
             }
+
             return false;
         }
 
@@ -111,6 +112,7 @@ namespace TorrentFileRenamer
                     await Task.Delay(attempt * 2000, cancellationToken);
                 }
             }
+
             return false;
         }
 

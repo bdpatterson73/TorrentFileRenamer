@@ -69,12 +69,12 @@ namespace TorrentFileRenamer
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.Description = "Select the folder to monitor for completed HandBrake conversions";
             fbd.ShowNewFolderButton = true;
-            
+
             if (!string.IsNullOrWhiteSpace(txtWatchFolder.Text) && Directory.Exists(txtWatchFolder.Text))
             {
                 fbd.SelectedPath = txtWatchFolder.Text;
             }
-            
+
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 txtWatchFolder.Text = fbd.SelectedPath;
@@ -87,12 +87,12 @@ namespace TorrentFileRenamer
             FolderBrowserDialog fbd = new FolderBrowserDialog();
             fbd.Description = "Select the destination folder for processed TV shows";
             fbd.ShowNewFolderButton = true;
-            
+
             if (!string.IsNullOrWhiteSpace(txtDestinationPath.Text) && Directory.Exists(txtDestinationPath.Text))
             {
                 fbd.SelectedPath = txtDestinationPath.Text;
             }
-            
+
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 txtDestinationPath.Text = fbd.SelectedPath;
@@ -121,7 +121,7 @@ namespace TorrentFileRenamer
             var watchValidation = PathValidator.ValidateSourcePath(txtWatchFolder.Text);
             if (!watchValidation.IsValid)
             {
-                MessageBox.Show($"Watch Folder Error: {watchValidation.Message}", 
+                MessageBox.Show($"Watch Folder Error: {watchValidation.Message}",
                     "Invalid Watch Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtWatchFolder.Focus();
                 return false;
@@ -131,7 +131,7 @@ namespace TorrentFileRenamer
             var destValidation = PathValidator.ValidateDestinationPath(txtDestinationPath.Text);
             if (!destValidation.IsValid)
             {
-                MessageBox.Show($"Destination Folder Error: {destValidation.Message}", 
+                MessageBox.Show($"Destination Folder Error: {destValidation.Message}",
                     "Invalid Destination Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtDestinationPath.Focus();
                 return false;
@@ -140,17 +140,17 @@ namespace TorrentFileRenamer
             // Validate file extensions
             if (string.IsNullOrWhiteSpace(txtFileExtensions.Text))
             {
-                MessageBox.Show("File extensions cannot be empty. Please specify at least one extension (e.g., *.mp4)", 
+                MessageBox.Show("File extensions cannot be empty. Please specify at least one extension (e.g., *.mp4)",
                     "Invalid File Extensions", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtFileExtensions.Focus();
                 return false;
             }
 
             // Check if paths are the same
-            if (string.Equals(Path.GetFullPath(txtWatchFolder.Text), 
-                Path.GetFullPath(txtDestinationPath.Text), StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Path.GetFullPath(txtWatchFolder.Text),
+                    Path.GetFullPath(txtDestinationPath.Text), StringComparison.OrdinalIgnoreCase))
             {
-                MessageBox.Show("Watch folder and destination folder cannot be the same.", 
+                MessageBox.Show("Watch folder and destination folder cannot be the same.",
                     "Invalid Configuration", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -258,7 +258,7 @@ namespace TorrentFileRenamer
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error testing configuration: {ex.Message}", 
+                MessageBox.Show($"Error testing configuration: {ex.Message}",
                     "Test Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

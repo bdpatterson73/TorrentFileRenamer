@@ -42,6 +42,7 @@ public partial class SettingsDialog : Window
         {
             viewModel.PropertyChanged -= ViewModel_PropertyChanged;
         }
+
         base.OnClosed(e);
     }
 }

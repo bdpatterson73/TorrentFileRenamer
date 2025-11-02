@@ -9,6 +9,6 @@ public partial class MovieFileCompactCard : System.Windows.Controls.UserControl
 {
     public MovieFileCompactCard()
     {
-   InitializeComponent();
+        InitializeComponent();
     }
 }

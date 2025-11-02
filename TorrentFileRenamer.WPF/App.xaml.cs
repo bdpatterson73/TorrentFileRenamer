@@ -42,7 +42,7 @@ public partial class App : WpfApplication
         services.AddSingleton<IWindowStateService, WindowStateService>();
         services.AddSingleton<IMruService, MruService>();
         services.AddSingleton<ISearchService, SearchService>();
-        services.AddSingleton<IExportService, ExportService>();  // Phase 7
+        services.AddSingleton<IExportService, ExportService>(); // Phase 7
 
         // ViewModels
         services.AddSingleton<MainViewModel>();
@@ -52,7 +52,7 @@ public partial class App : WpfApplication
         services.AddTransient<SearchViewModel>();
         services.AddTransient<FilterViewModel>();
         services.AddTransient<StatsViewModel>();
-        services.AddTransient<ExportViewModel>();  // Phase 7
+        services.AddTransient<ExportViewModel>(); // Phase 7
 
         // Views
         services.AddSingleton<MainWindow>();
@@ -63,9 +63,8 @@ public partial class App : WpfApplication
         // Dispose AutoMonitorViewModel to stop monitoring and cleanup
         var autoMonitorViewModel = _serviceProvider?.GetService<AutoMonitorViewModel>();
         autoMonitorViewModel?.Dispose();
-        
+
         _serviceProvider?.Dispose();
         base.OnExit(e);
     }
 }
-

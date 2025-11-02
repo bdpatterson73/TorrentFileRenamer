@@ -13,7 +13,7 @@ namespace TorrentFileRenamer
     {
         private string? _fileNamePath;
         private string _newParentRootDir;
-        
+
         public MovieFile(string? fileNamePath, string newParentRootDir)
         {
             _fileNamePath = fileNamePath;
@@ -23,12 +23,9 @@ namespace TorrentFileRenamer
 
         public string FileNamePath
         {
-            get
-            {
-                return _fileNamePath;
-            }
+            get { return _fileNamePath; }
         }
-        
+
         public string? FilePath { get; set; }
         public string? FileName { get; set; }
         public string? MovieName { get; set; }
@@ -55,13 +52,13 @@ namespace TorrentFileRenamer
             {
                 string extension = Path.GetExtension(_fileNamePath).ToUpper().Trim();
                 string newfileName = FileName.Replace(extension, "", StringComparison.OrdinalIgnoreCase).Trim();
-                
+
                 // Replace common separators with spaces
                 newfileName = newfileName.Replace(".", " ").Replace("_", " ").Replace("-", " ").Trim();
-                
+
                 // Clean up quality indicators and other artifacts
                 newfileName = CleanMovieName(newfileName);
-                
+
                 // Try to extract year using multiple patterns
                 string extractedYear = ExtractMovieYear(newfileName);
                 if (!string.IsNullOrEmpty(extractedYear))
@@ -103,9 +100,10 @@ namespace TorrentFileRenamer
         {
             if (string.IsNullOrWhiteSpace(name))
                 return name;
-                
+
             // Remove common quality indicators and other artifacts
-            string[] artifactsToRemove = {
+            string[] artifactsToRemove =
+            {
                 // Video quality
                 "720P", "1080P", "480P", "4K", "UHD", "HDR", "2160P",
                 // Source
@@ -123,20 +121,20 @@ namespace TorrentFileRenamer
                 // Other
                 "MULTI", "DUAL", "COMPLETE", "RERiP", "STV"
             };
-            
+
             string cleanName = name;
             foreach (string artifact in artifactsToRemove)
             {
                 // Remove whole word matches only
                 cleanName = Regex.Replace(cleanName, $@"\b{Regex.Escape(artifact)}\b", "", RegexOptions.IgnoreCase);
             }
-            
+
             // Remove common patterns like [GROUP], {GROUP}, etc.
             cleanName = Regex.Replace(cleanName, @"[\[\{].+?[\]\}]", "", RegexOptions.IgnoreCase);
-            
+
             // Clean up extra spaces
             cleanName = Regex.Replace(cleanName, @"\s+", " ").Trim();
-            
+
             return cleanName;
         }
 
@@ -191,11 +189,12 @@ namespace TorrentFileRenamer
         private string RemoveYearFromTitle(string title, string year)
         {
             // Remove year in various formats
-            string[] patterns = {
-                $@"\(\s*{Regex.Escape(year)}\s*\)",  // (2021)
-                $@"\[\s*{Regex.Escape(year)}\s*\]",  // [2021]
-                $@"\b{Regex.Escape(year)}\b\s*$",    // 2021 at end
-                $@"\b{Regex.Escape(year)}\b"         // 2021 anywhere
+            string[] patterns =
+            {
+                $@"\(\s*{Regex.Escape(year)}\s*\)", // (2021)
+                $@"\[\s*{Regex.Escape(year)}\s*\]", // [2021]
+                $@"\b{Regex.Escape(year)}\b\s*$", // 2021 at end
+                $@"\b{Regex.Escape(year)}\b" // 2021 anywhere
             };
 
             string result = title;
@@ -235,14 +234,14 @@ namespace TorrentFileRenamer
 
                 // Clean up the movie name for directory creation
                 string dirName = MovieName;
-                
+
                 // Handle articles (The, A, An) - move to end
                 dirName = HandleArticles(dirName);
-                
+
                 // Get first letter for alphabetical organization
                 char firstLetter = GetFirstLetterForSorting(dirName);
                 string letterFolder = firstLetter.ToString().ToUpper();
-                
+
                 // Handle numbers and special characters
                 if (char.IsDigit(firstLetter))
                 {
@@ -263,11 +262,11 @@ namespace TorrentFileRenamer
                 {
                     movieFolderName = MovieName;
                 }
-                
+
                 // Create the new filename - THIS IS THE KEY CHANGE!
                 string newFileName;
                 string extension = Path.GetExtension(FileName ?? "");
-                
+
                 if (!string.IsNullOrEmpty(MovieYear))
                 {
                     newFileName = $"{MovieName} ({MovieYear}){extension}";
@@ -276,7 +275,7 @@ namespace TorrentFileRenamer
                 {
                     newFileName = $"{MovieName}{extension}";
                 }
-                
+
                 // Sanitize names for file system compatibility
                 movieFolderName = SanitizeForDirectoryName(movieFolderName);
                 newFileName = SanitizeForFileName(newFileName);
@@ -284,7 +283,7 @@ namespace TorrentFileRenamer
                 // Create the full directory path: Root\Letter\MovieFolder\NewFileName
                 string parentDir = Path.Combine(_newParentRootDir, letterFolder);
                 string movieDir = Path.Combine(parentDir, movieFolderName);
-                
+
                 // Use the new formatted filename instead of the original
                 NewDestDirectory = Path.Combine(movieDir, newFileName);
 
@@ -306,30 +305,30 @@ namespace TorrentFileRenamer
         {
             if (string.IsNullOrWhiteSpace(name))
                 return "Unknown";
-                
+
             // Remove invalid characters for Windows file system
             char[] invalidChars = Path.GetInvalidFileNameChars().Concat(Path.GetInvalidPathChars()).ToArray();
             string sanitized = name;
-            
+
             foreach (char c in invalidChars)
             {
                 sanitized = sanitized.Replace(c, ' ');
             }
-            
+
             // Replace multiple spaces with single space
             sanitized = Regex.Replace(sanitized, @"\s+", " ").Trim();
-            
+
             // Remove leading/trailing periods and spaces (Windows doesn't like these)
             sanitized = sanitized.Trim('.', ' ');
-            
+
             // Ensure the name isn't empty after sanitization
             if (string.IsNullOrWhiteSpace(sanitized))
                 return "Unknown";
-                
+
             // Limit length to reasonable size (Windows max path considerations)
             if (sanitized.Length > 100)
                 sanitized = sanitized.Substring(0, 100).Trim();
-            
+
             return sanitized;
         }
 
@@ -340,14 +339,14 @@ namespace TorrentFileRenamer
         {
             if (string.IsNullOrWhiteSpace(name))
                 return "Unknown";
-            
+
             // Get the extension separately
             string extension = Path.GetExtension(name);
             string nameWithoutExt = Path.GetFileNameWithoutExtension(name);
-            
+
             // Apply same sanitization as directory names
             nameWithoutExt = SanitizeForDirectoryName(nameWithoutExt);
-            
+
             return nameWithoutExt + extension;
         }
 
@@ -357,7 +356,7 @@ namespace TorrentFileRenamer
         private string HandleArticles(string title)
         {
             string[] articles = { "The ", "A ", "An " };
-            
+
             foreach (string article in articles)
             {
                 if (title.StartsWith(article, StringComparison.OrdinalIgnoreCase))
@@ -366,7 +365,7 @@ namespace TorrentFileRenamer
                     return $"{remaining}, {article.Trim()}";
                 }
             }
-            
+
             return title;
         }
 
@@ -377,13 +376,13 @@ namespace TorrentFileRenamer
         {
             if (string.IsNullOrWhiteSpace(title))
                 return 'U'; // Unknown
-                
+
             char firstChar = title.Trim().ToUpper()[0];
-            
+
             // If it's a letter or number, return it
             if (char.IsLetterOrDigit(firstChar))
                 return firstChar;
-                
+
             // For special characters, put in # folder
             return '#';
         }

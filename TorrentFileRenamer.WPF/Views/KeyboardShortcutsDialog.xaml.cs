@@ -10,7 +10,7 @@ public partial class KeyboardShortcutsDialog : Window
     public KeyboardShortcutsDialog()
     {
         InitializeComponent();
-}
+    }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {

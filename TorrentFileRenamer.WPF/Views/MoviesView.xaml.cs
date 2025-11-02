@@ -9,6 +9,6 @@ public partial class MoviesView : WpfUserControl
 {
     public MoviesView()
     {
-  InitializeComponent();
+        InitializeComponent();
     }
 }

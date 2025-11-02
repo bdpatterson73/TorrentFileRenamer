@@ -8,31 +8,31 @@ namespace TorrentFileRenamer.WPF.Models;
 public class LogEntryModel : ObservableObject
 {
     private DateTime _timestamp;
- private string _level = "";
+    private string _level = "";
     private string _context = "";
     private string _message = "";
 
     public DateTime Timestamp
     {
-  get => _timestamp;
+        get => _timestamp;
         set => SetProperty(ref _timestamp, value);
     }
 
     public string Level
     {
-   get => _level;
+        get => _level;
         set => SetProperty(ref _level, value);
     }
 
     public string Context
     {
-    get => _context;
+        get => _context;
         set => SetProperty(ref _context, value);
     }
 
     public string Message
     {
         get => _message;
-   set => SetProperty(ref _message, value);
+        set => SetProperty(ref _message, value);
     }
 }

@@ -9,12 +9,12 @@ public partial class ExportDialog : Window
 {
     public ExportDialog()
     {
- InitializeComponent();
+        InitializeComponent();
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
-  DialogResult = false;
+        DialogResult = false;
         Close();
     }
 }

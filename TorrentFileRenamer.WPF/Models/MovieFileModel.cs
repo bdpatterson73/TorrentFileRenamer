@@ -16,12 +16,12 @@ public class MovieFileModel : ObservableObject
     private int _confidence;
 
     public MovieFileModel(MovieFile coreMovie, string sourceFile)
-  {
-  _coreMovie = coreMovie;
-        
+    {
+        _coreMovie = coreMovie;
+
         // Calculate confidence using MediaTypeDetector
         _confidence = MediaTypeDetector.GetMovieConfidence(sourceFile);
-        
+
         // Set initial status based on whether parsing succeeded
         _status = string.IsNullOrEmpty(coreMovie.MovieName) || coreMovie.MovieName == "Unknown Movie"
             ? ProcessingStatus.Unparsed
@@ -54,17 +54,17 @@ public class MovieFileModel : ObservableObject
     public string MovieYear => _coreMovie.MovieYear ?? string.Empty;
 
     /// <summary>
-  /// Display name with year (if available)
-  /// </summary>
-  public string DisplayName
-  {
-   get
-   {
-     if (!string.IsNullOrEmpty(MovieYear))
-       return $"{MovieName} ({MovieYear})";
-     return MovieName;
-   }
-  }
+    /// Display name with year (if available)
+    /// </summary>
+    public string DisplayName
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(MovieYear))
+                return $"{MovieName} ({MovieYear})";
+            return MovieName;
+        }
+    }
 
     /// <summary>
     /// File name only (without path)
@@ -78,11 +78,11 @@ public class MovieFileModel : ObservableObject
     {
         get
         {
-     if (string.IsNullOrEmpty(_coreMovie.NewDestDirectory))
-        return string.Empty;
-   
-       return Path.GetFileName(_coreMovie.NewDestDirectory) ?? string.Empty;
-      }
+            if (string.IsNullOrEmpty(_coreMovie.NewDestDirectory))
+                return string.Empty;
+
+            return Path.GetFileName(_coreMovie.NewDestDirectory) ?? string.Empty;
+        }
     }
 
     /// <summary>
@@ -95,28 +95,28 @@ public class MovieFileModel : ObservableObject
     /// </summary>
     public long FileSize
     {
-     get
+        get
         {
-  if (string.IsNullOrEmpty(SourcePath) || !File.Exists(SourcePath))
-     return 0;
-   
-  try
-   {
-       return new FileInfo(SourcePath).Length;
-   }
-    catch
-      {
-          return 0;
+            if (string.IsNullOrEmpty(SourcePath) || !File.Exists(SourcePath))
+                return 0;
+
+            try
+            {
+                return new FileInfo(SourcePath).Length;
+            }
+            catch
+            {
+                return 0;
+            }
         }
-  }
-  }
+    }
 
     /// <summary>
     /// Detection confidence (0-100)
     /// </summary>
     public int Confidence
     {
-      get => _confidence;
+        get => _confidence;
         set => SetProperty(ref _confidence, value);
     }
 
@@ -125,12 +125,12 @@ public class MovieFileModel : ObservableObject
     /// </summary>
     public string ConfidenceLevel
     {
-  get
+        get
         {
-        if (_confidence >= 70) return "High";
+            if (_confidence >= 70) return "High";
             if (_confidence >= 40) return "Medium";
             return "Low";
-    }
+        }
     }
 
     /// <summary>
@@ -138,17 +138,17 @@ public class MovieFileModel : ObservableObject
     /// </summary>
     public ProcessingStatus Status
     {
-get => _status;
+        get => _status;
         set
-  {
-     if (SetProperty(ref _status, value))
-  {
-      OnPropertyChanged(nameof(StatusText));
-   }
+        {
+            if (SetProperty(ref _status, value))
+            {
+                OnPropertyChanged(nameof(StatusText));
+            }
         }
     }
 
- /// <summary>
+    /// <summary>
     /// Status as display text
     /// </summary>
     public string StatusText => Status.ToString();

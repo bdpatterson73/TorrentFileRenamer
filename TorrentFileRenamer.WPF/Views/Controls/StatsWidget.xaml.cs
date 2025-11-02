@@ -9,6 +9,6 @@ public partial class StatsWidget : System.Windows.Controls.UserControl
 {
     public StatsWidget()
     {
-   InitializeComponent();
+        InitializeComponent();
     }
 }

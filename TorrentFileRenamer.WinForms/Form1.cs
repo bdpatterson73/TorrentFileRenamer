@@ -3,6 +3,7 @@ using System.Diagnostics;
 using static System.Windows.Forms.Design.AxImporter;
 using System.Runtime.InteropServices;
 using System.Text;
+
 //using TMDbLib.Client;
 //using TMDbLib.Objects.General;
 //using TMDbLib.Objects.Authentication;
@@ -22,8 +23,8 @@ namespace TorrentFileRenamer
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         public static extern int GetShortPathName([MarshalAs(UnmanagedType.LPTStr)] string path, [MarshalAs(UnmanagedType.LPTStr)] StringBuilder shortPath,
-       int shortPathLength
-       );
+            int shortPathLength
+        );
 
         // Folder monitoring service and settings
         private FolderMonitorService? _folderMonitorService;
@@ -86,8 +87,8 @@ namespace TorrentFileRenamer
 
             var textRect = new Rectangle(e.Bounds.X + 6, e.Bounds.Y, e.Bounds.Width - 6, e.Bounds.Height);
             TextRenderer.DrawText(e.Graphics, e.Header.Text, new Font("Segoe UI", 9F, FontStyle.Bold),
-                                textRect, Color.FromArgb(60, 60, 60),
-                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+                textRect, Color.FromArgb(60, 60, 60),
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
         }
 
         private void ListView_DrawItem(object? sender, DrawListViewItemEventArgs e)
@@ -117,8 +118,8 @@ namespace TorrentFileRenamer
             var textRect = new Rectangle(e.Bounds.X + 4, e.Bounds.Y, e.Bounds.Width - 4, e.Bounds.Height);
 
             TextRenderer.DrawText(e.Graphics, e.SubItem.Text, new Font("Segoe UI", 9F),
-                                textRect, textColor,
-                                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                textRect, textColor,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 
             // Draw grid lines
             using (var pen = new Pen(Color.FromArgb(230, 230, 230)))
@@ -133,7 +134,7 @@ namespace TorrentFileRenamer
             // Load application settings
             var settings = AppSettings.Load();
             ApplySettings(settings);
-            
+
             // Initialize folder monitoring service
             InitializeFolderMonitoring();
 
@@ -142,13 +143,13 @@ namespace TorrentFileRenamer
             LoggingService.LogInfo("Application started", "Startup");
 
             // Test the problematic filename parsing (remove this after testing)
-            #if DEBUG
+#if DEBUG
             FileEpisode.TestFilenameParsing(@"C:\temp\I Fought the Law 2025 S01E01 720p WEB-DL HEVC x265 BONE.mkv", @"C:\TestOutput");
             FileEpisode.TestFilenameParsing(@"C:\temp\Show Name S01E00 Pilot Episode.mkv", @"C:\TestOutput");
             FileEpisode.TestFilenameParsing(@"C:\temp\Show:Name*With?Problems S01E01.mkv", @"C:\TestOutput");
             FileEpisode.TestFilenameParsing(@"C:\temp\Unknown Show S01E01.mkv", @"C:\TestOutput");
             FileEpisode.TestFilenameParsing(@"C:\temp\Smallville - S01 E01 - Pilot (720P - Amzn Web-Dl).mp4", @"C:\TestOutput");
-            #endif
+#endif
         }
 
         private void ApplySettings(AppSettings settings)
@@ -158,23 +159,25 @@ namespace TorrentFileRenamer
                 // Apply monitoring settings with proper defaults
                 _savedWatchFolder = settings.Monitoring.WatchFolder ?? "";
                 _savedDestinationFolder = settings.Monitoring.DestinationFolder ?? "";
-                _savedFileExtensions = !string.IsNullOrEmpty(settings.Monitoring.FileExtensions) 
-                    ? settings.Monitoring.FileExtensions 
+                _savedFileExtensions = !string.IsNullOrEmpty(settings.Monitoring.FileExtensions)
+                    ? settings.Monitoring.FileExtensions
                     : "*.mp4;*.mkv;*.avi;*.m4v";
-                _savedStabilityDelay = settings.Monitoring.StabilityDelaySeconds > 0 
-                    ? settings.Monitoring.StabilityDelaySeconds 
+                _savedStabilityDelay = settings.Monitoring.StabilityDelaySeconds > 0
+                    ? settings.Monitoring.StabilityDelaySeconds
                     : 30;
                 _savedAutoStart = settings.Monitoring.AutoStartOnLoad;
                 _savedMaxAutoMonitorLogEntries = settings.Monitoring.MaxAutoMonitorLogEntries > 0
                     ? settings.Monitoring.MaxAutoMonitorLogEntries
                     : 20;
-                
-                LoggingService.LogInfo($"Settings applied - Watch: '{_savedWatchFolder}', Dest: '{_savedDestinationFolder}', Ext: '{_savedFileExtensions}', Delay: {_savedStabilityDelay}s, AutoStart: {_savedAutoStart}, MaxLogEntries: {_savedMaxAutoMonitorLogEntries}", "Settings");
+
+                LoggingService.LogInfo(
+                    $"Settings applied - Watch: '{_savedWatchFolder}', Dest: '{_savedDestinationFolder}', Ext: '{_savedFileExtensions}', Delay: {_savedStabilityDelay}s, AutoStart: {_savedAutoStart}, MaxLogEntries: {_savedMaxAutoMonitorLogEntries}",
+                    "Settings");
             }
             catch (Exception ex)
             {
                 LoggingService.LogError("Failed to apply settings", ex, "Settings");
-                
+
                 // Set safe defaults if settings loading fails
                 _savedWatchFolder = "";
                 _savedDestinationFolder = "";
@@ -190,7 +193,7 @@ namespace TorrentFileRenamer
             try
             {
                 var settings = AppSettings.Load();
-                
+
                 // Update with current values
                 settings.Monitoring.WatchFolder = _savedWatchFolder;
                 settings.Monitoring.DestinationFolder = _savedDestinationFolder;
@@ -198,7 +201,7 @@ namespace TorrentFileRenamer
                 settings.Monitoring.StabilityDelaySeconds = _savedStabilityDelay;
                 settings.Monitoring.AutoStartOnLoad = _savedAutoStart;
                 settings.Monitoring.MaxAutoMonitorLogEntries = _savedMaxAutoMonitorLogEntries;
-                
+
                 settings.Save();
                 LoggingService.LogInfo("Current settings saved", "Settings");
             }
@@ -214,18 +217,18 @@ namespace TorrentFileRenamer
             {
                 // Save settings before closing
                 SaveCurrentSettings();
-                
+
                 // Stop monitoring service
                 _folderMonitorService?.StopMonitoring();
                 _folderMonitorService?.Dispose();
-                
+
                 LoggingService.LogInfo("Application closing", "Shutdown");
             }
             catch (Exception ex)
             {
                 LoggingService.LogError("Error during application shutdown", ex, "Shutdown");
             }
-            
+
             base.OnFormClosing(e);
         }
 
@@ -234,13 +237,13 @@ namespace TorrentFileRenamer
         /// </summary>
         private bool ValidateBeforeProcessing(bool isTVEpisodes)
         {
-            var itemsToProcess = isTVEpisodes ? 
-                lvFiles.Items.Cast<ListViewItem>().Where(item => item.BackColor != Color.LightGray) :
-                lvMovies.Items.Cast<ListViewItem>().Where(item => item.BackColor != Color.LightGray);
-                
+            var itemsToProcess = isTVEpisodes
+                ? lvFiles.Items.Cast<ListViewItem>().Where(item => item.BackColor != Color.LightGray)
+                : lvMovies.Items.Cast<ListViewItem>().Where(item => item.BackColor != Color.LightGray);
+
             if (!itemsToProcess.Any())
             {
-                MessageBox.Show("No valid items to process. All items are unparsed or invalid.", 
+                MessageBox.Show("No valid items to process. All items are unparsed or invalid.",
                     "No Valid Items", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return false;
             }
@@ -248,14 +251,14 @@ namespace TorrentFileRenamer
             // Check destination paths and space for a sample of items
             var sampleItems = itemsToProcess.Take(5).ToList();
             long totalEstimatedSize = 0;
-            
+
             foreach (ListViewItem lvi in sampleItems)
             {
                 try
                 {
                     string destinationPath;
                     string sourceFile;
-                    
+
                     if (isTVEpisodes)
                     {
                         FileEpisode fe = (FileEpisode)lvi.Tag;
@@ -268,22 +271,22 @@ namespace TorrentFileRenamer
                         destinationPath = Path.GetDirectoryName(mv.NewDestDirectory);
                         sourceFile = mv.FileNamePath;
                     }
-                    
+
                     // Validate destination directory
                     var validation = PathValidator.ValidateDestinationPath(destinationPath);
                     if (!validation.IsValid)
                     {
                         var continueResult = MessageBox.Show(
                             $"Destination validation warning: {validation.Message}\n\n" +
-                            "Continue anyway?", 
-                            "Validation Warning", 
-                            MessageBoxButtons.YesNo, 
+                            "Continue anyway?",
+                            "Validation Warning",
+                            MessageBoxButtons.YesNo,
                             MessageBoxIcon.Warning);
-                            
+
                         if (continueResult != DialogResult.Yes)
                             return false;
                     }
-                    
+
                     // Add to size estimation
                     if (File.Exists(sourceFile))
                     {
@@ -296,14 +299,14 @@ namespace TorrentFileRenamer
                     Debug.WriteLine($"Validation error: {ex.Message}");
                 }
             }
-            
+
             // Extrapolate total size if we sampled
             if (sampleItems.Count < itemsToProcess.Count())
             {
                 double ratio = (double)itemsToProcess.Count() / sampleItems.Count;
                 totalEstimatedSize = (long)(totalEstimatedSize * ratio);
             }
-            
+
             return true;
         }
 
@@ -347,25 +350,25 @@ TIPS:
         {
             statusLabel.Text = "Scanning for TV episodes...";
             statusProgress.Value = 0;
-            
+
             frmScanOptions options = new frmScanOptions();
             DialogResult dr = options.ShowDialog();
             if (dr == DialogResult.OK)
             {
                 // Create cancellation token for long operations
                 using var cts = new CancellationTokenSource();
-                
+
                 try
                 {
                     // Use async file enumeration for better performance
-                    var allFiles = await Task.Run(() => 
+                    var allFiles = await Task.Run(() =>
                         Directory.EnumerateFiles(options.VideoPath, "*.*", SearchOption.AllDirectories)
-                        .Where(f => f.EndsWith(options.FileExtension, StringComparison.OrdinalIgnoreCase))
-                        .ToArray(), cts.Token);
-                    
+                            .Where(f => f.EndsWith(options.FileExtension, StringComparison.OrdinalIgnoreCase))
+                            .ToArray(), cts.Token);
+
                     statusProgress.Maximum = allFiles.Length;
                     statusProgress.Value = 0;
-                    
+
                     int totalVideoFiles = 0;
                     int likelyMoviesSkipped = 0;
                     int validEpisodes = 0;
@@ -376,25 +379,27 @@ TIPS:
                     for (int i = 0; i < allFiles.Length; i += batchSize)
                     {
                         var batch = allFiles.Skip(i).Take(batchSize);
-                        
-                        await Task.Run(() => {
+
+                        await Task.Run(() =>
+                        {
                             foreach (string s in batch)
                             {
                                 if (cts.Token.IsCancellationRequested)
                                     return;
-                                    
-                                ProcessFileForScan(s, options, ref totalVideoFiles, ref likelyMoviesSkipped, 
-                                                 ref validEpisodes, ref unparsedFiles);
+
+                                ProcessFileForScan(s, options, ref totalVideoFiles, ref likelyMoviesSkipped,
+                                    ref validEpisodes, ref unparsedFiles);
                             }
                         }, cts.Token);
-                        
+
                         // Update UI on main thread
                         statusProgress.Value = Math.Min(i + batchSize, allFiles.Length);
                         Application.DoEvents();
                     }
-                    
-                    statusLabel.Text = $"TV scan completed: {validEpisodes} episodes found, {unparsedFiles} unparsed, {likelyMoviesSkipped} movies skipped from {totalVideoFiles} total files at {DateTime.Now:HH:mm:ss}";
-                    
+
+                    statusLabel.Text =
+                        $"TV scan completed: {validEpisodes} episodes found, {unparsedFiles} unparsed, {likelyMoviesSkipped} movies skipped from {totalVideoFiles} total files at {DateTime.Now:HH:mm:ss}";
+
                     // Show summary if useful
                     if (totalVideoFiles > 0)
                     {
@@ -407,19 +412,19 @@ TIPS:
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    MessageBox.Show("Access denied to source directory. Please check permissions.", 
+                    MessageBox.Show("Access denied to source directory. Please check permissions.",
                         "Access Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Scan failed - Access denied";
                 }
                 catch (DirectoryNotFoundException)
                 {
-                    MessageBox.Show("Source directory not found. Please verify the path.", 
+                    MessageBox.Show("Source directory not found. Please verify the path.",
                         "Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Scan failed - Directory not found";
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error during scan: {ex.Message}", 
+                    MessageBox.Show($"Error during scan: {ex.Message}",
                         "Scan Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Scan failed - Error occurred";
                     Debug.WriteLine($"Scan error: {ex}");
@@ -432,16 +437,16 @@ TIPS:
             }
         }
 
-        private void ProcessFileForScan(string filePath, frmScanOptions options, 
-            ref int totalVideoFiles, ref int likelyMoviesSkipped, 
+        private void ProcessFileForScan(string filePath, frmScanOptions options,
+            ref int totalVideoFiles, ref int likelyMoviesSkipped,
             ref int validEpisodes, ref int unparsedFiles)
         {
             totalVideoFiles++;
-            
+
             // Check if this file is likely a movie and should be skipped
             int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(filePath);
             int movieConfidence = MediaTypeDetector.GetMovieConfidence(filePath);
-            
+
             // Skip files that seem more like movies than TV episodes
             if (movieConfidence > tvConfidence && movieConfidence > 40)
             {
@@ -449,24 +454,22 @@ TIPS:
                 Debug.WriteLine($"Skipping likely movie: {Path.GetFileName(filePath)} (Movie: {movieConfidence}%, TV: {tvConfidence}%)");
                 return;
             }
-            
+
             FileEpisode fe = new FileEpisode(filePath, options.OutputDirectory);
-            
+
             // Create local variables to avoid ref parameter issue in lambda
             int localValidEpisodes = validEpisodes;
             int localUnparsedFiles = unparsedFiles;
-            
+
             // Process on main thread since it involves UI updates
-            Invoke(new Action(() => {
-                AddFileToList(fe, ref localValidEpisodes, ref localUnparsedFiles, tvConfidence, movieConfidence);
-            }));
-            
+            Invoke(new Action(() => { AddFileToList(fe, ref localValidEpisodes, ref localUnparsedFiles, tvConfidence, movieConfidence); }));
+
             // Update the original ref parameters
             validEpisodes = localValidEpisodes;
             unparsedFiles = localUnparsedFiles;
         }
 
-        private void AddFileToList(FileEpisode fe, ref int validEpisodes, ref int unparsedFiles, 
+        private void AddFileToList(FileEpisode fe, ref int validEpisodes, ref int unparsedFiles,
             int tvConfidence, int movieConfidence)
         {
             // Allow episode 0 for special episodes - only exclude truly invalid parsing
@@ -480,9 +483,8 @@ TIPS:
                     if (fe.PlexValidation.SuggestedAction == PlexValidationAction.PromptUser)
                     {
                         string issuesText = string.Join("\n• ", fe.PlexValidation.Issues);
-                        string warningsText = fe.PlexValidation.Warnings.Any() ? 
-                            "\n\nWarnings:\n• " + string.Join("\n• ", fe.PlexValidation.Warnings) : "";
-                        
+                        string warningsText = fe.PlexValidation.Warnings.Any() ? "\n\nWarnings:\n• " + string.Join("\n• ", fe.PlexValidation.Warnings) : "";
+
                         var result = MessageBox.Show(
                             $"Plex Compatibility Issues Found:\n• {issuesText}{warningsText}\n\n" +
                             $"Original file: {Path.GetFileName(fe.FullFilePath)}\n" +
@@ -517,7 +519,7 @@ TIPS:
                     lvi.SubItems.Add(fe.NewFileNamePath);
                     lvi.SubItems.Add(fe.ShowName);
                     lvi.SubItems.Add(fe.SeasonNumber.ToString());
-                    
+
                     // Display episode numbers - show all episodes if multi-episode
                     string episodeDisplay;
                     if (fe.IsMultiEpisode)
@@ -528,8 +530,9 @@ TIPS:
                     {
                         episodeDisplay = fe.EpisodeNumber.ToString();
                     }
+
                     lvi.SubItems.Add(episodeDisplay);
-                    
+
                     // Add status based on Plex validation
                     string status = "";
                     if (fe.PlexValidation != null)
@@ -541,14 +544,15 @@ TIPS:
                         else
                             status = "✅ Plex Compatible";
                     }
+
                     lvi.SubItems.Add(status);
-                    
+
                     lvi.Tag = fe;
-                    
+
                     // Color code based on Plex validation
                     if (fe.PlexValidation != null && fe.PlexValidation.Warnings.Any())
                         lvi.BackColor = Color.LightYellow;
-                    
+
                     lvFiles.Items.Add(lvi);
                 }
             }
@@ -580,18 +584,18 @@ TIPS:
         private async Task ShowScanSummary(int totalVideoFiles, int validEpisodes, int unparsedFiles, int likelyMoviesSkipped)
         {
             await Task.Delay(100); // Brief delay for UI responsiveness
-            
+
             string summary = $"Scan Results:\n" +
-                           $"Total video files: {totalVideoFiles}\n" +
-                           $"Valid TV episodes: {validEpisodes}\n" +
-                           $"Unparsed files: {unparsedFiles}\n" +
-                           $"Movies skipped: {likelyMoviesSkipped}";
-            
+                             $"Total video files: {totalVideoFiles}\n" +
+                             $"Valid TV episodes: {validEpisodes}\n" +
+                             $"Unparsed files: {unparsedFiles}\n" +
+                             $"Movies skipped: {likelyMoviesSkipped}";
+
             if (unparsedFiles > 0)
             {
                 summary += "\n\nTip: Review unparsed files (gray) and remove them if they're not TV episodes.";
             }
-            
+
             MessageBox.Show(summary, "Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -612,6 +616,7 @@ TIPS:
                     System.Threading.Thread.Sleep(5000);
                 }
             }
+
             return false;
         }
 
@@ -622,7 +627,7 @@ TIPS:
         {
             if (lvFiles.Items.Count == 0)
             {
-                MessageBox.Show("No TV episodes to process. Please scan for files first.", 
+                MessageBox.Show("No TV episodes to process. Please scan for files first.",
                     "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -634,24 +639,24 @@ TIPS:
             // Ask for user confirmation
             int validItems = lvFiles.Items.Cast<ListViewItem>()
                 .Count(item => item.BackColor != Color.LightGray);
-            
+
             var result = MessageBox.Show(
                 $"Process {validItems} TV episode(s)?\n\nThis will:\n" +
                 "1. Copy files to the server\n" +
                 "2. Verify file sizes match\n" +
                 "3. Delete original files if verification succeeds\n\n" +
-                "Continue?", 
-                "Confirm Processing", 
-                MessageBoxButtons.YesNo, 
+                "Continue?",
+                "Confirm Processing",
+                MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
-                
+
             if (result != DialogResult.Yes)
                 return;
 
             // Initialize processing with cancellation support
             using var cts = new CancellationTokenSource();
             var progress = new Progress<ProcessingProgress>(UpdateProcessingProgress);
-            
+
             try
             {
                 await ProcessFilesAsync(validItems, progress, cts.Token);
@@ -665,7 +670,7 @@ TIPS:
             {
                 statusLabel.Text = "Processing failed with error";
                 LoggingService.LogError("File processing failed", ex, "Processing");
-                MessageBox.Show($"Processing failed: {ex.Message}", "Error", 
+                MessageBox.Show($"Processing failed: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -676,24 +681,24 @@ TIPS:
             int successfulCopies = 0;
             int successfulDeletions = 0;
             int errors = 0;
-            
+
             statusProgress.Maximum = totalItems;
             DateTime startTime = DateTime.Now;
-            
+
             var itemsToProcess = lvFiles.Items.Cast<ListViewItem>()
                 .Where(item => item.BackColor != Color.LightGray)
                 .ToList();
 
             // Phase 1: Copy files
             LoggingService.LogInfo($"Starting to process {totalItems} files", "Processing");
-            
+
             foreach (var lvi in itemsToProcess)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 FileEpisode fe = (FileEpisode)lvi.Tag;
                 processedCount++;
-                
+
                 var currentProgress = new ProcessingProgress
                 {
                     CurrentFile = Path.GetFileName(fe.FullFilePath),
@@ -702,9 +707,9 @@ TIPS:
                     Phase = ProcessingPhase.Copying,
                     Message = $"Copying {processedCount}/{totalItems}: {Path.GetFileName(fe.FullFilePath)}"
                 };
-                
+
                 progress.Report(currentProgress);
-                
+
                 try
                 {
                     if (!Directory.Exists(fe.NewDirectoryName))
@@ -718,9 +723,10 @@ TIPS:
                         () => CopyFileAsync(fe.FullFilePath, fe.NewFileNamePath),
                         maxRetries: 5,
                         cancellationToken);
-                    
+
                     // Update UI on the UI thread
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         if (retVal)
                         {
                             lvi.BackColor = Color.Yellow;
@@ -739,32 +745,34 @@ TIPS:
                 catch (Exception ex)
                 {
                     // Update UI on the UI thread
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         lvi.BackColor = Color.Red;
                         lvi.SubItems[5].Text = $"Error: {ex.Message}";
                         errors++;
                     }));
                     LoggingService.LogError($"Error processing {fe.FullFilePath}", ex, "Processing");
                 }
-                
+
                 // Update UI
-                Invoke(new Action(() => {
+                Invoke(new Action(() =>
+                {
                     lvFiles.EnsureVisible(itemsToProcess.IndexOf(lvi));
                     lvFiles.Refresh();
                 }));
             }
-            
+
             // Phase 2: Verify and cleanup
             LoggingService.LogInfo("Starting verification and cleanup phase", "Processing");
             processedCount = 0;
-            
+
             foreach (var lvi in itemsToProcess.Where(item => item.BackColor == Color.Yellow))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 FileEpisode fe = (FileEpisode)lvi.Tag;
                 processedCount++;
-                
+
                 var currentProgress = new ProcessingProgress
                 {
                     CurrentFile = Path.GetFileName(fe.FullFilePath),
@@ -773,19 +781,20 @@ TIPS:
                     Phase = ProcessingPhase.Verifying,
                     Message = $"Verifying and cleaning up {processedCount}/{successfulCopies}"
                 };
-                
+
                 progress.Report(currentProgress);
-                
+
                 try
                 {
-                    await Task.Run(() => {
+                    await Task.Run(() =>
+                    {
                         FileInfo fiLocal = new FileInfo(fe.FullFilePath);
                         FileInfo fiRemote = new FileInfo(fe.NewFileNamePath);
-                        
+
                         // Prepare the UI updates on the background thread but don't execute them yet
                         string statusMessage;
                         Color statusColor;
-                        
+
                         if (!fiRemote.Exists)
                         {
                             statusMessage = "Remote file not found";
@@ -808,19 +817,20 @@ TIPS:
                             errors++;
                             LoggingService.LogWarning($"Size mismatch for {fe.FullFilePath}: Local={fiLocal.Length}, Remote={fiRemote.Length}", "Processing");
                         }
-                        
+
                         // Now update the UI on the UI thread
-                        Invoke(new Action(() => {
+                        Invoke(new Action(() =>
+                        {
                             lvi.SubItems[5].Text = statusMessage;
                             lvi.BackColor = statusColor;
                         }));
-                        
                     }, cancellationToken);
                 }
                 catch (Exception ex)
                 {
                     // Update UI on the UI thread
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         lvi.SubItems[5].Text = $"Cleanup error: {ex.Message}";
                         lvi.BackColor = Color.Red;
                         errors++;
@@ -828,12 +838,12 @@ TIPS:
                     LoggingService.LogError($"Cleanup error for {fe.FullFilePath}", ex, "Processing");
                 }
             }
-            
+
             // Final summary
             TimeSpan duration = DateTime.Now - startTime;
             string finalMessage = $"Processing completed in {duration.Minutes}m {duration.Seconds}s - " +
-                                $"Copied: {successfulCopies}, Deleted: {successfulDeletions}, Errors: {errors}";
-            
+                                  $"Copied: {successfulCopies}, Deleted: {successfulDeletions}, Errors: {errors}";
+
             progress.Report(new ProcessingProgress
             {
                 Phase = ProcessingPhase.Complete,
@@ -841,29 +851,29 @@ TIPS:
                 ProcessedCount = totalItems,
                 TotalCount = totalItems
             });
-            
+
             LoggingService.LogInfo($"Processing completed: Copied={successfulCopies}, Deleted={successfulDeletions}, Errors={errors}, Duration={duration}", "Processing");
-            
+
             // Show completion summary
             string summary = $"TV Episode Processing Complete!\n\n" +
-                           $"Files processed: {totalItems}\n" +
-                           $"Successfully copied: {successfulCopies}\n" +
-                           $"Original files deleted: {successfulDeletions}\n" +
-                           $"Errors: {errors}\n" +
-                           $"Duration: {duration.Minutes}m {duration.Seconds}s";
-                           
-            MessageBox.Show(summary, "Processing Complete", 
-                MessageBoxButtons.OK, 
+                             $"Files processed: {totalItems}\n" +
+                             $"Successfully copied: {successfulCopies}\n" +
+                             $"Original files deleted: {successfulDeletions}\n" +
+                             $"Errors: {errors}\n" +
+                             $"Duration: {duration.Minutes}m {duration.Seconds}s";
+
+            MessageBox.Show(summary, "Processing Complete",
+                MessageBoxButtons.OK,
                 errors > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
         }
 
         private async Task<bool> CopyFileAsync(string source, string destination)
         {
             const int bufferSize = 8192; // 8KB buffer
-            
+
             using var sourceStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, true);
             using var destinationStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, true);
-            
+
             await sourceStream.CopyToAsync(destinationStream);
             return true;
         }
@@ -890,6 +900,7 @@ TIPS:
                     await Task.Delay(5000, cancellationToken);
                 }
             }
+
             return false;
         }
 
@@ -900,7 +911,7 @@ TIPS:
                 Invoke(new Action<ProcessingProgress>(UpdateProcessingProgress), progress);
                 return;
             }
-            
+
             statusLabel.Text = progress.Message;
             statusProgress.Value = progress.ProcessedCount;
             statusProgress.Maximum = progress.TotalCount;
@@ -930,14 +941,14 @@ TIPS:
             try
             {
                 var logs = LoggingService.GetRecentLogs(200);
-                
+
                 var logForm = new Form
                 {
                     Text = "Application Logs",
                     Size = new Size(800, 600),
                     StartPosition = FormStartPosition.CenterParent
                 };
-                
+
                 var textBox = new TextBox
                 {
                     Multiline = true,
@@ -947,13 +958,13 @@ TIPS:
                     ReadOnly = true,
                     Text = string.Join(Environment.NewLine, logs)
                 };
-                
+
                 logForm.Controls.Add(textBox);
                 logForm.ShowDialog();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to show logs: {ex.Message}", "Error", 
+                MessageBox.Show($"Failed to show logs: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -1005,12 +1016,12 @@ TIPS:
                     lvFiles.Items.Remove(lvi);
                     removedCount++;
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     Debug.WriteLine($"Error removing TV episode item: {ex.Message}");
                 }
             }
-            
+
             statusLabel.Text = $"Removed {removedCount} TV episode item(s) from list";
         }
 
@@ -1038,12 +1049,12 @@ TIPS:
                     lvMovies.Items.Remove(lvi);
                     removedCount++;
                 }
-                catch (Exception ex) 
+                catch (Exception ex)
                 {
                     Debug.WriteLine($"Error removing movie item: {ex.Message}");
                 }
             }
-            
+
             statusLabel.Text = $"Removed {removedCount} movie item(s) from list";
         }
 
@@ -1077,7 +1088,7 @@ TIPS:
             try
             {
                 _folderMonitorService = new FolderMonitorService();
-                
+
                 // Subscribe to events
                 _folderMonitorService.StatusChanged += FolderMonitorService_StatusChanged;
                 _folderMonitorService.FileFound += FolderMonitorService_FileFound;
@@ -1088,13 +1099,13 @@ TIPS:
                 LoadMonitoringSettings();
 
                 // Auto-start only if explicitly enabled AND valid configuration exists
-                if (_savedAutoStart && 
-                    !string.IsNullOrWhiteSpace(_savedWatchFolder) && 
+                if (_savedAutoStart &&
+                    !string.IsNullOrWhiteSpace(_savedWatchFolder) &&
                     !string.IsNullOrWhiteSpace(_savedDestinationFolder) &&
                     Directory.Exists(_savedWatchFolder))
                 {
                     LoggingService.LogInfo($"Auto-starting monitoring: Watch='{_savedWatchFolder}', Dest='{_savedDestinationFolder}'", "AutoMonitor");
-                    
+
                     bool started = ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay);
                     if (!started)
                     {
@@ -1103,12 +1114,14 @@ TIPS:
                 }
                 else
                 {
-                    LoggingService.LogInfo($"Auto-monitoring not started - AutoStart: {_savedAutoStart}, ValidConfig: {!string.IsNullOrWhiteSpace(_savedWatchFolder) && !string.IsNullOrWhiteSpace(_savedDestinationFolder)}", "AutoMonitor");
+                    LoggingService.LogInfo(
+                        $"Auto-monitoring not started - AutoStart: {_savedAutoStart}, ValidConfig: {!string.IsNullOrWhiteSpace(_savedWatchFolder) && !string.IsNullOrWhiteSpace(_savedDestinationFolder)}",
+                        "AutoMonitor");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error initializing folder monitoring: {ex.Message}", 
+                MessageBox.Show($"Error initializing folder monitoring: {ex.Message}",
                     "Monitoring Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 LoggingService.LogError("Failed to initialize folder monitoring", ex, "AutoMonitor");
             }
@@ -1206,7 +1219,7 @@ TIPS:
             lvi.SubItems.Add("Auto");
             lvi.SubItems.Add("Auto");
             lvi.SubItems.Add($"{e.Message} at {e.ProcessedAt:HH:mm:ss}");
-            
+
             // Insert newest items right after the monitoring status item (most recent first)
             int insertIndex = _monitoringStatusItem != null ? 1 : 0;
             if (insertIndex <= lvFiles.Items.Count)
@@ -1221,9 +1234,9 @@ TIPS:
             // Keep only the configured number of auto-processed items to avoid cluttering
             var autoItems = lvFiles.Items.Cast<ListViewItem>()
                 .Where(item => item.Text.StartsWith("🔄"))
-                .Skip(_savedMaxAutoMonitorLogEntries)  // Keep only the first N items, remove the rest
+                .Skip(_savedMaxAutoMonitorLogEntries) // Keep only the first N items, remove the rest
                 .ToList();
-            
+
             foreach (var item in autoItems)
             {
                 lvFiles.Items.Remove(item);
@@ -1271,7 +1284,7 @@ TIPS:
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error starting monitoring: {ex.Message}", 
+                MessageBox.Show($"Error starting monitoring: {ex.Message}",
                     "Monitoring Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
@@ -1291,7 +1304,7 @@ TIPS:
                     configForm.StabilityDelaySeconds = _savedStabilityDelay;
                     configForm.AutoStartOnLoad = _savedAutoStart;
                     configForm.MaxAutoMonitorLogEntries = _savedMaxAutoMonitorLogEntries;
-                    
+
                     // Show config form as dialog
                     DialogResult result = configForm.ShowDialog();
                     if (result == DialogResult.OK)
@@ -1303,33 +1316,33 @@ TIPS:
                         _savedStabilityDelay = configForm.StabilityDelaySeconds;
                         _savedAutoStart = configForm.AutoStartOnLoad;
                         _savedMaxAutoMonitorLogEntries = configForm.MaxAutoMonitorLogEntries;
-                        
+
                         // Save settings to persistent storage
                         SaveCurrentSettings();
-                        
+
                         // Stop current monitoring if running
                         if (_folderMonitorService != null && _folderMonitorService.IsMonitoring)
                         {
                             _folderMonitorService.StopMonitoring();
                         }
-                        
+
                         // Start monitoring with new settings if auto-start is enabled
                         if (_savedAutoStart && !string.IsNullOrWhiteSpace(_savedWatchFolder) && !string.IsNullOrWhiteSpace(_savedDestinationFolder))
                         {
                             if (ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay))
                             {
-                                MessageBox.Show("Auto-monitoring configured and started successfully!", 
+                                MessageBox.Show("Auto-monitoring configured and started successfully!",
                                     "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                             }
                             else
                             {
-                                MessageBox.Show("Auto-monitoring configuration saved, but failed to start monitoring. Please check the settings.", 
+                                MessageBox.Show("Auto-monitoring configuration saved, but failed to start monitoring. Please check the settings.",
                                     "Partial Success", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             }
                         }
                         else
                         {
-                            MessageBox.Show("Auto-monitoring settings saved. Use 'Start/Stop Monitoring' to begin monitoring.", 
+                            MessageBox.Show("Auto-monitoring settings saved. Use 'Start/Stop Monitoring' to begin monitoring.",
                                 "Settings Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                     }
@@ -1337,7 +1350,7 @@ TIPS:
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error configuring auto-monitor: {ex.Message}", 
+                MessageBox.Show($"Error configuring auto-monitor: {ex.Message}",
                     "Configuration Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 LoggingService.LogError("Failed to configure auto-monitoring", ex, "AutoMonitor");
             }
@@ -1347,7 +1360,7 @@ TIPS:
         {
             if (_folderMonitorService == null)
             {
-                MessageBox.Show("Monitoring service not initialized.", "Service Error", 
+                MessageBox.Show("Monitoring service not initialized.", "Service Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -1356,7 +1369,7 @@ TIPS:
             {
                 // Stop monitoring
                 _folderMonitorService.StopMonitoring();
-                MessageBox.Show("Auto-monitoring stopped.", "Monitoring Stopped", 
+                MessageBox.Show("Auto-monitoring stopped.", "Monitoring Stopped",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 LoggingService.LogInfo("Auto-monitoring stopped by user", "AutoMonitor");
             }
@@ -1365,9 +1378,9 @@ TIPS:
                 // Try to start monitoring with current settings
                 if (string.IsNullOrWhiteSpace(_savedWatchFolder) || string.IsNullOrWhiteSpace(_savedDestinationFolder))
                 {
-                    var result = MessageBox.Show("No monitoring configuration found. Would you like to configure monitoring now?", 
+                    var result = MessageBox.Show("No monitoring configuration found. Would you like to configure monitoring now?",
                         "Configuration Required", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    
+
                     if (result == DialogResult.Yes)
                     {
                         miAutoMonitor_Click(sender, e);
@@ -1379,16 +1392,16 @@ TIPS:
                     if (ConfigureAndStartMonitoring(_savedWatchFolder, _savedDestinationFolder, _savedFileExtensions, _savedStabilityDelay))
                     {
                         MessageBox.Show($"Auto-monitoring started successfully!\n\n" +
-                                      $"Watch folder: {_savedWatchFolder}\n" +
-                                      $"Destination: {_savedDestinationFolder}\n" +
-                                      $"Extensions: {_savedFileExtensions}\n" +
-                                      $"Stability delay: {_savedStabilityDelay} seconds", 
-                                      "Monitoring Started", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        $"Watch folder: {_savedWatchFolder}\n" +
+                                        $"Destination: {_savedDestinationFolder}\n" +
+                                        $"Extensions: {_savedFileExtensions}\n" +
+                                        $"Stability delay: {_savedStabilityDelay} seconds",
+                            "Monitoring Started", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         LoggingService.LogInfo($"Auto-monitoring started - Watch: {_savedWatchFolder}, Dest: {_savedDestinationFolder}", "AutoMonitor");
                     }
                     else
                     {
-                        MessageBox.Show("Failed to start monitoring. Please check your configuration.", 
+                        MessageBox.Show("Failed to start monitoring. Please check your configuration.",
                             "Start Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
@@ -1399,15 +1412,15 @@ TIPS:
         {
             if (_folderMonitorService == null)
             {
-                MessageBox.Show("Monitoring service not initialized.", "Status", 
+                MessageBox.Show("Monitoring service not initialized.", "Status",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             string status = _folderMonitorService.IsMonitoring ? "Running" : "Stopped";
-            
+
             string statusDetails = $"Auto-Monitoring Status: {status}\n\n";
-            
+
             if (!string.IsNullOrWhiteSpace(_savedWatchFolder))
             {
                 statusDetails += $"Watch Folder: {_savedWatchFolder}\n";
@@ -1415,7 +1428,7 @@ TIPS:
                 statusDetails += $"File Extensions: {_savedFileExtensions}\n";
                 statusDetails += $"Stability Delay: {_savedStabilityDelay} seconds\n";
                 statusDetails += $"Auto-start on Load: {(_savedAutoStart ? "Yes" : "No")}\n\n";
-                
+
                 if (_folderMonitorService.IsMonitoring)
                 {
                     statusDetails += "The service is actively monitoring for new TV episode files.";
@@ -1430,8 +1443,8 @@ TIPS:
                 statusDetails += "No monitoring configuration found.\n";
                 statusDetails += "Use 'Configure Auto-Monitor' to set up monitoring.";
             }
-            
-            MessageBox.Show(statusDetails, "Monitoring Status", 
+
+            MessageBox.Show(statusDetails, "Monitoring Status",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -1442,25 +1455,25 @@ TIPS:
         {
             statusLabel.Text = "Scanning for movies...";
             statusProgress.Value = 0;
-            
+
             frmScanMovies options = new frmScanMovies();
             DialogResult dr = options.ShowDialog();
             if (dr == DialogResult.OK)
             {
                 // Create cancellation token for long operations
                 using var cts = new CancellationTokenSource();
-                
+
                 try
                 {
                     // Use async file enumeration for better performance
-                    var allFiles = await Task.Run(() => 
+                    var allFiles = await Task.Run(() =>
                         Directory.EnumerateFiles(options.VideoPath, "*.*", SearchOption.AllDirectories)
-                        .Where(f => f.EndsWith(options.FileExtension, StringComparison.OrdinalIgnoreCase))
-                        .ToArray(), cts.Token);
-                    
+                            .Where(f => f.EndsWith(options.FileExtension, StringComparison.OrdinalIgnoreCase))
+                            .ToArray(), cts.Token);
+
                     statusProgress.Maximum = allFiles.Length;
                     statusProgress.Value = 0;
-                    
+
                     int totalVideoFiles = 0;
                     int likelyTVShowsSkipped = 0;
                     int validMovies = 0;
@@ -1471,25 +1484,27 @@ TIPS:
                     for (int i = 0; i < allFiles.Length; i += batchSize)
                     {
                         var batch = allFiles.Skip(i).Take(batchSize);
-                        
-                        await Task.Run(() => {
+
+                        await Task.Run(() =>
+                        {
                             foreach (string s in batch)
                             {
                                 if (cts.Token.IsCancellationRequested)
                                     return;
-                                    
-                                ProcessMovieFileForScan(s, options, ref totalVideoFiles, ref likelyTVShowsSkipped, 
-                                                       ref validMovies, ref unparsedFiles);
+
+                                ProcessMovieFileForScan(s, options, ref totalVideoFiles, ref likelyTVShowsSkipped,
+                                    ref validMovies, ref unparsedFiles);
                             }
                         }, cts.Token);
-                        
+
                         // Update UI on main thread
                         statusProgress.Value = Math.Min(i + batchSize, allFiles.Length);
                         Application.DoEvents();
                     }
-                    
-                    statusLabel.Text = $"Movie scan completed: {validMovies} movies found, {unparsedFiles} unparsed, {likelyTVShowsSkipped} TV shows skipped from {totalVideoFiles} total files at {DateTime.Now:HH:mm:ss}";
-                    
+
+                    statusLabel.Text =
+                        $"Movie scan completed: {validMovies} movies found, {unparsedFiles} unparsed, {likelyTVShowsSkipped} TV shows skipped from {totalVideoFiles} total files at {DateTime.Now:HH:mm:ss}";
+
                     // Show summary if useful
                     if (totalVideoFiles > 0)
                     {
@@ -1502,19 +1517,19 @@ TIPS:
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    MessageBox.Show("Access denied to source directory. Please check permissions.", 
+                    MessageBox.Show("Access denied to source directory. Please check permissions.",
                         "Access Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Movie scan failed - Access denied";
                 }
                 catch (DirectoryNotFoundException)
                 {
-                    MessageBox.Show("Source directory not found. Please verify the path.", 
+                    MessageBox.Show("Source directory not found. Please verify the path.",
                         "Directory Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Movie scan failed - Directory not found";
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error during movie scan: {ex.Message}", 
+                    MessageBox.Show($"Error during movie scan: {ex.Message}",
                         "Scan Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     statusLabel.Text = "Movie scan failed - Error occurred";
                     Debug.WriteLine($"Movie scan error: {ex}");
@@ -1527,16 +1542,16 @@ TIPS:
             }
         }
 
-        private void ProcessMovieFileForScan(string filePath, frmScanMovies options, 
-            ref int totalVideoFiles, ref int likelyTVShowsSkipped, 
+        private void ProcessMovieFileForScan(string filePath, frmScanMovies options,
+            ref int totalVideoFiles, ref int likelyTVShowsSkipped,
             ref int validMovies, ref int unparsedFiles)
         {
             totalVideoFiles++;
-            
+
             // Check if this file is likely a TV show and should be skipped
             int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(filePath);
             int movieConfidence = MediaTypeDetector.GetMovieConfidence(filePath);
-            
+
             // Skip files that seem more like TV shows than movies
             if (tvConfidence > movieConfidence && tvConfidence > 40)
             {
@@ -1544,24 +1559,22 @@ TIPS:
                 Debug.WriteLine($"Skipping likely TV show: {Path.GetFileName(filePath)} (TV: {tvConfidence}%, Movie: {movieConfidence}%)");
                 return;
             }
-            
+
             MovieFile mv = new MovieFile(filePath, options.OutputDirectory);
-            
+
             // Create local variables to avoid ref parameter issue in lambda
             int localValidMovies = validMovies;
             int localUnparsedFiles = unparsedFiles;
-            
+
             // Process on main thread since it involves UI updates
-            Invoke(new Action(() => {
-                AddMovieToList(mv, ref localValidMovies, ref localUnparsedFiles, tvConfidence, movieConfidence);
-            }));
-            
+            Invoke(new Action(() => { AddMovieToList(mv, ref localValidMovies, ref localUnparsedFiles, tvConfidence, movieConfidence); }));
+
             // Update the original ref parameters
             validMovies = localValidMovies;
             unparsedFiles = localUnparsedFiles;
         }
 
-        private void AddMovieToList(MovieFile mv, ref int validMovies, ref int unparsedFiles, 
+        private void AddMovieToList(MovieFile mv, ref int validMovies, ref int unparsedFiles,
             int tvConfidence, int movieConfidence)
         {
             // Only exclude movies with completely invalid parsing
@@ -1603,18 +1616,18 @@ TIPS:
         private async Task ShowMovieScanSummary(int totalVideoFiles, int validMovies, int unparsedFiles, int likelyTVShowsSkipped)
         {
             await Task.Delay(100); // Brief delay for UI responsiveness
-            
+
             string summary = $"Movie Scan Results:\n" +
-                           $"Total video files: {totalVideoFiles}\n" +
-                           $"Valid movies: {validMovies}\n" +
-                           $"Unparsed files: {unparsedFiles}\n" +
-                           $"TV shows skipped: {likelyTVShowsSkipped}";
-            
+                             $"Total video files: {totalVideoFiles}\n" +
+                             $"Valid movies: {validMovies}\n" +
+                             $"Unparsed files: {unparsedFiles}\n" +
+                             $"TV shows skipped: {likelyTVShowsSkipped}";
+
             if (unparsedFiles > 0)
             {
                 summary += "\n\nTip: Review unparsed files (gray) and remove them if they're not movies.";
             }
-            
+
             MessageBox.Show(summary, "Movie Scan Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -1625,7 +1638,7 @@ TIPS:
         {
             if (lvMovies.Items.Count == 0)
             {
-                MessageBox.Show("No movies to process. Please scan for movie files first.", 
+                MessageBox.Show("No movies to process. Please scan for movie files first.",
                     "No Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -1637,25 +1650,25 @@ TIPS:
             // Ask for user confirmation
             int validItems = lvMovies.Items.Cast<ListViewItem>()
                 .Count(item => item.BackColor != Color.LightGray);
-            
+
             var result = MessageBox.Show(
                 $"Process {validItems} movie(s)?\n\nThis will:\n" +
                 "1. Copy files to the destination server\n" +
                 "2. Organize movies alphabetically\n" +
                 "3. Verify file sizes match\n" +
                 "4. Delete original files if verification succeeds\n\n" +
-                "Continue?", 
-                "Confirm Movie Processing", 
-                MessageBoxButtons.YesNo, 
+                "Continue?",
+                "Confirm Movie Processing",
+                MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question);
-                
+
             if (result != DialogResult.Yes)
                 return;
 
             // Initialize processing with cancellation support
             using var cts = new CancellationTokenSource();
             var progress = new Progress<ProcessingProgress>(UpdateProcessingProgress);
-            
+
             try
             {
                 await ProcessMovieFilesAsync(validItems, progress, cts.Token);
@@ -1669,7 +1682,7 @@ TIPS:
             {
                 statusLabel.Text = "Movie processing failed with error";
                 LoggingService.LogError("Movie processing failed", ex, "Processing");
-                MessageBox.Show($"Movie processing failed: {ex.Message}", "Error", 
+                MessageBox.Show($"Movie processing failed: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -1680,24 +1693,24 @@ TIPS:
             int successfulCopies = 0;
             int successfulDeletions = 0;
             int errors = 0;
-            
+
             statusProgress.Maximum = totalItems;
             DateTime startTime = DateTime.Now;
-            
+
             var itemsToProcess = lvMovies.Items.Cast<ListViewItem>()
                 .Where(item => item.BackColor != Color.LightGray)
                 .ToList();
 
             // Phase 1: Copy files
             LoggingService.LogInfo($"Starting to process {totalItems} movie files", "Processing");
-            
+
             foreach (var lvi in itemsToProcess)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 MovieFile mv = (MovieFile)lvi.Tag;
                 processedCount++;
-                
+
                 var currentProgress = new ProcessingProgress
                 {
                     CurrentFile = Path.GetFileName(mv.FileNamePath),
@@ -1706,9 +1719,9 @@ TIPS:
                     Phase = ProcessingPhase.Copying,
                     Message = $"Copying movie {processedCount}/{totalItems}: {Path.GetFileName(mv.FileNamePath)}"
                 };
-                
+
                 progress.Report(currentProgress);
-                
+
                 try
                 {
                     string destinationDir = Path.GetDirectoryName(mv.NewDestDirectory);
@@ -1723,9 +1736,10 @@ TIPS:
                         () => CopyFileAsync(mv.FileNamePath, mv.NewDestDirectory),
                         maxRetries: 5,
                         cancellationToken);
-                    
+
                     // Update UI on the UI thread
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         if (retVal)
                         {
                             lvi.BackColor = Color.Yellow;
@@ -1744,32 +1758,34 @@ TIPS:
                 catch (Exception ex)
                 {
                     // Update UI on the UI thread
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         lvi.BackColor = Color.Red;
                         lvi.SubItems[4].Text = $"Error: {ex.Message}";
                         errors++;
                     }));
                     LoggingService.LogError($"Error processing movie {mv.FileNamePath}", ex, "Processing");
                 }
-                
+
                 // Update UI
-                Invoke(new Action(() => {
+                Invoke(new Action(() =>
+                {
                     lvMovies.EnsureVisible(itemsToProcess.IndexOf(lvi));
                     lvMovies.Refresh();
                 }));
             }
-            
+
             // Phase 2: Verify and cleanup
             LoggingService.LogInfo("Starting movie verification and cleanup phase", "Processing");
             processedCount = 0;
-            
+
             foreach (var lvi in itemsToProcess.Where(item => item.BackColor == Color.Yellow))
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                
+
                 MovieFile mv = (MovieFile)lvi.Tag;
                 processedCount++;
-                
+
                 var currentProgress = new ProcessingProgress
                 {
                     CurrentFile = Path.GetFileName(mv.FileNamePath),
@@ -1778,19 +1794,20 @@ TIPS:
                     Phase = ProcessingPhase.Verifying,
                     Message = $"Verifying and cleaning up movie {processedCount}/{successfulCopies}"
                 };
-                
+
                 progress.Report(currentProgress);
-                
+
                 try
                 {
-                    await Task.Run(() => {
+                    await Task.Run(() =>
+                    {
                         FileInfo fiLocal = new FileInfo(mv.FileNamePath);
                         FileInfo fiRemote = new FileInfo(mv.NewDestDirectory);
-                        
+
                         // Prepare the UI updates on the background thread but don't execute them yet
                         string statusMessage;
                         Color statusColor;
-                        
+
                         if (!fiRemote.Exists)
                         {
                             statusMessage = "Remote file not found";
@@ -1813,19 +1830,20 @@ TIPS:
                             errors++;
                             LoggingService.LogWarning($"Size mismatch for movie {mv.FileNamePath}: Local={fiLocal.Length}, Remote={fiRemote.Length}", "Processing");
                         }
-                        
+
                         // Now update the UI on the UI thread
-                        Invoke(new Action(() => {
+                        Invoke(new Action(() =>
+                        {
                             lvi.SubItems[4].Text = statusMessage;
                             lvi.BackColor = statusColor;
                         }));
-                        
                     }, cancellationToken);
                 }
                 catch (Exception ex)
                 {
                     // Update UI on the UI thread
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         lvi.SubItems[4].Text = $"Cleanup error: {ex.Message}";
                         lvi.BackColor = Color.Red;
                         errors++;
@@ -1833,12 +1851,12 @@ TIPS:
                     LoggingService.LogError($"Cleanup error for movie {mv.FileNamePath}", ex, "Processing");
                 }
             }
-            
+
             // Final summary
             TimeSpan duration = DateTime.Now - startTime;
             string finalMessage = $"Movie processing completed in {duration.Minutes}m {duration.Seconds}s - " +
-                                $"Copied: {successfulCopies}, Deleted: {successfulDeletions}, Errors: {errors}";
-            
+                                  $"Copied: {successfulCopies}, Deleted: {successfulDeletions}, Errors: {errors}";
+
             progress.Report(new ProcessingProgress
             {
                 Phase = ProcessingPhase.Complete,
@@ -1846,19 +1864,19 @@ TIPS:
                 ProcessedCount = totalItems,
                 TotalCount = totalItems
             });
-            
+
             LoggingService.LogInfo($"Movie processing completed: Copied={successfulCopies}, Deleted={successfulDeletions}, Errors={errors}, Duration={duration}", "Processing");
-            
+
             // Show completion summary
             string summary = $"Movie Processing Complete!\n\n" +
-                           $"Movies processed: {totalItems}\n" +
-                           $"Successfully copied: {successfulCopies}\n" +
-                           $"Original files deleted: {successfulDeletions}\n" +
-                           $"Errors: {errors}\n" +
-                           $"Duration: {duration.Minutes}m {duration.Seconds}s";
-                           
-            MessageBox.Show(summary, "Movie Processing Complete", 
-                MessageBoxButtons.OK, 
+                             $"Movies processed: {totalItems}\n" +
+                             $"Successfully copied: {successfulCopies}\n" +
+                             $"Original files deleted: {successfulDeletions}\n" +
+                             $"Errors: {errors}\n" +
+                             $"Duration: {duration.Minutes}m {duration.Seconds}s";
+
+            MessageBox.Show(summary, "Movie Processing Complete",
+                MessageBoxButtons.OK,
                 errors > 0 ? MessageBoxIcon.Warning : MessageBoxIcon.Information);
         }
 
@@ -1868,13 +1886,13 @@ TIPS:
         private void toolStripButton3_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Movie cleaner functionality is under development.\n\n" +
-                          "This feature will scan for movie files that have messy titles and help clean them up automatically.\n\n" +
-                          "Current features available:\n" +
-                          "• Movie scan and processing (working)\n" +
-                          "• TV episode scan and processing (working)\n" +
-                          "• Auto-monitoring (working)", 
-                          "Movie Cleaner - Coming Soon", 
-                          MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            "This feature will scan for movie files that have messy titles and help clean them up automatically.\n\n" +
+                            "Current features available:\n" +
+                            "• Movie scan and processing (working)\n" +
+                            "• TV episode scan and processing (working)\n" +
+                            "• Auto-monitoring (working)",
+                "Movie Cleaner - Coming Soon",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         /// <summary>
@@ -1883,14 +1901,14 @@ TIPS:
         private void toolStripButton4_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Movie year processing functionality is under development.\n\n" +
-                          "This feature will help organize movies by year and handle year detection issues.\n\n" +
-                          "Current movie processing already includes:\n" +
-                          "• Year extraction from filenames\n" +
-                          "• Alphabetical organization\n" +
-                          "• Quality tag removal\n\n" +
-                          "Use the regular Movie scan and process buttons for full movie functionality.", 
-                          "Movie Year Processing - Coming Soon", 
-                          MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            "This feature will help organize movies by year and handle year detection issues.\n\n" +
+                            "Current movie processing already includes:\n" +
+                            "• Year extraction from filenames\n" +
+                            "• Alphabetical organization\n" +
+                            "• Quality tag removal\n\n" +
+                            "Use the regular Movie scan and process buttons for full movie functionality.",
+                "Movie Year Processing - Coming Soon",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void tsbAutoMonitor_Click(object sender, EventArgs e)
@@ -1900,7 +1918,7 @@ TIPS:
 
         private void tsbForceDateCheck_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Force date check functionality is currently disabled.", 
+            MessageBox.Show("Force date check functionality is currently disabled.",
                 "Feature Disabled", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 

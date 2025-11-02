@@ -15,9 +15,10 @@ namespace TorrentFileRenamer
         public static async Task DemoFileProgress(string sourceFile, string destinationFile)
         {
             var fileOperation = new FileOperationProgress();
-            
+
             // Subscribe to progress events
-            fileOperation.ProgressChanged += (sender, args) => {
+            fileOperation.ProgressChanged += (sender, args) =>
+            {
                 if (args.IsComplete)
                 {
                     Console.WriteLine($"? Copy completed! Final size: {args.FormattedProgress}");
@@ -33,15 +34,15 @@ namespace TorrentFileRenamer
                     string progressLine = $"?? {Path.GetFileName(args.SourceFile)}: {args.FormattedProgress} at {args.FormattedSpeed}";
                     if (!string.IsNullOrEmpty(args.FormattedTimeRemaining))
                         progressLine += $" - ETA: {args.FormattedTimeRemaining}";
-                    
+
                     Console.Write($"\r{progressLine}".PadRight(80));
                 }
             };
-            
+
             Console.WriteLine($"?? Starting copy of {Path.GetFileName(sourceFile)}...");
-            
+
             bool success = await fileOperation.CopyFileWithRetryAsync(sourceFile, destinationFile);
-            
+
             Console.WriteLine(); // New line after progress
             if (success)
             {
@@ -52,17 +53,17 @@ namespace TorrentFileRenamer
                 Console.WriteLine("? File copy failed!");
             }
         }
-        
+
         /// <summary>
         /// Creates a demo file for testing purposes
         /// </summary>
         public static void CreateDemoFile(string filePath, int sizeInMB = 50)
         {
             Console.WriteLine($"Creating demo file: {filePath} ({sizeInMB} MB)");
-            
+
             var random = new Random();
             byte[] buffer = new byte[1024 * 1024]; // 1MB buffer
-            
+
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 for (int i = 0; i < sizeInMB; i++)
@@ -71,7 +72,7 @@ namespace TorrentFileRenamer
                     stream.Write(buffer, 0, buffer.Length);
                 }
             }
-            
+
             Console.WriteLine($"? Demo file created: {new FileInfo(filePath).Length / (1024 * 1024)} MB");
         }
     }
