@@ -118,40 +118,57 @@ return lines.Skip(Math.Max(0, lines.Length - maxLines)).ToList();
 
         public string DefaultSourcePath { get; set; } = "";
    public string DefaultDestinationPath { get; set; } = "";
-      public string DefaultFileExtensions { get; set; } = "*.mp4;*.mkv;*.avi;*.m4v";
-        public bool RememberLastPaths { get; set; } = true;
+   public string DefaultFileExtensions { get; set; } = "*.mp4;*.mkv;*.avi;*.m4v";
+     public bool RememberLastPaths { get; set; } = true;
      public bool EnableLogging { get; set; } = true;
 public int LogRetentionDays { get; set; } = 30;
         public bool SimulateMode { get; set; } = false;
-        public MonitoringSettings Monitoring { get; set; } = new();
-   public PlexSettings PlexSettings { get; set; } = new();
+    
+        /// <summary>
+   /// File verification method: "FileSize" (fast) or "Checksum" (thorough MD5)
+        /// </summary>
+        public string FileVerificationMethod { get; set; } = "FileSize";
+   
+     public MonitoringSettings Monitoring { get; set; } = new();
+ public PlexSettings PlexSettings { get; set; } = new();
+
+      // Last used paths for TV Episodes scan
+        public string LastTvEpisodeSourcePath { get; set; } = "";
+public string LastTvEpisodeDestinationPath { get; set; } = "";
+ public string LastTvEpisodeFileExtensions { get; set; } = ".mkv;.mp4;.avi";
+        
+        // Last used paths for Movies scan
+        public string LastMovieSourcePath { get; set; } = "";
+        public string LastMovieDestinationPath { get; set; } = "";
+        public string LastMovieFileExtensions { get; set; } = ".mkv, .mp4, .avi, .m4v";
+     public int LastMovieMinimumConfidence { get; set; } = 40;
 
   // Window state persistence
         public Dictionary<string, WindowState> WindowStates { get; set; } = new();
  
       // Column widths persistence
-        public Dictionary<string, List<double>> ColumnWidths { get; set; } = new();
+   public Dictionary<string, List<double>> ColumnWidths { get; set; } = new();
  
-        // Selected tabs persistence
-     public Dictionary<string, int> SelectedTabs { get; set; } = new();
-        
+// Selected tabs persistence
+   public Dictionary<string, int> SelectedTabs { get; set; } = new();
+   
         // MRU (Most Recently Used) lists
 public Dictionary<string, List<string>> MruLists { get; set; } = new();
 
   public static AppSettings Load()
  {
-            try
+      try
   {
    if (!File.Exists(SettingsFilePath))
    return new AppSettings();
 
 var json = File.ReadAllText(SettingsFilePath);
-                return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
-            }
+      return JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+  }
             catch (Exception ex)
  {
     LoggingService.LogError("Failed to load settings", ex, "AppSettings");
-           return new AppSettings();
+       return new AppSettings();
     }
         }
 
@@ -163,17 +180,17 @@ try
       if (!Directory.Exists(settingsDir))
   Directory.CreateDirectory(settingsDir!);
 
-     var options = new JsonSerializerOptions { WriteIndented = true };
-           var json = JsonSerializer.Serialize(this, options);
+   var options = new JsonSerializerOptions { WriteIndented = true };
+   var json = JsonSerializer.Serialize(this, options);
      File.WriteAllText(SettingsFilePath, json);
        
-                LoggingService.LogInfo("Settings saved successfully", "AppSettings");
+        LoggingService.LogInfo("Settings saved successfully", "AppSettings");
             }
        catch (Exception ex)
      {
-          LoggingService.LogError("Failed to save settings", ex, "AppSettings");
+   LoggingService.LogError("Failed to save settings", ex, "AppSettings");
       }
-   }
+}
     }
 
     // Window state data

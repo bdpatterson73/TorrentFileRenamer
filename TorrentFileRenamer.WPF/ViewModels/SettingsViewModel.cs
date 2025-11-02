@@ -27,6 +27,7 @@ public class SettingsViewModel : ViewModelBase
     
     // Processing Settings
     private bool _simulateMode;
+    private string _fileVerificationMethod;
     
     // Plex Settings
     private bool _enablePlexValidation;
@@ -40,8 +41,8 @@ public class SettingsViewModel : ViewModelBase
     private string _fileExtensions;
     private int _stabilityDelaySeconds;
   private bool _autoStartOnLoad;
-    private bool _processSubfolders;
-    private int _maxAutoMonitorLogEntries;
+  private bool _processSubfolders;
+  private int _maxAutoMonitorLogEntries;
 
   public SettingsViewModel(AppSettings settings, IDialogService dialogService)
     {
@@ -113,6 +114,15 @@ set => SetProperty(ref _rememberLastPaths, value);
     {
         get => _simulateMode;
         set => SetProperty(ref _simulateMode, value);
+    }
+
+    /// <summary>
+    /// File verification method after copy: "FileSize" (fast) or "Checksum" (thorough MD5)
+ /// </summary>
+    public string FileVerificationMethod
+    {
+        get => _fileVerificationMethod;
+        set => SetProperty(ref _fileVerificationMethod, value);
     }
 
     // Plex Settings
@@ -484,15 +494,16 @@ StabilityDelaySeconds = 30;
         // General Settings
    _defaultSourcePath = _settings.DefaultSourcePath;
       _defaultDestinationPath = _settings.DefaultDestinationPath;
-     _defaultFileExtensions = _settings.DefaultFileExtensions;
+    _defaultFileExtensions = _settings.DefaultFileExtensions;
       _rememberLastPaths = _settings.RememberLastPaths;
    
   // Logging Settings
     _enableLogging = _settings.EnableLogging;
       _logRetentionDays = _settings.LogRetentionDays;
-      
+   
   // Processing Settings
     _simulateMode = _settings.SimulateMode;
+        _fileVerificationMethod = _settings.FileVerificationMethod;
     
   // Plex Settings
     _enablePlexValidation = _settings.PlexSettings.EnablePlexValidation;
@@ -526,8 +537,9 @@ StabilityDelaySeconds = 30;
       
       // Processing Settings
         _settings.SimulateMode = SimulateMode;
+     _settings.FileVerificationMethod = FileVerificationMethod;
     
-      // Plex Settings
+  // Plex Settings
  _settings.PlexSettings.EnablePlexValidation = EnablePlexValidation;
         _settings.PlexSettings.AutoFixPlexIssues = AutoFixPlexIssues;
     _settings.PlexSettings.PromptForPlexIssues = PromptForPlexIssues;

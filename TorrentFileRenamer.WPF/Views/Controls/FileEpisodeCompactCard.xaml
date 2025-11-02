@@ -36,6 +36,7 @@
   <TextBlock Grid.Column="0"
               Text="{Binding Status, Converter={StaticResource StatusToIconConverter}}"
           FontSize="24"
+         FontFamily="Segoe MDL2 Assets"
     VerticalAlignment="Center"
  Margin="16,0,16,0"
   Foreground="{Binding Status, Converter={StaticResource StatusToBrushConverter}}"/>
@@ -76,36 +77,40 @@ Text="{Binding ShowName}"
 
     <!-- Multi-episode indicator -->
       <TextBlock Grid.Column="2"
-        Text="&#x1F4D1; Multi-Episode"
-    FontSize="11"
+  FontSize="11"
      Foreground="#FF6F00"
   VerticalAlignment="Center"
-    Margin="12,0,0,0"
-    Visibility="{Binding IsMultiEpisode, Converter={StaticResource BoolToVisibilityConverter}}"/>
+  Margin="12,0,0,0"
+    Visibility="{Binding IsMultiEpisode, Converter={StaticResource BoolToVisibilityConverter}}">
+    <Run Text="&#xE8FD;" FontFamily="Segoe MDL2 Assets"/>
+       <Run Text=" Multi-Episode"/>
+   </TextBlock>
    </Grid>
 
      <!-- Filename Info (Original ? New) -->
      <TextBlock Style="{StaticResource CardMetadata}"
      FontSize="11"
        Margin="0,4,0,0"
-     TextTrimming="CharacterEllipsis">
-           <Run Text="&#x1F4C4;" />
-      <Run Text="{Binding CoreEpisode.FileName}" Foreground="#757575"/>
-    <Run Text=" &#x2192; " Foreground="#2196F3"/>
-        <Run Text="{Binding NewFileName}" FontWeight="Medium" Foreground="#2E7D32"/>
-      </TextBlock>
+   TextTrimming="CharacterEllipsis">
+    <Run Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" />
+      <Run Text=" "/>
+<Run Text="{Binding CoreEpisode.FileName, Mode=OneWay}" Foreground="#757575"/>
+    <Run Text=" ? " Foreground="#2196F3"/>
+        <Run Text="{Binding NewFileName, Mode=OneWay}" FontWeight="Medium" Foreground="#2E7D32"/>
+    </TextBlock>
 
     <!-- Error message (if any) -->
-       <TextBlock Style="{StaticResource CardMetadata}"
+  <TextBlock Style="{StaticResource CardMetadata}"
       FontSize="11"
-    Foreground="#D32F2F"
+ Foreground="#D32F2F"
   Margin="0,2,0,0"
        TextTrimming="CharacterEllipsis"
-         Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
-<Run Text="&#x26A0;&#xFE0F;"/>
-        <Run Text="{Binding ErrorMessage}"/>
-      </TextBlock>
-       </StackPanel>
+   Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
+<Run Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets"/>
+<Run Text=" "/>
+<Run Text="{Binding ErrorMessage, Mode=OneWay}"/>
+    </TextBlock>
+    </StackPanel>
 
           <!-- Status Badge -->
     <Border Grid.Column="2"
@@ -134,47 +139,51 @@ Text="{Binding ShowName}"
 
          <!-- Quick Action Buttons -->
 <StackPanel Grid.Column="4" 
-        Orientation="Horizontal"
-      VerticalAlignment="Center"
-       Margin="0,0,16,0">
-          
-         <Button Content="&#x1F4C1;"
-      Style="{StaticResource SecondaryButton}"
-       Padding="8,4"
+  Orientation="Horizontal"
+     VerticalAlignment="Center"
+    Margin="0,0,16,0">
+   
+  <Button Padding="8,4"
+    Style="{StaticResource SecondaryButton}"
       Margin="0,0,4,0"
    FontSize="14"
-     ToolTip="Open Folder"
+   ToolTip="Open Folder"
      Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-       CommandParameter="{Binding}"/>
+   CommandParameter="{Binding}">
+ <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets"/>
+ </Button>
 
-    <Button Content="&#x1F4CB;"
+  <Button Padding="8,4"
  Style="{StaticResource SecondaryButton}"
-    Padding="8,4"
-        Margin="0,0,4,0"
+  Margin="0,0,4,0"
  FontSize="14"
-     ToolTip="View Details"
-       Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
- CommandParameter="{Binding}"/>
+ ToolTip="View Details"
+  Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+ CommandParameter="{Binding}">
+      <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets"/>
+ </Button>
 
-   <Button Content="&#x1F504;"
-     Style="{StaticResource PrimaryButton}"
-  Padding="8,4"
-   Margin="0,0,4,0"
-     FontSize="14"
+   <Button Padding="8,4"
+ Style="{StaticResource PrimaryButton}"
+ Margin="0,0,4,0"
+  FontSize="14"
    ToolTip="Retry"
 Command="{Binding DataContext.RetryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-     CommandParameter="{Binding}"
-   Visibility="{Binding Status, Converter={StaticResource StatusToRetryVisibilityConverter}}"/>
+   CommandParameter="{Binding}"
+   Visibility="{Binding Status, Converter={StaticResource StatusToRetryVisibilityConverter}}">
+     <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets"/>
+   </Button>
 
-           <Button Content="&#x1F5D1;"
+  <Button Padding="8,4"
       Style="{StaticResource SecondaryButton}"
-   Padding="8,4"
    FontSize="14"
    ToolTip="Remove"
-       Command="{Binding DataContext.RemoveSelectedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-      CommandParameter="{Binding}"/>
+     Command="{Binding DataContext.RemoveSelectedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+   CommandParameter="{Binding}">
+       <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets"/>
+        </Button>
    </StackPanel>
  </Grid>
-    </Grid>
+  </Grid>
  </Border>
 </UserControl>

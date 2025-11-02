@@ -9,72 +9,101 @@ namespace TorrentFileRenamer.WPF.Services;
 /// </summary>
 public class ScanningService : IScanningService
 {
+    private const int BatchSize = 50; // Process files in batches for better performance
+
     /// <inheritdoc/>
     public async Task<List<FileEpisodeModel>> ScanForTvEpisodesAsync(
-  string sourcePath,
+        string sourcePath,
         string destinationPath,
- string[] fileExtensions,
- IProgress<ScanProgress>? progress = null,
-        CancellationToken cancellationToken = default)
+        string[] fileExtensions,
+        IProgress<ScanProgress>? progress = null,
+      CancellationToken cancellationToken = default)
     {
-     if (string.IsNullOrWhiteSpace(sourcePath))
-     throw new ArgumentException("Source path cannot be empty", nameof(sourcePath));
+        if (string.IsNullOrWhiteSpace(sourcePath))
+  throw new ArgumentException("Source path cannot be empty", nameof(sourcePath));
 
-     if (string.IsNullOrWhiteSpace(destinationPath))
-       throw new ArgumentException("Destination path cannot be empty", nameof(destinationPath));
+  if (string.IsNullOrWhiteSpace(destinationPath))
+        throw new ArgumentException("Destination path cannot be empty", nameof(destinationPath));
 
-   if (!Directory.Exists(sourcePath))
-       throw new DirectoryNotFoundException($"Source directory not found: {sourcePath}");
+        if (!Directory.Exists(sourcePath))
+    throw new DirectoryNotFoundException($"Source directory not found: {sourcePath}");
 
         var results = new List<FileEpisodeModel>();
 
-        // Find all matching files
-        var allFiles = new List<string>();
-        foreach (var extension in fileExtensions)
- {
-   var files = Directory.GetFiles(sourcePath, $"*{extension}", SearchOption.AllDirectories);
-        allFiles.AddRange(files);
-    }
+      // Find all matching files - do this on a background thread
+  var allFiles = await Task.Run(() =>
+        {
+            var files = new List<string>();
+   foreach (var extension in fileExtensions)
+            {
+ try
+   {
+                var matchingFiles = Directory.GetFiles(sourcePath, $"*{extension}", SearchOption.AllDirectories);
+files.AddRange(matchingFiles);
+         }
+   catch (UnauthorizedAccessException)
+                {
+                    // Skip directories we don't have access to
+          System.Diagnostics.Debug.WriteLine($"Access denied to some directories with extension {extension}");
+         }
+      }
+      return files;
+        }, cancellationToken);
 
         if (allFiles.Count == 0)
-            return results;
+   return results;
 
-        // Process files
     var scanProgress = new ScanProgress
-{
-  TotalFiles = allFiles.Count,
-     FilesProcessed = 0
+        {
+        TotalFiles = allFiles.Count,
+  FilesProcessed = 0
   };
 
-   for (int i = 0; i < allFiles.Count; i++)
-    {
-  cancellationToken.ThrowIfCancellationRequested();
+        // Process files in batches to improve performance and UI responsiveness
+        for (int i = 0; i < allFiles.Count; i += BatchSize)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
 
-  var file = allFiles[i];
-   scanProgress.CurrentFile = Path.GetFileName(file);
-    scanProgress.FilesProcessed = i;
-
-     progress?.Report(scanProgress);
-
-       // Use Task.Run to avoid blocking UI thread during parsing
-    await Task.Run(() =>
-     {
-     try
+        var batch = allFiles.Skip(i).Take(BatchSize).ToList();
+         
+ // Process the batch on a background thread
+            var batchResults = await Task.Run(() =>
       {
-        var episode = new FileEpisode(file, destinationPath);
-    var model = new FileEpisodeModel(episode);
-   results.Add(model);
-    }
-  catch (Exception ex)
-    {
-      // Log error but continue processing
+    var batchModels = new List<FileEpisodeModel>();
+    foreach (var file in batch)
+        {
+          if (cancellationToken.IsCancellationRequested)
+      break;
+
+               try
+              {
+            var episode = new FileEpisode(file, destinationPath);
+       var model = new FileEpisodeModel(episode);
+         batchModels.Add(model);
+              }
+                    catch (Exception ex)
+      {
+  // Log error but continue processing
    System.Diagnostics.Debug.WriteLine($"Error scanning file {file}: {ex.Message}");
-  }
-       }, cancellationToken);
+            }
+     }
+      return batchModels;
+         }, cancellationToken);
+
+results.AddRange(batchResults);
+
+            // Update progress after each batch
+     scanProgress.FilesProcessed = Math.Min(i + BatchSize, allFiles.Count);
+       scanProgress.CurrentFile = batch.Count > 0 ? Path.GetFileName(batch[0]) : "";
+      progress?.Report(scanProgress);
+
+  // Small delay to allow UI to update
+            await Task.Delay(10, cancellationToken);
         }
 
-// Report completion
-    scanProgress.FilesProcessed = allFiles.Count;
+        // Report completion
+        scanProgress.FilesProcessed = allFiles.Count;
+  scanProgress.CurrentFile = "Scan complete";
         progress?.Report(scanProgress);
 
         return results;
@@ -82,72 +111,99 @@ public class ScanningService : IScanningService
 
     /// <inheritdoc/>
     public async Task<List<MovieFileModel>> ScanForMoviesAsync(
-     string sourcePath,
+        string sourcePath,
         string destinationPath,
-   string[] fileExtensions,
+        string[] fileExtensions,
         IProgress<ScanProgress>? progress = null,
- CancellationToken cancellationToken = default)
+     CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(sourcePath))
-  throw new ArgumentException("Source path cannot be empty", nameof(sourcePath));
+          throw new ArgumentException("Source path cannot be empty", nameof(sourcePath));
 
-        if (string.IsNullOrWhiteSpace(destinationPath))
-throw new ArgumentException("Destination path cannot be empty", nameof(destinationPath));
+    if (string.IsNullOrWhiteSpace(destinationPath))
+      throw new ArgumentException("Destination path cannot be empty", nameof(destinationPath));
 
         if (!Directory.Exists(sourcePath))
-   throw new DirectoryNotFoundException($"Source directory not found: {sourcePath}");
+            throw new DirectoryNotFoundException($"Source directory not found: {sourcePath}");
 
         var results = new List<MovieFileModel>();
 
-        // Find all matching files
-        var allFiles = new List<string>();
-        foreach (var extension in fileExtensions)
+        // Find all matching files - do this on a background thread
+var allFiles = await Task.Run(() =>
         {
-            var files = Directory.GetFiles(sourcePath, $"*{extension}", SearchOption.AllDirectories);
-        allFiles.AddRange(files);
-        }
+      var files = new List<string>();
+     foreach (var extension in fileExtensions)
+            {
+try
+      {
+           var matchingFiles = Directory.GetFiles(sourcePath, $"*{extension}", SearchOption.AllDirectories);
+              files.AddRange(matchingFiles);
+       }
+        catch (UnauthorizedAccessException)
+                {
+          // Skip directories we don't have access to
+            System.Diagnostics.Debug.WriteLine($"Access denied to some directories with extension {extension}");
+         }
+     }
+            return files;
+        }, cancellationToken);
 
         if (allFiles.Count == 0)
-            return results;
+  return results;
 
-        // Process files
-      var scanProgress = new ScanProgress
-        {
-       TotalFiles = allFiles.Count,
-            FilesProcessed = 0
-    };
+   var scanProgress = new ScanProgress
+   {
+    TotalFiles = allFiles.Count,
+  FilesProcessed = 0
+        };
 
-        for (int i = 0; i < allFiles.Count; i++)
-        {
-         cancellationToken.ThrowIfCancellationRequested();
+ // Process files in batches to improve performance and UI responsiveness
+        for (int i = 0; i < allFiles.Count; i += BatchSize)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
 
-            var file = allFiles[i];
-          scanProgress.CurrentFile = Path.GetFileName(file);
-   scanProgress.FilesProcessed = i;
+            var batch = allFiles.Skip(i).Take(BatchSize).ToList();
+   
+    // Process the batch on a background thread
+       var batchResults = await Task.Run(() =>
+    {
+         var batchModels = new List<MovieFileModel>();
+       foreach (var file in batch)
+                {
+     if (cancellationToken.IsCancellationRequested)
+     break;
 
- progress?.Report(scanProgress);
-
-        // Use Task.Run to avoid blocking UI thread during parsing
-       await Task.Run(() =>
-            {
-                try
-  {
-    var movie = new MovieFile(file, destinationPath);
-var model = new MovieFileModel(movie, file);
-              results.Add(model);
-        }
+        try
+     {
+       var movie = new MovieFile(file, destinationPath);
+   var model = new MovieFileModel(movie, file);
+       batchModels.Add(model);
+                    }
    catch (Exception ex)
-        {
-    // Log error but continue processing
-        System.Diagnostics.Debug.WriteLine($"Error scanning file {file}: {ex.Message}");
-   }
-            }, cancellationToken);
+  {
+  // Log error but continue processing
+  System.Diagnostics.Debug.WriteLine($"Error scanning file {file}: {ex.Message}");
+    }
+                }
+   return batchModels;
+        }, cancellationToken);
+
+            results.AddRange(batchResults);
+
+            // Update progress after each batch
+scanProgress.FilesProcessed = Math.Min(i + BatchSize, allFiles.Count);
+            scanProgress.CurrentFile = batch.Count > 0 ? Path.GetFileName(batch[0]) : "";
+         progress?.Report(scanProgress);
+
+      // Small delay to allow UI to update
+   await Task.Delay(10, cancellationToken);
         }
 
-    // Report completion
-     scanProgress.FilesProcessed = allFiles.Count;
-   progress?.Report(scanProgress);
+        // Report completion
+        scanProgress.FilesProcessed = allFiles.Count;
+        scanProgress.CurrentFile = "Scan complete";
+        progress?.Report(scanProgress);
 
-        return results;
+ return results;
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using TorrentFileRenamer.Core.Configuration;
 using TorrentFileRenamer.WPF.Models;
 using TorrentFileRenamer.WPF.Services;
 using TorrentFileRenamer.WPF.ViewModels.Base;
@@ -20,6 +21,7 @@ public class MoviesViewModel : ViewModelBase
     private readonly IDialogService _dialogService;
     private readonly IWindowStateService _windowStateService;
     private readonly IExportService _exportService;
+    private readonly AppSettings _appSettings;
     private string _statusMessage = "No movies scanned";
     private bool _isProcessing;
     private int _minimumConfidence = 40;
@@ -32,24 +34,26 @@ public class MoviesViewModel : ViewModelBase
 
     public MoviesViewModel(
         IScanningService scanningService,
-        IFileProcessingService fileProcessingService,
+      IFileProcessingService fileProcessingService,
         IDialogService dialogService,
-        IWindowStateService windowStateService,
-        IExportService exportService,
+     IWindowStateService windowStateService,
+ IExportService exportService,
         SearchViewModel searchViewModel,
-        FilterViewModel filterViewModel,
-        StatsViewModel statsViewModel)
+      FilterViewModel filterViewModel,
+        StatsViewModel statsViewModel,
+      AppSettings appSettings)
     {
-        _scanningService = scanningService;
+  _scanningService = scanningService;
         _fileProcessingService = fileProcessingService;
         _dialogService = dialogService;
         _windowStateService = windowStateService;
-        _exportService = exportService;
+  _exportService = exportService;
+        _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
 
         // Phase 6: Initialize ViewModels
         SearchViewModel = searchViewModel ?? throw new ArgumentNullException(nameof(searchViewModel));
         FilterViewModel = filterViewModel ?? throw new ArgumentNullException(nameof(filterViewModel));
-        StatsViewModel = statsViewModel ?? throw new ArgumentNullException(nameof(statsViewModel));
+    StatsViewModel = statsViewModel ?? throw new ArgumentNullException(nameof(statsViewModel));
 
         Movies = new ObservableCollection<MovieFileModel>();
 
@@ -373,19 +377,19 @@ public class MoviesViewModel : ViewModelBase
     private async Task ScanAsync()
     {
         // Show scan movies dialog
-        var dialog = new ScanMoviesDialog();
-    if (WpfApplication.Current.MainWindow != null)
-   {
+        var dialog = new ScanMoviesDialog(_appSettings);
+        if (WpfApplication.Current.MainWindow != null)
+        {
      dialog.Owner = WpfApplication.Current.MainWindow;
         }
 
-if (dialog.ShowDialog() != true)
-     {
-         return;
+        if (dialog.ShowDialog() != true)
+        {
+   return;
         }
 
-        var options = dialog.ViewModel;
-        MinimumConfidence = options.MinimumConfidence;
+var options = dialog.ViewModel;
+     MinimumConfidence = options.MinimumConfidence;
 
     try
         {
@@ -409,7 +413,7 @@ if (dialog.ShowDialog() != true)
  var progress = new Progress<ScanProgress>(p =>
           {
         progressDialog.UpdateCurrentFile(p.CurrentFile);
-progressDialog.UpdateProgress(p.PercentComplete);
+progressDialog.UpdateProgress((int)p.PercentComplete);
          });
 
             return await _scanningService.ScanForMoviesAsync(
@@ -420,11 +424,14 @@ progressDialog.UpdateProgress(p.PercentComplete);
         cts.Token);
          });
 
-       // Show progress dialog
-            progressDialog.ShowDialog();
+       // Show progress dialog (non-blocking)
+            progressDialog.Show();
 
             // Wait for scan to complete
-  var results = await scanTask;
+     var results = await scanTask;
+
+     // Close progress dialog
+       progressDialog.Close();
 
             // Store all movies and update filtered collection
             _allMovies.Clear();
@@ -443,7 +450,7 @@ progressDialog.UpdateProgress(p.PercentComplete);
 
             StatusMessage = $"Scanned {results.Count} files: {parsedCount} parsed, {unparsedCount} unparsed | Confidence: {highConfidence} high, {mediumConfidence} medium, {lowConfidence} low";
 
-   if (lowConfidence > 0 && MinimumConfidence > 0)
+      if (lowConfidence > 0 && MinimumConfidence > 0)
             {
           var result = await _dialogService.ShowConfirmationAsync(
             "Low Confidence Files",
@@ -474,26 +481,26 @@ catch (OperationCanceledException)
 
     private async Task ProcessAsync()
     {
-        var moviesToProcess = Movies
+     var moviesToProcess = Movies
      .Where(m => m.Status == ProcessingStatus.Pending)
-          .ToList();
+  .ToList();
 
     if (moviesToProcess.Count == 0)
         {
        await _dialogService.ShowMessageAsync("Process", "No pending movies to process.");
   return;
-     }
+  }
 
         var result = await _dialogService.ShowConfirmationAsync(
     "Confirm Process",
      $"Process {moviesToProcess.Count} movies?");
 
-        if (!result)
-        {
+   if (!result)
+      {
     return;
  }
 
-        try
+      try
      {
         IsProcessing = true;
  StatusMessage = $"Processing {moviesToProcess.Count} files...";
@@ -505,69 +512,82 @@ catch (OperationCanceledException)
      progressDialog.Owner = WpfApplication.Current.MainWindow;
        }
        
-        var cts = new CancellationTokenSource();
-      progressDialog.Initialize(cts);
+    var cts = new CancellationTokenSource();
+      progressDialog.Initialize(cts, autoClose: true);
   progressDialog.UpdateTitle("Processing Movies");
 
-            // Start processing in background
-       var processTask = Task.Run(async () =>
-        {
+ // Start processing in background
+var processTask = Task.Run(async () =>
+ {
+      int currentFileIndex = 0;
+  
  var fileProgress = new Progress<(string fileName, int percentage)>(p =>
-        {
-              progressDialog.UpdateCurrentFile(p.fileName);
+ {
+  progressDialog.UpdateCurrentFile(p.fileName);
+       progressDialog.UpdateProgress(p.percentage);
  });
 
        var overallProgress = new Progress<(int current, int total)>(p =>
-            {
+   {
+        currentFileIndex = p.current;
     int percentage = (p.current * 100) / p.total;
-       progressDialog.UpdateProgress(percentage, $"{p.current} of {p.total} files ({percentage}%)");
-              });
+     progressDialog.UpdateProgress(percentage, $"File {p.current} of {p.total} ({percentage}%)");
+ });
 
-         return await _fileProcessingService.ProcessMoviesAsync(
-    moviesToProcess,
-          fileProgress,
-           overallProgress,
-    cts.Token);
+     var successCount = await _fileProcessingService.ProcessMoviesAsync(
+  moviesToProcess,
+ fileProgress,
+ overallProgress,
+cts.Token);
+  
+         // Mark dialog as complete from within the task
+            progressDialog.Complete($"Completed: {successCount} of {moviesToProcess.Count} movies processed");
+      
+return successCount;
         });
 
    // Show progress dialog
-            progressDialog.ShowDialog();
+      progressDialog.ShowDialog();
 
  // Wait for processing to complete
-            var successCount = await processTask;
+   var successCount = await processTask;
 
-      var failedCount = moviesToProcess.Count - successCount;
-          StatusMessage = $"Processed {successCount} files successfully, {failedCount} failed";
+    var failedCount = moviesToProcess.Count - successCount;
+    StatusMessage = $"Processed {successCount} files successfully, {failedCount} failed";
+   
+          // Update statistics after processing
+   ApplyFilters();
+   StatsViewModel.UpdateMovieStatistics(_allMovies);
 
-            if (successCount > 0)
-            {
+      if (successCount > 0)
+    {
        await _dialogService.ShowMessageAsync(
  "Process Complete",
-        $"Successfully processed {successCount} of {moviesToProcess.Count} files.");
-            }
+$"Successfully processed {successCount} of {moviesToProcess.Count} files.");
+ }
 
-            if (failedCount > 0)
-        {
+   if (failedCount > 0)
+     {
  var failedMovies = moviesToProcess.Where(m => m.Status == ProcessingStatus.Failed).ToList();
        var errorMessages = string.Join("\n", failedMovies.Select(m => $"{m.FileName}: {m.ErrorMessage}"));
 
-                await _dialogService.ShowErrorAsync(
+        await _dialogService.ShowErrorAsync(
     "Process Errors",
   $"Failed to process {failedCount} files:\n\n{errorMessages}");
-        }
+ }
     }
-        catch (OperationCanceledException)
+    catch (OperationCanceledException)
         {
  StatusMessage = "Processing cancelled";
-        }
+     }
      catch (Exception ex)
-        {
-       StatusMessage = $"Processing failed: {ex.Message}";
-          await _dialogService.ShowErrorAsync("Process Error", $"Failed to process files: {ex.Message}");
-        }
+  {
+   StatusMessage = $"Processing failed: {ex.Message}";
+    await _dialogService.ShowErrorAsync("Process Error", $"Failed to process files: {ex.Message}");
+     }
         finally
-        {
-            IsProcessing = false;
+     {
+    IsProcessing = false;
 }
     }
 
@@ -828,7 +848,7 @@ var result = await _dialogService.ShowConfirmationAsync(
   }
 
          ApplyFilters();
-    StatusMessage = $"Removed {completedMovies.Count} completed movies. {_allMovies.Count} remaining.";
+    StatusMessage = $"removed {completedMovies.Count} completed movies. {_allMovies.Count} remaining.";
             ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RemoveLowConfidenceCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();

@@ -9,39 +9,42 @@ namespace TorrentFileRenamer.WPF.Views;
 public partial class ProgressDialog : Window
 {
     private CancellationTokenSource? _cancellationTokenSource;
+    private bool _autoClose = false;
+    private bool _operationComplete = false;
 
     public ProgressDialog()
     {
  InitializeComponent();
-    }
+ }
 
     /// <summary>
  /// Gets the cancellation token for this operation
-    /// </summary>
+ /// </summary>
     public CancellationToken CancellationToken => _cancellationTokenSource?.Token ?? CancellationToken.None;
 
     /// <summary>
     /// Initializes the dialog with a cancellation token source
-    /// </summary>
-    public void Initialize(CancellationTokenSource cancellationTokenSource)
+  /// </summary>
+    public void Initialize(CancellationTokenSource cancellationTokenSource, bool autoClose = true)
   {
         _cancellationTokenSource = cancellationTokenSource;
+        _autoClose = autoClose;
     }
 
-    /// <summary>
+ /// <summary>
     /// Updates the dialog title
     /// </summary>
-    public void UpdateTitle(string title)
+public void UpdateTitle(string title)
   {
   Dispatcher.Invoke(() =>
-        {
-    TitleTextBlock.Text = title;
+     {
+  TitleTextBlock.Text = title;
  });
     }
 
     /// <summary>
  /// Updates the current file being processed
-    /// </summary>
+ /// </summary>
     public void UpdateCurrentFile(string fileName)
     {
      Dispatcher.Invoke(() =>
@@ -52,48 +55,84 @@ public partial class ProgressDialog : Window
 
     /// <summary>
     /// Updates the progress percentage (0-100)
-    /// </summary>
+ /// </summary>
     public void UpdateProgress(int percentage)
-    {
+  {
    Dispatcher.Invoke(() =>
         {
    ProgressBar.Value = percentage;
     ProgressTextBlock.Text = $"{percentage}%";
-        });
+      });
     }
 
     /// <summary>
     /// Updates progress with custom text
     /// </summary>
-    public void UpdateProgress(int percentage, string text)
+public void UpdateProgress(int percentage, string text)
     {
    Dispatcher.Invoke(() =>
         {
   ProgressBar.Value = percentage;
    ProgressTextBlock.Text = text;
-        });
+});
     }
 
     /// <summary>
-    /// Marks the operation as complete
+    /// Updates transfer details (bytes copied and speed)
     /// </summary>
-    public void Complete(string message = "Complete!")
-    {
+ public void UpdateTransferDetails(string details)
+  {
         Dispatcher.Invoke(() =>
         {
+      TransferDetailsTextBlock.Text = details;
+ });
+    }
+
+ /// <summary>
+    /// Marks the operation as complete
+    /// </summary>
+  public void Complete(string message = "Complete!")
+    {
+      Dispatcher.Invoke(() =>
+    {
    ProgressBar.Value = 100;
-            ProgressTextBlock.Text = message;
+ ProgressTextBlock.Text = message;
+    TransferDetailsTextBlock.Text = "";
   CancelButton.Content = "Close";
+         _operationComplete = true;
+         
+// Auto-close after a brief delay if enabled
+ if (_autoClose)
+      {
+          var timer = new DispatcherTimer
+{
+           Interval = TimeSpan.FromMilliseconds(800)
+    };
+   timer.Tick += (s, e) =>
+   {
+ timer.Stop();
+      try
+            {
+           DialogResult = true;
+          Close();
+        }
+            catch
+   {
+          // Dialog may already be closed
+  }
+  };
+  timer.Start();
+         }
 });
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
-      if (CancelButton.Content.ToString() == "Close")
+      if (_operationComplete || CancelButton.Content.ToString() == "Close")
  {
-     DialogResult = true;
+  DialogResult = true;
          Close();
-        }
+     }
         else
     {
     // Cancel the operation
@@ -105,11 +144,11 @@ public partial class ProgressDialog : Window
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        // If still processing, cancel the operation
-   if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested)
+   // If still processing and not complete, cancel the operation
+   if (_cancellationTokenSource != null && !_cancellationTokenSource.IsCancellationRequested && !_operationComplete)
         {
   _cancellationTokenSource.Cancel();
    }
-        base.OnClosing(e);
+ base.OnClosing(e);
     }
 }

@@ -1,4 +1,5 @@
 using System.Windows;
+using TorrentFileRenamer.Core.Configuration;
 using TorrentFileRenamer.WPF.ViewModels;
 
 namespace TorrentFileRenamer.WPF.Views;
@@ -8,10 +9,10 @@ namespace TorrentFileRenamer.WPF.Views;
 /// </summary>
 public partial class ScanMoviesDialog : Window
 {
-    public ScanMoviesDialog()
+    public ScanMoviesDialog(AppSettings appSettings)
     {
         InitializeComponent();
-        ViewModel = new ScanMoviesViewModel();
+        ViewModel = new ScanMoviesViewModel(appSettings);
         DataContext = ViewModel;
     }
 
@@ -19,13 +20,16 @@ public partial class ScanMoviesDialog : Window
 
     private void OkButton_Click(object sender, RoutedEventArgs e)
     {
+        // Save the paths before closing
+        ViewModel.SavePaths();
+
         DialogResult = true;
         Close();
     }
 
-private void CancelButton_Click(object sender, RoutedEventArgs e)
+    private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
         DialogResult = false;
         Close();
-  }
+    }
 }

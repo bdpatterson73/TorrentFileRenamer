@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using TorrentFileRenamer.Core.Configuration;
 using TorrentFileRenamer.WPF.Models;
 using TorrentFileRenamer.WPF.Services;
 using TorrentFileRenamer.WPF.ViewModels.Base;
@@ -20,6 +21,7 @@ public class TvEpisodesViewModel : ViewModelBase
     private readonly IDialogService _dialogService;
     private readonly IWindowStateService _windowStateService;
     private readonly IExportService _exportService;
+    private readonly AppSettings _appSettings;
     private string _statusMessage = "No episodes scanned";
     private bool _isProcessing;
     private bool _isCardViewSelected = true;
@@ -32,23 +34,25 @@ public class TvEpisodesViewModel : ViewModelBase
     public TvEpisodesViewModel(
         IScanningService scanningService,
         IFileProcessingService fileProcessingService,
-      IDialogService dialogService,
-    IWindowStateService windowStateService,
+        IDialogService dialogService,
+        IWindowStateService windowStateService,
       IExportService exportService,
         SearchViewModel searchViewModel,
         FilterViewModel filterViewModel,
-        StatsViewModel statsViewModel)
+        StatsViewModel statsViewModel,
+        AppSettings appSettings)
     {
         _scanningService = scanningService;
-        _fileProcessingService = fileProcessingService;
+   _fileProcessingService = fileProcessingService;
         _dialogService = dialogService;
-     _windowStateService = windowStateService;
+      _windowStateService = windowStateService;
         _exportService = exportService;
+        _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
 
-    // Phase 6: Initialize ViewModels
-        SearchViewModel = searchViewModel ?? throw new ArgumentNullException(nameof(searchViewModel));
-   FilterViewModel = filterViewModel ?? throw new ArgumentNullException(nameof(filterViewModel));
-        StatsViewModel = statsViewModel ?? throw new ArgumentNullException(nameof(statsViewModel));
+        // Phase 6: Initialize ViewModels
+   SearchViewModel = searchViewModel ?? throw new ArgumentNullException(nameof(searchViewModel));
+        FilterViewModel = filterViewModel ?? throw new ArgumentNullException(nameof(filterViewModel));
+ StatsViewModel = statsViewModel ?? throw new ArgumentNullException(nameof(statsViewModel));
 
         Episodes = new ObservableCollection<FileEpisodeModel>();
 
@@ -295,18 +299,18 @@ public class TvEpisodesViewModel : ViewModelBase
 
     private async Task ScanAsync()
     {
-     var dialog = new ScanOptionsDialog();
+        var dialog = new ScanOptionsDialog(_appSettings);
         if (WpfApplication.Current.MainWindow != null)
         {
-  dialog.Owner = WpfApplication.Current.MainWindow;
+    dialog.Owner = WpfApplication.Current.MainWindow;
         }
 
         if (dialog.ShowDialog() != true)
-  {
-            return;
-      }
+        {
+      return;
+  }
 
- var options = dialog.ViewModel;
+var options = dialog.ViewModel;
 
         try
         {
@@ -403,91 +407,104 @@ var unparsedCount = results.Count - parsedCount;
      .ToList();
 
         if (episodesToProcess.Count == 0)
-        {
-            await _dialogService.ShowMessageAsync("Process", "No pending episodes to process.");
-            return;
-        }
+{
+await _dialogService.ShowMessageAsync("Process", "No pending episodes to process.");
+   return;
+}
 
-        var result = await _dialogService.ShowConfirmationAsync(
-        "Confirm Process",
-            $"Process {episodesToProcess.Count} episodes?");
+      var result = await _dialogService.ShowConfirmationAsync(
+      "Confirm Process",
+       $"Process {episodesToProcess.Count} episodes?");
 
         if (!result)
-        {
-            return;
+  {
+   return;
         }
 
   try
-        {
-            IsProcessing = true;
+    {
+     IsProcessing = true;
   StatusMessage = $"Processing {episodesToProcess.Count} files...";
 
    var progressDialog = new ProgressDialog();
-    if (WpfApplication.Current.MainWindow != null)
-            {
-        progressDialog.Owner = WpfApplication.Current.MainWindow;
-      }
+ if (WpfApplication.Current.MainWindow != null)
+  {
+      progressDialog.Owner = WpfApplication.Current.MainWindow;
+    }
 
-         var cts = new CancellationTokenSource();
-         progressDialog.Initialize(cts);
+var cts = new CancellationTokenSource();
+      progressDialog.Initialize(cts, autoClose: true);
  progressDialog.UpdateTitle("Processing TV Episodes");
 
-            var processTask = Task.Run(async () =>
-            {
+     var processTask = Task.Run(async () =>
+     {
+      int currentFileIndex = 0;
+
       var fileProgress = new Progress<(string fileName, int percentage)>(p =>
          {
-           progressDialog.UpdateCurrentFile(p.fileName);
+  progressDialog.UpdateCurrentFile(p.fileName);
+   progressDialog.UpdateProgress(p.percentage);
  });
 
-      var overallProgress = new Progress<(int current, int total)>(p =>
+  var overallProgress = new Progress<(int current, int total)>(p =>
  {
-          int percentage = (p.current * 100) / p.total;
-           progressDialog.UpdateProgress(percentage, $"{p.current} of {p.total} files ({percentage}%)");
-             });
+     currentFileIndex = p.current;
+  int percentage = (p.current * 100) / p.total;
+         progressDialog.UpdateProgress(percentage, $"File {p.current} of {p.total} ({percentage}%)");
+  });
 
-         return await _fileProcessingService.ProcessFilesAsync(
+         var successCount = await _fileProcessingService.ProcessFilesAsync(
      episodesToProcess,
       fileProgress,
-       overallProgress,
+    overallProgress,
       cts.Token);
-            });
+         
+            // Mark dialog as complete from within the task
+          progressDialog.Complete($"Completed: {successCount} of {episodesToProcess.Count} files processed");
+      
+            return successCount;
+     });
 
             progressDialog.ShowDialog();
 
-            var successCount = await processTask;
+     var successCount = await processTask;
 
       var failedCount = episodesToProcess.Count - successCount;
-       StatusMessage = $"Processed {successCount} files successfully, {failedCount} failed";
+     StatusMessage = $"Processed {successCount} files successfully, {failedCount} failed";
+         
+          // Update statistics after processing
+   ApplyFilters();
+StatsViewModel.UpdateEpisodeStatistics(_allEpisodes);
 
-          if (successCount > 0)
-            {
+   if (successCount > 0)
+   {
      await _dialogService.ShowMessageAsync(
  "Process Complete",
-              $"Successfully processed {successCount} of {episodesToProcess.Count} files.");
+       $"Successfully processed {successCount} of {episodesToProcess.Count} files.");
     }
 
-            if (failedCount > 0)
-        {
+      if (failedCount > 0)
+{
      var failedEpisodes = episodesToProcess.Where(e => e.Status == ProcessingStatus.Failed).ToList();
     var errorMessages = string.Join("\n", failedEpisodes.Select(e => $"{e.NewFileName}: {e.ErrorMessage}"));
 
   await _dialogService.ShowErrorAsync(
-        "Process Errors",
-              $"Failed to process {failedCount} files:\n\n{errorMessages}");
+"Process Errors",
+  $"Failed to process {failedCount} files:\n\n{errorMessages}");
    }
-        }
-        catch (OperationCanceledException)
+  }
+   catch (OperationCanceledException)
       {
-        StatusMessage = "Processing cancelled";
-        }
+    StatusMessage = "Processing cancelled";
+  }
         catch (Exception ex)
-        {
-         StatusMessage = $"Processing failed: {ex.Message}";
+   {
+    StatusMessage = $"Processing failed: {ex.Message}";
      await _dialogService.ShowErrorAsync("Process Error", $"Failed to process files: {ex.Message}");
         }
     finally
-        {
-            IsProcessing = false;
+   {
+  IsProcessing = false;
         }
     }
 

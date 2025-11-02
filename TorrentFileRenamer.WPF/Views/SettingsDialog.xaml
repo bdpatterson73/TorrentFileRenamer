@@ -220,9 +220,20 @@
            Style="{StaticResource ModernSettingCheckBox}"/>
                <TextBlock Text="When enabled, files will be scanned and processing will be simulated without actually copying or deleting any files. Perfect for testing your configuration before committing to real file operations." 
                  Style="{StaticResource SettingDescription}"
-          Margin="24,0,0,8"/>
+          Margin="24,0,0,16"/>
+                  
+  <TextBlock Text="File Verification Method" Style="{StaticResource SettingLabel}"/>
+             <ComboBox SelectedValue="{Binding FileVerificationMethod}"
+         Style="{StaticResource ModernComboBox}"
+Margin="0,0,0,8">
+           <ComboBoxItem Content="File Size Only (Fast)" Tag="FileSize" IsSelected="True"/>
+       <ComboBoxItem Content="MD5 Checksum (Thorough)" Tag="Checksum"/>
+       </ComboBox>
+    <TextBlock Text="File Size Only: Quick verification by comparing file sizes. MD5 Checksum: Thorough verification using MD5 hash comparison (slower but more accurate for large files)." 
+              Style="{StaticResource SettingDescription}"
+               Margin="0,0,0,8"/>
           </StackPanel>
-           </Border>
+         </Border>
       </StackPanel>
     </ScrollViewer>
           </TabItem>
