@@ -100,21 +100,22 @@
 <RowDefinition Height="Auto"/> <!-- Footer Buttons -->
         </Grid.RowDefinitions>
         
-        <!-- Header -->
+        <!-- Header with gear icon -->
         <Border Grid.Row="0" 
-     Background="{StaticResource PrimaryBrush}"
+ Background="{StaticResource PrimaryBrush}"
     Padding="24,20">
   <Grid>
          <Grid.ColumnDefinitions>
     <ColumnDefinition Width="Auto"/>
 <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-          
+        </Grid.ColumnDefinitions>
+       
+<!-- GEAR ICON using Unicode -->
 <TextBlock Grid.Column="0"
-         Text="?"
+    Text="&#x2699;&#xFE0F;"
    FontSize="32"
       Foreground="White"
-       VerticalAlignment="Center"
+   VerticalAlignment="Center"
           Margin="0,0,16,0"/>
 
      <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -145,7 +146,7 @@
   <!-- Default Paths Section -->
  <Border Style="{StaticResource SettingsCard}">
       <StackPanel>
-     <TextBlock Text="?? Default Paths" Style="{StaticResource SectionHeader}"/>
+     <TextBlock Text="&#x1F4C1; Default Paths" Style="{StaticResource SectionHeader}"/>
      
        <TextBlock Text="Default Source Path" Style="{StaticResource SettingLabel}"/>
        <Grid Style="{StaticResource PathInputGrid}">

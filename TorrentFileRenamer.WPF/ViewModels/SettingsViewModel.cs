@@ -495,7 +495,7 @@ StabilityDelaySeconds = 30;
    _defaultSourcePath = _settings.DefaultSourcePath;
       _defaultDestinationPath = _settings.DefaultDestinationPath;
     _defaultFileExtensions = _settings.DefaultFileExtensions;
-      _rememberLastPaths = _settings.RememberLastPaths;
+    _rememberLastPaths = _settings.RememberLastPaths;
    
   // Logging Settings
     _enableLogging = _settings.EnableLogging;
@@ -503,7 +503,9 @@ StabilityDelaySeconds = 30;
    
   // Processing Settings
     _simulateMode = _settings.SimulateMode;
-        _fileVerificationMethod = _settings.FileVerificationMethod;
+  _fileVerificationMethod = string.IsNullOrEmpty(_settings.FileVerificationMethod) 
+            ? "FileSize" 
+   : _settings.FileVerificationMethod;
     
   // Plex Settings
     _enablePlexValidation = _settings.PlexSettings.EnablePlexValidation;

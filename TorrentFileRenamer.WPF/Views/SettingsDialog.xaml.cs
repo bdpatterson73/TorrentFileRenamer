@@ -10,27 +10,38 @@ public partial class SettingsDialog : Window
     public SettingsDialog()
     {
         InitializeComponent();
+        Loaded += SettingsDialog_Loaded;
     }
 
-    protected override void OnContentRendered(EventArgs e)
+    private void SettingsDialog_Loaded(object sender, RoutedEventArgs e)
     {
-        base.OnContentRendered(e);
-
         // Subscribe to DialogResult changes if ViewModel implements it
         if (DataContext is ViewModels.SettingsViewModel viewModel)
         {
-            viewModel.PropertyChanged += (s, args) =>
-    {
-         if (args.PropertyName == nameof(viewModel.DialogResult))
-       {
-    DialogResult = viewModel.DialogResult;
-          // Explicitly close the window
-        if (viewModel.DialogResult.HasValue)
-  {
-   Close();
-       }
-       }
-   };
+            viewModel.PropertyChanged += ViewModel_PropertyChanged;
         }
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (sender is ViewModels.SettingsViewModel viewModel &&
+            e.PropertyName == nameof(viewModel.DialogResult))
+        {
+            if (viewModel.DialogResult.HasValue)
+            {
+                DialogResult = viewModel.DialogResult;
+                Close();
+            }
+        }
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        // Unsubscribe from events
+        if (DataContext is ViewModels.SettingsViewModel viewModel)
+        {
+            viewModel.PropertyChanged -= ViewModel_PropertyChanged;
+        }
+        base.OnClosed(e);
     }
 }
