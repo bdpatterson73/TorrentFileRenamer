@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Security.Cryptography;
+using TorrentFileRenamer.Core.Configuration;
 using TorrentFileRenamer.WPF.Models;
 
 namespace TorrentFileRenamer.WPF.Services;
@@ -13,6 +14,13 @@ public class FileProcessingService : IFileProcessingService
     private const int BufferSize = 81920; // 80 KB buffer
     private const int MaxRetries = 3;
     private const int InitialRetryDelayMs = 1000;
+
+    private readonly AppSettings _appSettings;
+
+    public FileProcessingService(AppSettings appSettings)
+    {
+        _appSettings = appSettings ?? throw new ArgumentNullException(nameof(appSettings));
+    }
 
     /// <inheritdoc/>
   public async Task<bool> ProcessFileAsync(
@@ -33,6 +41,24 @@ public class FileProcessingService : IFileProcessingService
  {
    episode.Status = ProcessingStatus.Processing;
   episode.ErrorMessage = string.Empty;
+
+            // Simulate mode - skip actual file operations
+      if (_appSettings.SimulateMode)
+      {
+ // Simulate processing delay
+        await Task.Delay(500, cancellationToken);
+            
+    // Report simulated progress
+       for (int i = 0; i <= 100; i += 20)
+          {
+          progress?.Report(i);
+           await Task.Delay(100, cancellationToken);
+          }
+            
+    episode.Status = ProcessingStatus.Completed;
+  episode.ErrorMessage = "[SIMULATED] File would be processed successfully";
+         return true;
+      }
 
   // Ensure destination directory exists
    var destDirectory = Path.GetDirectoryName(destinationPath);
@@ -277,11 +303,29 @@ IProgress<int>? progress = null,
     movie.Status = ProcessingStatus.Processing;
             movie.ErrorMessage = string.Empty;
 
-            // Ensure destination directory exists
+            // Simulate mode - skip actual file operations
+ if (_appSettings.SimulateMode)
+  {
+         // Simulate processing delay
+                await Task.Delay(500, cancellationToken);
+              
+       // Report simulated progress
+       for (int i = 0; i <= 100; i += 20)
+{
+      progress?.Report(i);
+ await Task.Delay(100, cancellationToken);
+    }
+              
+              movie.Status = ProcessingStatus.Completed;
+    movie.ErrorMessage = "[SIMULATED] File would be processed successfully";
+          return true;
+   }
+
+        // Ensure destination directory exists
    var destDirectory = Path.GetDirectoryName(destinationPath);
       if (!string.IsNullOrEmpty(destDirectory))
        {
-                Directory.CreateDirectory(destDirectory);
+          Directory.CreateDirectory(destDirectory);
  }
 
   // Copy file with retry logic

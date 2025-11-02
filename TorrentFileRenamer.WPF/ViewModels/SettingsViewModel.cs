@@ -12,8 +12,8 @@ namespace TorrentFileRenamer.WPF.ViewModels;
 /// </summary>
 public class SettingsViewModel : ViewModelBase
 {
- private readonly AppSettings _settings;
-  private readonly IDialogService _dialogService;
+    private readonly AppSettings _settings;
+    private readonly IDialogService _dialogService;
 
     // General Settings
     private string _defaultSourcePath;
@@ -24,6 +24,9 @@ public class SettingsViewModel : ViewModelBase
     // Logging Settings
     private bool _enableLogging;
     private int _logRetentionDays;
+    
+    // Processing Settings
+    private bool _simulateMode;
     
     // Plex Settings
     private bool _enablePlexValidation;
@@ -103,6 +106,13 @@ set => SetProperty(ref _rememberLastPaths, value);
     {
  get => _logRetentionDays;
         set => SetProperty(ref _logRetentionDays, value);
+    }
+
+    // Processing Settings
+    public bool SimulateMode
+    {
+        get => _simulateMode;
+        set => SetProperty(ref _simulateMode, value);
     }
 
     // Plex Settings
@@ -481,6 +491,9 @@ StabilityDelaySeconds = 30;
     _enableLogging = _settings.EnableLogging;
       _logRetentionDays = _settings.LogRetentionDays;
       
+  // Processing Settings
+    _simulateMode = _settings.SimulateMode;
+    
   // Plex Settings
     _enablePlexValidation = _settings.PlexSettings.EnablePlexValidation;
         _autoFixPlexIssues = _settings.PlexSettings.AutoFixPlexIssues;
@@ -511,6 +524,9 @@ StabilityDelaySeconds = 30;
         _settings.EnableLogging = EnableLogging;
   _settings.LogRetentionDays = LogRetentionDays;
       
+      // Processing Settings
+        _settings.SimulateMode = SimulateMode;
+    
       // Plex Settings
  _settings.PlexSettings.EnablePlexValidation = EnablePlexValidation;
         _settings.PlexSettings.AutoFixPlexIssues = AutoFixPlexIssues;

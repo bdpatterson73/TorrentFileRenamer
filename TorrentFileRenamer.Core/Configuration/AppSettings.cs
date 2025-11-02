@@ -122,6 +122,7 @@ return lines.Skip(Math.Max(0, lines.Length - maxLines)).ToList();
         public bool RememberLastPaths { get; set; } = true;
      public bool EnableLogging { get; set; } = true;
 public int LogRetentionDays { get; set; } = 30;
+        public bool SimulateMode { get; set; } = false;
         public MonitoringSettings Monitoring { get; set; } = new();
    public PlexSettings PlexSettings { get; set; } = new();
 
