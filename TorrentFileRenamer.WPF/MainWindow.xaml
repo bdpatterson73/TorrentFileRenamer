@@ -45,82 +45,106 @@
         <!-- Menu Bar -->
    <Menu Grid.Row="0" Style="{StaticResource ModernMenu}">
   <MenuItem Header="_File">
-       <MenuItem Header="_Settings" 
-                  Command="{Binding ShowSettingsCommand}"
-      InputGestureText="Ctrl+,">
+  <MenuItem Header="_Settings" 
+      Command="{Binding ShowSettingsCommand}"
+    InputGestureText="Ctrl+,">
            <MenuItem.Icon>
-       <TextBlock Text="⚙" FontSize="16"/>
+       <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
     </MenuItem.Icon>
-        </MenuItem>
+  </MenuItem>
    <Separator/>
     <MenuItem Header="E_xit" Command="{Binding ExitCommand}">
-   <MenuItem.Icon>
-   <TextBlock Text="✕" FontSize="16"/>
+<MenuItem.Icon>
+   <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
      </MenuItem.Icon>
   </MenuItem>
-            </MenuItem>
+      </MenuItem>
          <MenuItem Header="_Edit">
    <MenuItem Header="Select _All" InputGestureText="Ctrl+A"/>
-      <MenuItem Header="_Clear" InputGestureText="Ctrl+D"/>
+  <MenuItem Header="_Clear" InputGestureText="Ctrl+D"/>
    </MenuItem>
    <MenuItem Header="_Tools">
          <MenuItem Header="_Options" Command="{Binding ShowSettingsCommand}"/>
       <MenuItem Header="_View Logs" Command="{Binding ShowLogsCommand}">
   <MenuItem.Icon>
-   <TextBlock Text="📋" FontSize="16"/>
+   <TextBlock Text="&#xE7C3;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
      </MenuItem.Icon>
   </MenuItem>
    </MenuItem>
        <MenuItem Header="_Help">
  <MenuItem Header="_Keyboard Shortcuts" 
-          Command="{Binding ShowKeyboardShortcutsCommand}"
+   Command="{Binding ShowKeyboardShortcutsCommand}"
          InputGestureText="F1">
      <MenuItem.Icon>
-      <TextBlock Text="⌨" FontSize="16"/>
+      <TextBlock Text="&#xE765;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
     </MenuItem.Icon>
-         </MenuItem>
+  </MenuItem>
    <MenuItem Header="_Documentation" Command="{Binding ShowDocumentationCommand}">
    <MenuItem.Icon>
-   <TextBlock Text="📖" FontSize="16"/>
+   <TextBlock Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
          </MenuItem.Icon>
 </MenuItem>
        <Separator/>
         <MenuItem Header="_About" Command="{Binding ShowAboutCommand}">
         <MenuItem.Icon>
-  <TextBlock Text="ℹ" FontSize="16"/>
+  <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="16"/>
    </MenuItem.Icon>
      </MenuItem>
        </MenuItem>
         </Menu>
 
-        <!-- Toolbar -->
-        <ToolBar Grid.Row="1" Style="{StaticResource ModernToolBar}">
-      <Button Content="📺 Scan TV" 
-         Style="{StaticResource PrimaryButton}"
+   <!-- Toolbar -->
+ <ToolBar Grid.Row="1" Style="{StaticResource ModernToolBar}">
+      <Button Style="{StaticResource PrimaryButton}"
               Command="{Binding ScanTvCommand}"
-     ToolTip="Scan for TV episodes (Ctrl+S when on TV tab)"/>
-    <Button Content="🎬 Scan Movies" 
-    Style="{StaticResource PrimaryButton}"
-            Command="{Binding ScanMoviesCommand}"
-         ToolTip="Scan for movies (Ctrl+S when on Movies tab)"/>
+     ToolTip="Scan for TV episodes (Ctrl+S when on TV tab)">
+          <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xE8B2;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+           <TextBlock Text="Scan TV"/>
+          </StackPanel>
+      </Button>
+    <Button Style="{StaticResource PrimaryButton}"
+        Command="{Binding ScanMoviesCommand}"
+      ToolTip="Scan for movies (Ctrl+S when on Movies tab)">
+ <StackPanel Orientation="Horizontal">
+    <TextBlock Text="&#xE714;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+   <TextBlock Text="Scan Movies"/>
+          </StackPanel>
+      </Button>
           <Separator/>
-            <Button Content="▶ Process" 
-                Style="{StaticResource PrimaryButton}"
+   <Button Style="{StaticResource PrimaryButton}"
       Command="{Binding ProcessCommand}"
-        ToolTip="Process scanned files (Ctrl+P)"/>
+        ToolTip="Process scanned files (Ctrl+P)">
+   <StackPanel Orientation="Horizontal">
+       <TextBlock Text="&#xE768;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+ <TextBlock Text="Process"/>
+      </StackPanel>
+      </Button>
    <Separator/>
-       <Button Content="📤 Export" 
-       Style="{StaticResource SecondaryButton}"
-         Command="{Binding ShowExportCommand}"
-       ToolTip="Export data to file (Ctrl+Shift+E)"/>
-<Button Content="⚙ Settings" 
- Style="{StaticResource SecondaryButton}"
+       <Button Style="{StaticResource SecondaryButton}"
+    Command="{Binding ShowExportCommand}"
+     ToolTip="Export data to file (Ctrl+Shift+E)">
+          <StackPanel Orientation="Horizontal">
+              <TextBlock Text="&#xEDE1;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+            <TextBlock Text="Export"/>
+          </StackPanel>
+      </Button>
+<Button Style="{StaticResource SecondaryButton}"
    Command="{Binding ShowSettingsCommand}"
-    ToolTip="Open settings (Ctrl+,)"/>
-       <Button Content="⌨ Help" 
-      Style="{StaticResource SecondaryButton}"
+    ToolTip="Open settings (Ctrl+,)">
+          <StackPanel Orientation="Horizontal">
+       <TextBlock Text="&#xE713;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+       <TextBlock Text="Settings"/>
+    </StackPanel>
+      </Button>
+       <Button Style="{StaticResource SecondaryButton}"
     Command="{Binding ShowKeyboardShortcutsCommand}"
-            ToolTip="Show keyboard shortcuts (F1)"/>
+            ToolTip="Show keyboard shortcuts (F1)">
+<StackPanel Orientation="Horizontal">
+     <TextBlock Text="&#xE897;" FontFamily="Segoe MDL2 Assets" FontSize="16" Margin="0,0,6,0"/>
+    <TextBlock Text="Help"/>
+          </StackPanel>
+      </Button>
         </ToolBar>
 
   <!-- Phase 6: Search Panel -->

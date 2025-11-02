@@ -36,16 +36,7 @@
 
  <!-- Toolbar -->
    <ToolBar Grid.Row="0" Style="{StaticResource ModernToolBar}">
-   <Button Content="Scan Movies" 
-Command="{Binding ScanCommand}"
-    Style="{StaticResource PrimaryButton}"
-   ToolTip="Scan for movies (Ctrl+S)"/>
-     <Button Content="Process" 
-  Command="{Binding ProcessCommand}"
-       Style="{StaticResource PrimaryButton}"
-     ToolTip="Process scanned movies (Ctrl+P)"/>
- <Separator/>
-       <Button Content="Remove Selected" 
+   <Button Content="Remove Selected" 
        Command="{Binding RemoveSelectedCommand}"
    CommandParameter="{Binding SelectedItem, ElementName=MoviesDataGrid}"
     Style="{StaticResource SecondaryButton}"
@@ -133,22 +124,23 @@ Command="{Binding ScanCommand}"
   </StackPanel>
 
   <!-- Search Box -->
-      <StackPanel Grid.Column="4" Orientation="Horizontal">
-<TextBlock Text="&#x1F50D;" 
+  <StackPanel Grid.Column="4" Orientation="Horizontal">
+<TextBlock Text="&#xE721;" 
    FontSize="16"
+   FontFamily="Segoe MDL2 Assets"
   VerticalAlignment="Center"
 Margin="0,0,8,0"/>
      <TextBox Width="250"
-    Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+  Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
  ToolTip="Search by movie name, filename, or path">
 <TextBox.Style>
     <Style TargetType="TextBox">
    <Setter Property="Padding" Value="8,6"/>
    <Setter Property="BorderBrush" Value="#BDBDBD"/>
-       <Setter Property="BorderThickness" Value="1"/>
+   <Setter Property="BorderThickness" Value="1"/>
  <Style.Triggers>
  <Trigger Property="IsMouseOver" Value="True">
-         <Setter Property="BorderBrush" Value="#2196F3"/>
+<Setter Property="BorderBrush" Value="#2196F3"/>
       </Trigger>
  <Trigger Property="IsFocused" Value="True">
        <Setter Property="BorderBrush" Value="#2196F3"/>
@@ -256,7 +248,7 @@ Margin="0,0,8,0"/>
      Command="{Binding ViewDetailsCommand}"
    CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
         <MenuItem.Icon>
- <TextBlock Text="&#x1F4CB;" FontSize="14"/>
+ <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
      </MenuItem.Icon>
     </MenuItem>
         <Separator/>
@@ -264,14 +256,14 @@ Margin="0,0,8,0"/>
      Command="{Binding OpenSourceFolderCommand}"
     CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
      <MenuItem.Icon>
-   <TextBlock Text="&#x1F4C1;" FontSize="14"/>
+   <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
       </MenuItem.Icon>
       </MenuItem>
       <MenuItem Header="Open Destination Folder" 
    Command="{Binding OpenDestinationFolderCommand}"
   CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
  <MenuItem.Icon>
-   <TextBlock Text="&#x1F4C2;" FontSize="14"/>
+   <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
         </MenuItem.Icon>
  </MenuItem>
       <Separator/>
@@ -279,22 +271,22 @@ Margin="0,0,8,0"/>
   Command="{Binding CopySourcePathCommand}"
 CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
       <MenuItem.Icon>
-  <TextBlock Text="&#x1F4CB;" FontSize="14"/>
+  <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
     </MenuItem.Icon>
       </MenuItem>
       <MenuItem Header="Copy Destination Path" 
 Command="{Binding CopyDestinationPathCommand}"
     CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
   <MenuItem.Icon>
-     <TextBlock Text="&#x1F4CB;" FontSize="14"/>
+   <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
         </MenuItem.Icon>
  </MenuItem>
-    <Separator/>
-      <MenuItem Header="Retry Failed" 
+<Separator/>
+   <MenuItem Header="Retry Failed" 
   Command="{Binding RetryCommand}"
   CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
-     <MenuItem.Icon>
-  <TextBlock Text="&#x1F504;" FontSize="14"/>
+<MenuItem.Icon>
+  <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
    </MenuItem.Icon>
       </MenuItem>
  <Separator/>
@@ -302,62 +294,62 @@ Command="{Binding CopyDestinationPathCommand}"
     Command="{Binding RemoveSelectedCommand}"
     CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
      <MenuItem.Icon>
-   <TextBlock Text="&#x1F5D1;" FontSize="14"/>
+   <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
    </MenuItem.Icon>
  </MenuItem>
  <MenuItem Header="Remove All Failed" 
      Command="{Binding RemoveAllFailedCommand}">
-      <MenuItem.Icon>
-     <TextBlock Text="&#x26A0;&#xFE0F;" FontSize="14"/>
+ <MenuItem.Icon>
+     <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
    </MenuItem.Icon>
  </MenuItem>
       <MenuItem Header="Remove All Completed" 
 Command="{Binding RemoveAllCompletedCommand}">
      <MenuItem.Icon>
-  <TextBlock Text="&#x2705;" FontSize="14"/>
+  <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
         </MenuItem.Icon>
    </MenuItem>
       <MenuItem Header="Clear All" 
 Command="{Binding ClearAllCommand}">
      <MenuItem.Icon>
-  <TextBlock Text="&#x1F5D1;" FontSize="14"/>
+  <TextBlock Text="&#xE75C;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
         </MenuItem.Icon>
  </MenuItem>
     <Separator/>
   <MenuItem Header="Select All"
      Command="{Binding SelectAllCommand}">
-        <MenuItem.Icon>
- <TextBlock Text="&#x2611;&#xFE0F;" FontSize="14"/>
+ <MenuItem.Icon>
+ <TextBlock Text="&#xE8B3;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
    </MenuItem.Icon>
  </MenuItem>
     </ContextMenu>
    </DataGrid.ContextMenu>
 
         <DataGrid.Columns>
-     <!-- Movie Name -->
+   <!-- Movie Name -->
  <DataGridTextColumn Header="Movie" 
    Binding="{Binding DisplayName}"
-   Width="*"
+   Width="SizeToCells"
       MinWidth="200"/>
 
-      <!-- Year -->
+   <!-- Year -->
  <DataGridTextColumn Header="Year" 
   Binding="{Binding MovieYear}"
        Width="60"/>
 
   <!-- Confidence with colored indicator -->
-      <DataGridTemplateColumn Header="Confidence" Width="100">
+      <DataGridTemplateColumn Header="Confidence" Width="120" MinWidth="100">
       <DataGridTemplateColumn.CellTemplate>
      <DataTemplate>
    <StackPanel Orientation="Horizontal">
     <Ellipse Width="10" Height="10" 
-        Fill="{Binding Confidence, Converter={StaticResource ConfidenceToColorConverter}}"
+ Fill="{Binding Confidence, Converter={StaticResource ConfidenceToColorConverter}}"
     Margin="0,0,5,0"
  VerticalAlignment="Center"/>
       <TextBlock Text="{Binding ConfidenceLevel}" 
    VerticalAlignment="Center"/>
    <TextBlock Text="{Binding Confidence, StringFormat=' ({0}%)'}" 
-      VerticalAlignment="Center"
+  VerticalAlignment="Center"
      Foreground="Gray"
    FontSize="10"/>
   </StackPanel>
@@ -373,20 +365,20 @@ Command="{Binding ClearAllCommand}">
  <!-- Source Path -->
         <DataGridTextColumn Header="Source Path" 
       Binding="{Binding SourcePath}"
-   Width="*"
+   Width="SizeToCells"
   MinWidth="250"/>
 
 <!-- Destination Path -->
       <DataGridTextColumn Header="Destination Path" 
     Binding="{Binding DestinationPath}"
-   Width="*"
+   Width="SizeToCells"
    MinWidth="250"/>
 
      <!-- Error Message -->
        <DataGridTextColumn Header="Error" 
  Binding="{Binding ErrorMessage}"
-   Width="*"
-         MinWidth="200"/>
+   Width="SizeToCells"
+      MinWidth="200"/>
   </DataGrid.Columns>
         </DataGrid>
         </Grid>

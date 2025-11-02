@@ -31,18 +31,9 @@
 
         <!-- Toolbar -->
      <ToolBar Grid.Row="0" Style="{StaticResource ModernToolBar}">
-   <Button Content="Scan" 
-    Command="{Binding ScanCommand}"
-        Style="{StaticResource PrimaryButton}" 
-    ToolTip="Scan for TV episodes (Ctrl+S)"/>
-   <Button Content="Process" 
-    Command="{Binding ProcessCommand}"
-     Style="{StaticResource PrimaryButton}"
-       ToolTip="Process scanned episodes (Ctrl+P)"/>
-   <Separator/>
-        <Button Content="Remove Selected" 
-        Command="{Binding RemoveSelectedCommand}"
-      CommandParameter="{Binding SelectedItem, ElementName=EpisodesDataGrid}"
+   <Button Content="Remove Selected" 
+Command="{Binding RemoveSelectedCommand}"
+    CommandParameter="{Binding SelectedItem, ElementName=EpisodesDataGrid}"
        Style="{StaticResource SecondaryButton}"
    ToolTip="Remove selected episode (Delete)"/>
    <Button Content="Clear All" 
@@ -53,7 +44,7 @@
     Command="{Binding RemoveUnparsedCommand}"
     Style="{StaticResource SecondaryButton}"
         ToolTip="Remove all unparsed files"/>
-   </ToolBar>
+ </ToolBar>
 
       <!-- Phase 6: Statistics Widget -->
         <controls:StatsWidget Grid.Row="1"
@@ -129,8 +120,9 @@
 
   <!-- Search Box -->
     <StackPanel Grid.Column="4" Orientation="Horizontal">
- <TextBlock Text="&#x1F50D;" 
+ <TextBlock Text="&#xE721;" 
    FontSize="16"
+   FontFamily="Segoe MDL2 Assets"
   VerticalAlignment="Center"
        Margin="0,0,8,0"/>
      <TextBox Width="250"
@@ -144,7 +136,7 @@
   <Style.Triggers>
    <Trigger Property="IsMouseOver" Value="True">
  <Setter Property="BorderBrush" Value="#2196F3"/>
-         </Trigger>
+    </Trigger>
  <Trigger Property="IsFocused" Value="True">
        <Setter Property="BorderBrush" Value="#2196F3"/>
     </Trigger>
@@ -247,49 +239,49 @@
 
    <DataGrid.ContextMenu>
      <ContextMenu>
-        <MenuItem Header="View Details" 
+   <MenuItem Header="View Details" 
  Command="{Binding ViewDetailsCommand}"
 CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
       <MenuItem.Icon>
-          <TextBlock Text="&#x1F4CB;" FontSize="14"/>
-        </MenuItem.Icon>
-      </MenuItem>
+          <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+ </MenuItem.Icon>
+  </MenuItem>
   <Separator/>
       <MenuItem Header="Open Source Folder" 
     Command="{Binding OpenSourceFolderCommand}"
        CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
    <MenuItem.Icon>
-  <TextBlock Text="&#x1F4C1;" FontSize="14"/>
+  <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
         </MenuItem.Icon>
  </MenuItem>
       <MenuItem Header="Open Destination Folder" 
      Command="{Binding OpenDestinationFolderCommand}"
     CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
      <MenuItem.Icon>
-  <TextBlock Text="&#x1F4C2;" FontSize="14"/>
-        </MenuItem.Icon>
+  <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
+   </MenuItem.Icon>
       </MenuItem>
       <Separator/>
-      <MenuItem Header="Copy Source Path" 
+    <MenuItem Header="Copy Source Path" 
   Command="{Binding CopySourcePathCommand}"
     CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
   <MenuItem.Icon>
-      <TextBlock Text="&#x1F4CB;" FontSize="14"/>
+      <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
   </MenuItem.Icon>
  </MenuItem>
  <MenuItem Header="Copy Destination Path" 
     Command="{Binding CopyDestinationPathCommand}"
   CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
         <MenuItem.Icon>
-  <TextBlock Text="&#x1F4CB;" FontSize="14"/>
+  <TextBlock Text="&#xE8C8;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
    </MenuItem.Icon>
  </MenuItem>
-      <Separator/>
+<Separator/>
       <MenuItem Header="Retry Failed" 
 Command="{Binding RetryCommand}"
     CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
     <MenuItem.Icon>
-       <TextBlock Text="&#x1F504;" FontSize="14"/>
+       <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
      </MenuItem.Icon>
     </MenuItem>
   <Separator/>
@@ -297,32 +289,32 @@ Command="{Binding RetryCommand}"
   Command="{Binding RemoveSelectedCommand}"
          CommandParameter="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource AncestorType=ContextMenu}}">
  <MenuItem.Icon>
-  <TextBlock Text="&#x1F5D1;" FontSize="14"/>
+  <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
    </MenuItem.Icon>
  </MenuItem>
       <MenuItem Header="Remove All Failed" 
    Command="{Binding RemoveAllFailedCommand}">
   <MenuItem.Icon>
-  <TextBlock Text="&#x26A0;&#xFE0F;" FontSize="14"/>
+  <TextBlock Text="&#xE7BA;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
  </MenuItem.Icon>
  </MenuItem>
    <MenuItem Header="Remove All Completed" 
   Command="{Binding RemoveAllCompletedCommand}">
         <MenuItem.Icon>
-     <TextBlock Text="&#x2705;" FontSize="14"/>
+     <TextBlock Text="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
     </MenuItem.Icon>
    </MenuItem>
       <MenuItem Header="Clear All" 
 Command="{Binding ClearAllCommand}">
      <MenuItem.Icon>
-  <TextBlock Text="&#x1F5D1;" FontSize="14"/>
+  <TextBlock Text="&#xE75C;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
         </MenuItem.Icon>
       </MenuItem>
     <Separator/>
      <MenuItem Header="Select All"
   Command="{Binding SelectAllCommand}">
   <MenuItem.Icon>
-        <TextBlock Text="&#x2611;&#xFE0F;" FontSize="14"/>
+        <TextBlock Text="&#xE8B3;" FontFamily="Segoe MDL2 Assets" FontSize="14"/>
  </MenuItem.Icon>
  </MenuItem>
       </ContextMenu>
@@ -332,8 +324,8 @@ Command="{Binding ClearAllCommand}">
     <!-- Show Name -->
       <DataGridTextColumn Header="Show" 
    Binding="{Binding ShowName}"
-   Width="*"
-         MinWidth="150"/>
+   Width="SizeToCells"
+   MinWidth="150"/>
 
      <!-- Season -->
  <DataGridTextColumn Header="Season" 
@@ -341,37 +333,37 @@ Command="{Binding ClearAllCommand}">
   Width="60"/>
 
      <!-- Episode(s) -->
-    <DataGridTextColumn Header="Episode(s)" 
+ <DataGridTextColumn Header="Episode(s)" 
      Binding="{Binding EpisodeNumbers}"
-       Width="80"/>
+     Width="80"/>
 
   <!-- New Filename -->
 <DataGridTextColumn Header="New Filename" 
-      Binding="{Binding NewFileName}"
-   Width="*"
+   Binding="{Binding NewFileName}"
+   Width="SizeToCells"
        MinWidth="200"/>
 
     <!-- Status -->
-       <DataGridTextColumn Header="Status" 
+     <DataGridTextColumn Header="Status" 
     Binding="{Binding StatusText}"
         Width="100"/>
 
     <!-- Source Path -->
       <DataGridTextColumn Header="Source Path" 
    Binding="{Binding SourcePath}"
-    Width="*"
+    Width="SizeToCells"
  MinWidth="250"/>
 
  <!-- Destination Path -->
    <DataGridTextColumn Header="Destination Path" 
  Binding="{Binding DestinationPath}"
-       Width="*"
-        MinWidth="250"/>
+       Width="SizeToCells"
+      MinWidth="250"/>
 
     <!-- Error Message -->
     <DataGridTextColumn Header="Error" 
          Binding="{Binding ErrorMessage}"
-Width="*"
+Width="SizeToCells"
     MinWidth="200"/>
    </DataGrid.Columns>
    </DataGrid>

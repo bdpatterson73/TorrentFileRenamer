@@ -95,8 +95,8 @@ Text="{Binding ShowName}"
     <Run Text="&#xE8A5;" FontFamily="Segoe MDL2 Assets" />
       <Run Text=" "/>
 <Run Text="{Binding CoreEpisode.FileName, Mode=OneWay}" Foreground="#757575"/>
-    <Run Text=" ? " Foreground="#2196F3"/>
-        <Run Text="{Binding NewFileName, Mode=OneWay}" FontWeight="Medium" Foreground="#2E7D32"/>
+    <Run Text=" &#x2192; " Foreground="#2196F3"/>
+      <Run Text="{Binding NewFileName, Mode=OneWay}" FontWeight="Medium" Foreground="#2E7D32"/>
     </TextBlock>
 
     <!-- Error message (if any) -->
@@ -144,12 +144,12 @@ Text="{Binding ShowName}"
     Margin="0,0,16,0">
    
   <Button Padding="8,4"
-    Style="{StaticResource SecondaryButton}"
+  Style="{StaticResource SecondaryButton}"
       Margin="0,0,4,0"
    FontSize="14"
    ToolTip="Open Folder"
-     Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-   CommandParameter="{Binding}">
+     Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+ CommandParameter="{Binding}">
  <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets"/>
  </Button>
 
@@ -158,7 +158,7 @@ Text="{Binding ShowName}"
   Margin="0,0,4,0"
  FontSize="14"
  ToolTip="View Details"
-  Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+  Command="{Binding DataContext.ViewDetailsCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
  CommandParameter="{Binding}">
       <TextBlock Text="&#xE946;" FontFamily="Segoe MDL2 Assets"/>
  </Button>
@@ -168,17 +168,17 @@ Text="{Binding ShowName}"
  Margin="0,0,4,0"
   FontSize="14"
    ToolTip="Retry"
-Command="{Binding DataContext.RetryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+Command="{Binding DataContext.RetryCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
    CommandParameter="{Binding}"
    Visibility="{Binding Status, Converter={StaticResource StatusToRetryVisibilityConverter}}">
      <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets"/>
    </Button>
 
   <Button Padding="8,4"
-      Style="{StaticResource SecondaryButton}"
-   FontSize="14"
+   Style="{StaticResource SecondaryButton}"
+ FontSize="14"
    ToolTip="Remove"
-     Command="{Binding DataContext.RemoveSelectedCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+     Command="{Binding DataContext.RemoveSelectedCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
    CommandParameter="{Binding}">
        <TextBlock Text="&#xE74D;" FontFamily="Segoe MDL2 Assets"/>
         </Button>
