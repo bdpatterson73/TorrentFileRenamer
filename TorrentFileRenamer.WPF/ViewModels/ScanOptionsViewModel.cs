@@ -108,7 +108,13 @@ Validate();
     public string[] ValidationErrors
     {
         get => _validationErrors;
-     private set => SetProperty(ref _validationErrors, value);
+private set
+        {
+        if (SetProperty(ref _validationErrors, value))
+            {
+    OnPropertyChanged(nameof(IsValid));
+   }
+        }
     }
 
     /// <summary>

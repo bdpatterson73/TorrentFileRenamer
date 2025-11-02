@@ -336,16 +336,19 @@ var options = dialog.ViewModel;
    });
 
   return await _scanningService.ScanForTvEpisodesAsync(
-         options.SourcePath,
+   options.SourcePath,
       options.DestinationPath,
-          options.FileExtensionsArray,
+     options.FileExtensionsArray,
         progress,
-   cts.Token);
-            });
+cts.Token);
+       });
 
-    progressDialog.ShowDialog();
+    progressDialog.Show();  // Changed from ShowDialog() to Show()
 
-            var results = await scanTask;
+    var results = await scanTask;
+            
+     // Close the progress dialog now that scanning is complete
+            progressDialog.Close();
 
           _allEpisodes.Clear();
          foreach (var episode in results)

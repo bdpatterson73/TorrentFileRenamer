@@ -126,15 +126,15 @@ public class FileEpisodeModel : ObservableObject
      if (_coreEpisode.PlexValidation == null)
    return string.Empty;
 
-            var validation = _coreEpisode.PlexValidation;
+   var validation = _coreEpisode.PlexValidation;
      if (validation.IsValid)
      return "? Plex Compatible";
 
      var messages = new List<string>();
-        if (validation.Issues.Count > 0)
-     messages.AddRange(validation.Issues);
-            if (validation.Warnings.Count > 0)
-     messages.AddRange(validation.Warnings);
+    if (validation.Issues.Count > 0)
+  messages.AddRange(validation.Issues);
+  if (validation.Warnings.Count > 0)
+   messages.AddRange(validation.Warnings);
 
        return string.Join("; ", messages);
  }

@@ -1,6 +1,12 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Color Brushes for Card Sections -->
+    <SolidColorBrush x:Key="CardSectionBackgroundBrush" Color="#FAFAFA"/>
+    <SolidColorBrush x:Key="CardSuccessSectionBrush" Color="#E8F5E9"/>
+    <SolidColorBrush x:Key="CardErrorSectionBrush" Color="#FFEBEE"/>
+    <SolidColorBrush x:Key="CardWarningSectionBrush" Color="#FFF3E0"/>
+
     <!-- Base Card Style -->
     <Style x:Key="FileCard" TargetType="Border">
         <Setter Property="Background" Value="White"/>
@@ -12,13 +18,13 @@
         <Setter Property="Effect">
      <Setter.Value>
          <DropShadowEffect Color="#000000" 
-              Opacity="0.1" 
+         Opacity="0.1" 
         BlurRadius="8" 
    ShadowDepth="2"/>
   </Setter.Value>
         </Setter>
    <Style.Triggers>
-         <!-- Hover effect -->
+   <!-- Hover effect -->
        <Trigger Property="IsMouseOver" Value="True">
   <Setter Property="Effect">
         <Setter.Value>
@@ -26,10 +32,10 @@
     Opacity="0.15" 
           BlurRadius="12" 
     ShadowDepth="4"/>
-    </Setter.Value>
+  </Setter.Value>
         </Setter>
-            </Trigger>
-        </Style.Triggers>
+        </Trigger>
+  </Style.Triggers>
     </Style>
 
     <!-- Status Border Style -->
@@ -41,7 +47,7 @@
 
     <!-- Card Title Style -->
     <Style x:Key="CardTitle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="18"/>
+      <Setter Property="FontSize" Value="18"/>
  <Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Foreground" Value="#212121"/>
       <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
@@ -51,7 +57,7 @@
     <Style x:Key="CardSubtitle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="Medium"/>
-      <Setter Property="Foreground" Value="#616161"/>
+    <Setter Property="Foreground" Value="#616161"/>
 <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
     </Style>
 
@@ -60,12 +66,12 @@
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="FontWeight" Value="Regular"/>
    <Setter Property="Foreground" Value="#757575"/>
-        <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+     <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
     </Style>
 
     <!-- Card Caption Style -->
-    <Style x:Key="CardCaption" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="12"/>
+  <Style x:Key="CardCaption" TargetType="TextBlock">
+    <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontWeight" Value="Regular"/>
         <Setter Property="Foreground" Value="#9E9E9E"/>
     </Style>
@@ -73,86 +79,86 @@
     <!-- Card Metadata Style -->
     <Style x:Key="CardMetadata" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11"/>
-        <Setter Property="FontWeight" Value="Regular"/>
+    <Setter Property="FontWeight" Value="Regular"/>
   <Setter Property="Foreground" Value="#BDBDBD"/>
     </Style>
 
     <!-- View Toggle Button Style -->
     <Style x:Key="ViewToggleButton" TargetType="RadioButton">
         <Setter Property="Template">
-        <Setter.Value>
-                <ControlTemplate TargetType="RadioButton">
-          <Border x:Name="Border"
+    <Setter.Value>
+      <ControlTemplate TargetType="RadioButton">
+  <Border x:Name="Border"
   Background="Transparent"
      BorderBrush="#E0E0E0"
             BorderThickness="1"
        CornerRadius="4"
       Padding="12,6">
-            <ContentPresenter HorizontalAlignment="Center" 
-         VerticalAlignment="Center"/>
-         </Border>
+     <ContentPresenter HorizontalAlignment="Center" 
+       VerticalAlignment="Center"/>
+   </Border>
   <ControlTemplate.Triggers>
-      <Trigger Property="IsChecked" Value="True">
-           <Setter TargetName="Border" Property="Background" Value="#2196F3"/>
+   <Trigger Property="IsChecked" Value="True">
+   <Setter TargetName="Border" Property="Background" Value="#2196F3"/>
      <Setter Property="Foreground" Value="White"/>
         <Setter TargetName="Border" Property="BorderBrush" Value="#2196F3"/>
  </Trigger>
           <Trigger Property="IsMouseOver" Value="True">
-             <Setter TargetName="Border" Property="Background" Value="#E3F2FD"/>
+       <Setter TargetName="Border" Property="Background" Value="#E3F2FD"/>
        </Trigger>
 <MultiTrigger>
          <MultiTrigger.Conditions>
    <Condition Property="IsChecked" Value="True"/>
    <Condition Property="IsMouseOver" Value="True"/>
      </MultiTrigger.Conditions>
-         <Setter TargetName="Border" Property="Background" Value="#1976D2"/>
-            </MultiTrigger>
-              </ControlTemplate.Triggers>
+     <Setter TargetName="Border" Property="Background" Value="#1976D2"/>
+   </MultiTrigger>
+     </ControlTemplate.Triggers>
     </ControlTemplate>
             </Setter.Value>
 </Setter>
-    </Style>
+</Style>
 
- <!-- Card Section Background Style -->
+ <!-- Card Section Background Style (deprecated - use CardSectionBackgroundBrush instead) -->
     <Style x:Key="CardSectionBackground" TargetType="Border">
-        <Setter Property="Background" Value="#FAFAFA"/>
+        <Setter Property="Background" Value="{StaticResource CardSectionBackgroundBrush}"/>
    <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="12,8"/>
     </Style>
 
-    <!-- Card Success Section Style -->
+    <!-- Card Success Section Style (deprecated - use CardSuccessSectionBrush instead) -->
     <Style x:Key="CardSuccessSection" TargetType="Border">
-        <Setter Property="Background" Value="#E8F5E9"/>
+        <Setter Property="Background" Value="{StaticResource CardSuccessSectionBrush}"/>
   <Setter Property="CornerRadius" Value="4"/>
-        <Setter Property="Padding" Value="12,8"/>
+  <Setter Property="Padding" Value="12,8"/>
     </Style>
 
-    <!-- Card Error Section Style -->
+    <!-- Card Error Section Style (deprecated - use CardErrorSectionBrush instead) -->
     <Style x:Key="CardErrorSection" TargetType="Border">
-        <Setter Property="Background" Value="#FFEBEE"/>
+        <Setter Property="Background" Value="{StaticResource CardErrorSectionBrush}"/>
   <Setter Property="CornerRadius" Value="4"/>
      <Setter Property="Padding" Value="12,8"/>
     </Style>
 
-    <!-- Card Warning Section Style -->
-    <Style x:Key="CardWarningSection" TargetType="Border">
-      <Setter Property="Background" Value="#FFF3E0"/>
+    <!-- Card Warning Section Style (deprecated - use CardWarningSectionBrush instead) -->
+  <Style x:Key="CardWarningSection" TargetType="Border">
+   <Setter Property="Background" Value="{StaticResource CardWarningSectionBrush}"/>
  <Setter Property="CornerRadius" Value="4"/>
    <Setter Property="Padding" Value="12,8"/>
-    </Style>
+</Style>
 
     <!-- Status Badge Style -->
     <Style x:Key="StatusBadge" TargetType="Border">
         <Setter Property="CornerRadius" Value="12"/>
   <Setter Property="Padding" Value="12,4"/>
-        <Setter Property="VerticalAlignment" Value="Center"/>
+   <Setter Property="VerticalAlignment" Value="Center"/>
     </Style>
 
   <!-- Status Badge Text Style -->
-    <Style x:Key="StatusBadgeText" TargetType="TextBlock">
+ <Style x:Key="StatusBadgeText" TargetType="TextBlock">
         <Setter Property="Foreground" Value="White"/>
       <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
+<Setter Property="FontWeight" Value="SemiBold"/>
     </Style>
 
 </ResourceDictionary>

@@ -87,7 +87,7 @@
           <Border Grid.Row="2" 
  Margin="16,0"
   Padding="12,8"
-      Background="{StaticResource CardWarningSection}"
+    Background="{StaticResource CardWarningSectionBrush}"
  CornerRadius="6"
   Visibility="{Binding IsMultiEpisode, Converter={StaticResource BoolToVisibilityConverter}}">
         <StackPanel Orientation="Horizontal">
@@ -106,12 +106,12 @@
 
             <!-- Original Filename Section -->
           <Border Grid.Row="4" 
-       Margin="16,0"
+   Margin="16,0"
    Padding="12"
-      Background="{StaticResource CardSectionBackground}"
+      Background="{StaticResource CardSectionBackgroundBrush}"
       CornerRadius="6">
       <Grid>
-               <Grid.RowDefinitions>
+       <Grid.RowDefinitions>
          <RowDefinition Height="Auto"/>
          <RowDefinition Height="4"/>
   <RowDefinition Height="Auto"/>
@@ -129,18 +129,18 @@
     TextTrimming="CharacterEllipsis"
      MaxHeight="60"
  ToolTip="{Binding CoreEpisode.FileName}"/>
-     </Grid>
+ </Grid>
  </Border>
 
-           <!-- New Filename Section -->
-                <Border Grid.Row="6" 
+    <!-- New Filename Section -->
+       <Border Grid.Row="6" 
    Margin="16,0"
       Padding="12"
-              Background="{StaticResource CardSuccessSection}"
-      CornerRadius="6">
+  Background="{StaticResource CardSuccessSectionBrush}"
+CornerRadius="6">
             <Grid>
           <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+  <RowDefinition Height="Auto"/>
   <RowDefinition Height="4"/>
      <RowDefinition Height="Auto"/>
      </Grid.RowDefinitions>
@@ -150,13 +150,13 @@
    Text="NEW FILENAME"
   Foreground="#2E7D32"/>
     
-          <TextBlock Grid.Row="2"
+  <TextBlock Grid.Row="2"
       Style="{StaticResource CardBody}"
-                  Text="{Binding NewFileName}"
-   FontWeight="Medium"
+          Text="{Binding NewFileName}"
+ FontWeight="Medium"
          TextWrapping="Wrap"
    TextTrimming="CharacterEllipsis"
-          MaxHeight="60"
+MaxHeight="60"
           ToolTip="{Binding NewFileName}"/>
   </Grid>
        </Border>
@@ -236,7 +236,7 @@
  <Border Grid.Row="12" 
     Margin="16,0"
     Padding="12"
-    Background="{StaticResource CardErrorSection}"
+    Background="{StaticResource CardErrorSectionBrush}"
  CornerRadius="6"
     Visibility="{Binding ErrorMessage, Converter={StaticResource StringToVisibilityConverter}}">
 <Grid>
@@ -260,7 +260,7 @@ FontSize="18"
   Margin="0,0,0,4"/>
     <TextBlock Style="{StaticResource CardBody}"
  Text="{Binding ErrorMessage}"
-        TextWrapping="Wrap"
+     TextWrapping="Wrap"
 Foreground="#D32F2F"/>
     </StackPanel>
     </Grid>
