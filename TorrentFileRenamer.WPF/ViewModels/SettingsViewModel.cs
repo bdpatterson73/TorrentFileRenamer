@@ -193,7 +193,13 @@ get => _enablePlexValidation;
         set => SetProperty(ref _maxAutoMonitorLogEntries, value);
     }
 
-    public bool? DialogResult { get; private set; }
+    private bool? _dialogResult;
+
+    public bool? DialogResult 
+    { 
+        get => _dialogResult;
+        private set => SetProperty(ref _dialogResult, value);
+    }
 
     #endregion
 

@@ -187,7 +187,7 @@
     <!-- File Extensions Section -->
      <Border Style="{StaticResource SettingsCard}">
         <StackPanel>
-        <TextBlock Text="?? File Extensions" Style="{StaticResource SectionHeader}"/>
+        <TextBlock Text="&#x1F4C4; File Extensions" Style="{StaticResource SectionHeader}"/>
  
        <TextBlock Text="Default File Extensions" Style="{StaticResource SettingLabel}"/>
   <TextBox Text="{Binding DefaultFileExtensions, UpdateSourceTrigger=PropertyChanged}"
@@ -200,7 +200,7 @@
              <!-- Preferences Section -->
          <Border Style="{StaticResource SettingsCard}">
         <StackPanel>
-       <TextBlock Text="? Preferences" Style="{StaticResource SectionHeader}"/>
+       <TextBlock Text="&#x2611;&#xFE0F; Preferences" Style="{StaticResource SectionHeader}"/>
         
           <CheckBox Content="Remember last used paths between sessions" 
           IsChecked="{Binding RememberLastPaths}"
@@ -214,7 +214,7 @@
    <!-- Processing Settings Section -->
  <Border Style="{StaticResource SettingsCard}">
     <StackPanel>
-       <TextBlock Text="?? Processing Options" Style="{StaticResource SectionHeader}"/>
+       <TextBlock Text="&#x2699;&#xFE0F; Processing Options" Style="{StaticResource SectionHeader}"/>
         
                 <CheckBox Content="Simulate Mode (Test Without Modifying Files)" 
    IsChecked="{Binding SimulateMode}"
@@ -249,7 +249,7 @@ Margin="0,0,0,8">
     <!-- Logging Configuration -->
    <Border Style="{StaticResource SettingsCard}">
         <StackPanel>
-         <TextBlock Text="?? Logging Configuration" Style="{StaticResource SectionHeader}"/>
+         <TextBlock Text="&#x1F4DD; Logging Configuration" Style="{StaticResource SectionHeader}"/>
           
           <CheckBox Content="Enable application logging" 
         IsChecked="{Binding EnableLogging}"
@@ -284,17 +284,17 @@ Margin="0,0,0,8">
        CornerRadius="8"
   Padding="16">
       <StackPanel>
-  <TextBlock Text="? About Logging" 
+  <TextBlock Text="&#x2139;&#xFE0F; About Logging" 
   FontSize="14"
     FontWeight="SemiBold"
          Foreground="{StaticResource PrimaryBrush}"
-            Margin="0,0,0,8"/>
+         Margin="0,0,0,8"/>
        <TextBlock TextWrapping="Wrap" 
                FontSize="12"
       Foreground="{StaticResource TextPrimaryBrush}">
  Application logs are stored locally and contain information about operations, errors, and system events. 
       Logs are useful for debugging issues and understanding application behavior. 
-         Valid retention period: 1-365 days.
+       Valid retention period: 1-365 days.
        </TextBlock>
              </StackPanel>
        </Border>
@@ -311,7 +311,7 @@ Margin="0,0,0,8">
      <!-- Plex Settings -->
               <Border Style="{StaticResource SettingsCard}">
      <StackPanel>
-   <TextBlock Text="?? Plex Compatibility" Style="{StaticResource SectionHeader}"/>
+   <TextBlock Text="&#x1F4FA; Plex Compatibility" Style="{StaticResource SectionHeader}"/>
        
          <CheckBox Content="Enable Plex compatibility validation" 
              IsChecked="{Binding EnablePlexValidation}"
@@ -388,7 +388,7 @@ Margin="0,0,0,8">
         <!-- Folder Settings -->
            <Border Style="{StaticResource SettingsCard}">
      <StackPanel>
-      <TextBlock Text="?? Monitoring Folders" Style="{StaticResource SectionHeader}"/>
+      <TextBlock Text="&#x1F4C1; Monitoring Folders" Style="{StaticResource SectionHeader}"/>
   
                <TextBlock Text="Watch Folder" Style="{StaticResource SettingLabel}"/>
  <Grid Style="{StaticResource PathInputGrid}">
@@ -435,7 +435,7 @@ Width="90"/>
    <!-- Behavior Settings -->
       <Border Style="{StaticResource SettingsCard}">
       <StackPanel>
-       <TextBlock Text="? Monitoring Behavior" Style="{StaticResource SectionHeader}"/>
+       <TextBlock Text="&#x1F50D; Monitoring Behavior" Style="{StaticResource SectionHeader}"/>
      
           <TextBlock Text="File Stability Delay (seconds)" Style="{StaticResource SettingLabel}"/>
               <Grid>
@@ -453,7 +453,7 @@ Width="90"/>
       Margin="0,0,0,8"/>
     
             <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,8">
-          <TextBlock Text="? Current value: " 
+          <TextBlock Text="&#x1F3AF; Current value: " 
     Style="{StaticResource SettingDescription}"
     VerticalAlignment="Center"/>
         <TextBlock Text="{Binding StabilityDelaySeconds}" 
@@ -493,7 +493,7 @@ FontSize="13"
              <!-- Options -->
     <Border Style="{StaticResource SettingsCard}">
          <StackPanel>
-        <TextBlock Text="?? Options" Style="{StaticResource SectionHeader}"/>
+        <TextBlock Text="&#x2699;&#xFE0F; Options" Style="{StaticResource SectionHeader}"/>
         
                <CheckBox Content="Auto-start monitoring when application loads" 
       IsChecked="{Binding AutoStartOnLoad}"
@@ -523,7 +523,7 @@ FontSize="13"
      <!-- Settings Management -->
      <Border Style="{StaticResource SettingsCard}">
  <StackPanel>
-     <TextBlock Text="?? Settings Management" Style="{StaticResource SectionHeader}"/>
+     <TextBlock Text="&#x1F4BE; Settings Management" Style="{StaticResource SectionHeader}"/>
              
   <TextBlock Text="Backup and restore your configuration settings" 
             Style="{StaticResource SettingDescription}"
@@ -536,14 +536,14 @@ FontSize="13"
         </Grid.ColumnDefinitions>
    
      <Button Grid.Column="0"
- Content="?? Export Settings"
+ Content="&#x1F4E4; Export Settings"
    Command="{Binding ExportSettingsCommand}"
            Style="{StaticResource SecondaryButton}"
           Margin="0,0,8,0"
     HorizontalAlignment="Stretch"/>
          
        <Button Grid.Column="1"
-   Content="?? Import Settings"
+   Content="&#x1F4E5; Import Settings"
     Command="{Binding ImportSettingsCommand}"
    Style="{StaticResource SecondaryButton}"
         Margin="8,0,0,0"
@@ -555,13 +555,13 @@ FontSize="13"
   <!-- Presets -->
           <Border Style="{StaticResource SettingsCard}">
         <StackPanel>
-      <TextBlock Text="?? Quick Presets" Style="{StaticResource SectionHeader}"/>
+      <TextBlock Text="&#x26A1; Quick Presets" Style="{StaticResource SectionHeader}"/>
      
         <TextBlock Text="Apply predefined configuration templates" 
                 Style="{StaticResource SettingDescription}"
        Margin="0,0,0,16"/>
          
-    <Button Content="? Basic Configuration"
+    <Button Content="&#x1F195; Basic Configuration"
     Command="{Binding ApplyBasicPresetCommand}"
    Style="{StaticResource SecondaryButton}"
       HorizontalAlignment="Stretch"
@@ -570,7 +570,7 @@ FontSize="13"
      Style="{StaticResource SettingDescription}"
         Margin="8,0,0,16"/>
          
-    <Button Content="?? Advanced Configuration"
+    <Button Content="&#x1F680; Advanced Configuration"
         Command="{Binding ApplyAdvancedPresetCommand}"
       Style="{StaticResource SecondaryButton}"
       HorizontalAlignment="Stretch"
@@ -579,7 +579,7 @@ FontSize="13"
   Style="{StaticResource SettingDescription}"
        Margin="8,0,0,16"/>
        
-             <Button Content="?? Plex-Optimized Configuration"
+             <Button Content="&#x1F4FA; Plex-Optimized Configuration"
     Command="{Binding ApplyPlexPresetCommand}"
              Style="{StaticResource SecondaryButton}"
           HorizontalAlignment="Stretch"
@@ -597,7 +597,7 @@ FontSize="13"
         CornerRadius="8"
               Padding="16">
       <StackPanel>
-       <TextBlock Text="? Warning" 
+       <TextBlock Text="&#x26A0;&#xFE0F; Warning" 
            FontSize="14"
 FontWeight="SemiBold"
           Foreground="{StaticResource ErrorBrush}"
@@ -630,13 +630,13 @@ Consider exporting your current settings first to create a backup.
    </Grid.ColumnDefinitions>
      
             <Button Grid.Column="0" 
-       Content="?? Reset to Defaults" 
+       Content="&#x21BA; Reset to Defaults" 
    Command="{Binding ResetToDefaultsCommand}"
     Style="{StaticResource SecondaryButton}"
    Width="150"/>
      
     <Button Grid.Column="2" 
-     Content="? Save" 
+     Content="&#x2714;&#xFE0F; Save" 
         Command="{Binding SaveCommand}"
        Style="{StaticResource PrimaryButton}"
         IsDefault="True"
