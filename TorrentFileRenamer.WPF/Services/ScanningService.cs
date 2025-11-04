@@ -1,5 +1,6 @@
 using System.IO;
 using TorrentFileRenamer.Core.Models;
+using TorrentFileRenamer.Core.Configuration;
 using TorrentFileRenamer.WPF.Models;
 
 namespace TorrentFileRenamer.WPF.Services;
@@ -28,6 +29,8 @@ public class ScanningService : IScanningService
         if (!Directory.Exists(sourcePath))
             throw new DirectoryNotFoundException($"Source directory not found: {sourcePath}");
 
+        LoggingService.LogInfo($"Starting TV episode scan: Source={sourcePath}, Dest={destinationPath}, Extensions=[{string.Join(", ", fileExtensions)}]", "Scanning");
+
         var results = new List<FileEpisodeModel>();
 
         // Find all matching files - do this on a background thread
@@ -40,16 +43,19 @@ public class ScanningService : IScanningService
                 {
                     var matchingFiles = Directory.GetFiles(sourcePath, $"*{extension}", SearchOption.AllDirectories);
                     files.AddRange(matchingFiles);
+                    LoggingService.LogDebug($"Found {matchingFiles.Length} files with extension {extension}", "Scanning");
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException ex)
                 {
                     // Skip directories we don't have access to
-                    System.Diagnostics.Debug.WriteLine($"Access denied to some directories with extension {extension}");
+                    LoggingService.LogWarning($"Access denied to some directories with extension {extension}: {ex.Message}", "Scanning");
                 }
             }
 
             return files;
         }, cancellationToken);
+
+        LoggingService.LogInfo($"Found {allFiles.Count} total files to scan for TV episodes", "Scanning");
 
         if (allFiles.Count == 0)
             return results;
@@ -59,6 +65,9 @@ public class ScanningService : IScanningService
             TotalFiles = allFiles.Count,
             FilesProcessed = 0
         };
+
+        int parsedCount = 0;
+        int unparsedCount = 0;
 
         // Process files in batches to improve performance and UI responsiveness
         for (int i = 0; i < allFiles.Count; i += BatchSize)
@@ -81,11 +90,16 @@ public class ScanningService : IScanningService
                         var episode = new FileEpisode(file, destinationPath);
                         var model = new FileEpisodeModel(episode);
                         batchModels.Add(model);
+
+                        if (model.IsParsed)
+                            parsedCount++;
+                        else
+                            unparsedCount++;
                     }
                     catch (Exception ex)
                     {
                         // Log error but continue processing
-                        System.Diagnostics.Debug.WriteLine($"Error scanning file {file}: {ex.Message}");
+                        LoggingService.LogError($"Error scanning file {Path.GetFileName(file)}", ex, "Scanning");
                     }
                 }
 
@@ -108,6 +122,8 @@ public class ScanningService : IScanningService
         scanProgress.CurrentFile = "Scan complete";
         progress?.Report(scanProgress);
 
+        LoggingService.LogInfo($"TV episode scan complete: {parsedCount} parsed, {unparsedCount} unparsed out of {allFiles.Count} total files", "Scanning");
+
         return results;
     }
 
@@ -128,6 +144,8 @@ public class ScanningService : IScanningService
         if (!Directory.Exists(sourcePath))
             throw new DirectoryNotFoundException($"Source directory not found: {sourcePath}");
 
+        LoggingService.LogInfo($"Starting movie scan: Source={sourcePath}, Dest={destinationPath}, Extensions=[{string.Join(", ", fileExtensions)}]", "Scanning");
+
         var results = new List<MovieFileModel>();
 
         // Find all matching files - do this on a background thread
@@ -140,16 +158,19 @@ public class ScanningService : IScanningService
                 {
                     var matchingFiles = Directory.GetFiles(sourcePath, $"*{extension}", SearchOption.AllDirectories);
                     files.AddRange(matchingFiles);
+                    LoggingService.LogDebug($"Found {matchingFiles.Length} files with extension {extension}", "Scanning");
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException ex)
                 {
                     // Skip directories we don't have access to
-                    System.Diagnostics.Debug.WriteLine($"Access denied to some directories with extension {extension}");
+                    LoggingService.LogWarning($"Access denied to some directories with extension {extension}: {ex.Message}", "Scanning");
                 }
             }
 
             return files;
         }, cancellationToken);
+
+        LoggingService.LogInfo($"Found {allFiles.Count} total files to scan for movies", "Scanning");
 
         if (allFiles.Count == 0)
             return results;
@@ -159,6 +180,9 @@ public class ScanningService : IScanningService
             TotalFiles = allFiles.Count,
             FilesProcessed = 0
         };
+
+        int parsedCount = 0;
+        int unparsedCount = 0;
 
         // Process files in batches to improve performance and UI responsiveness
         for (int i = 0; i < allFiles.Count; i += BatchSize)
@@ -181,11 +205,16 @@ public class ScanningService : IScanningService
                         var movie = new MovieFile(file, destinationPath);
                         var model = new MovieFileModel(movie, file);
                         batchModels.Add(model);
+
+                        if (model.IsParsed)
+                            parsedCount++;
+                        else
+                            unparsedCount++;
                     }
                     catch (Exception ex)
                     {
                         // Log error but continue processing
-                        System.Diagnostics.Debug.WriteLine($"Error scanning file {file}: {ex.Message}");
+                        LoggingService.LogError($"Error scanning movie file {Path.GetFileName(file)}", ex, "Scanning");
                     }
                 }
 
@@ -207,6 +236,8 @@ public class ScanningService : IScanningService
         scanProgress.FilesProcessed = allFiles.Count;
         scanProgress.CurrentFile = "Scan complete";
         progress?.Report(scanProgress);
+
+        LoggingService.LogInfo($"Movie scan complete: {parsedCount} parsed, {unparsedCount} unparsed out of {allFiles.Count} total files", "Scanning");
 
         return results;
     }

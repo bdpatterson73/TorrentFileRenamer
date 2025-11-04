@@ -80,6 +80,29 @@ public partial class ProgressDialog : Window
     }
 
     /// <summary>
+    /// Updates the ETA (Estimated Time of Arrival)
+    /// </summary>
+    public void UpdateEta(string eta)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            EtaTextBlock.Text = string.IsNullOrEmpty(eta) ? "" : $"ETA: {eta}";
+        });
+    }
+
+    /// <summary>
+    /// Updates transfer details with speed, progress, and ETA
+    /// </summary>
+    public void UpdateTransferProgress(string details, string eta)
+    {
+        Dispatcher.Invoke(() =>
+        {
+            TransferDetailsTextBlock.Text = details;
+            EtaTextBlock.Text = string.IsNullOrEmpty(eta) ? "" : $"ETA: {eta}";
+        });
+    }
+
+    /// <summary>
     /// Marks the operation as complete
     /// </summary>
     public void Complete(string message = "Complete!")
@@ -89,10 +112,11 @@ public partial class ProgressDialog : Window
             ProgressBar.Value = 100;
             ProgressTextBlock.Text = message;
             TransferDetailsTextBlock.Text = "";
+            EtaTextBlock.Text = ""; // Clear ETA on completion
             CancelButton.Content = "Close";
             _operationComplete = true;
 
-// Auto-close after a brief delay if enabled
+            // Auto-close after a brief delay if enabled
             if (_autoClose)
             {
                 var timer = new DispatcherTimer

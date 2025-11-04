@@ -104,32 +104,55 @@
 
         <!-- Button Panel -->
         <Grid Grid.Row="2" Margin="0,10,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-            <Button Grid.Column="0"
-                    Content="Clear Logs"
-                    Command="{Binding ClearLogsCommand}"
-                    Style="{StaticResource SecondaryButton}"
-                    Width="100"
-                    Margin="0,0,10,0" />
+            <!-- Status Message -->
+            <TextBlock Grid.Row="0"
+                       Text="{Binding StatusMessage}"
+                       FontSize="11"
+                       Foreground="Gray"
+                       Margin="0,0,0,10" />
 
-            <Button Grid.Column="1"
-                    Content="Export..."
-                    Command="{Binding ExportLogsCommand}"
-                    Style="{StaticResource SecondaryButton}"
-                    Width="100" />
+            <!-- Buttons -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="3"
-                    Content="Close"
-                    Command="{Binding CloseCommand}"
-                    Style="{StaticResource PrimaryButton}"
-                    IsCancel="True"
-                    Width="80" />
+                <Button Grid.Column="0"
+                        Content="Clear Logs"
+                        Command="{Binding ClearLogsCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        Width="100"
+                        Margin="0,0,10,0" />
+
+                <Button Grid.Column="1"
+                        Content="Export..."
+                        Command="{Binding ExportLogsCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        Width="100"
+                        Margin="0,0,10,0" />
+
+                <Button Grid.Column="2"
+                        Content="Open Log Folder"
+                        Command="{Binding OpenLogFolderCommand}"
+                        Style="{StaticResource SecondaryButton}"
+                        Width="120" />
+
+                <Button Grid.Column="4"
+                        Content="Close"
+                        Command="{Binding CloseCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        IsCancel="True"
+                        Width="80" />
+            </Grid>
         </Grid>
     </Grid>
 </Window>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="Processing"
-        Height="300"
+        Height="350"
         Width="500"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
@@ -13,6 +13,7 @@
         SizeToContent="Height">
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -66,11 +67,22 @@
                    VerticalAlignment="Top"
                    Foreground="#666666"
                    FontSize="11"
-                   Margin="0,2,0,10" />
+                   Margin="0,2,0,5" />
+
+        <!-- ETA Display -->
+        <TextBlock x:Name="EtaTextBlock"
+                   Grid.Row="6"
+                   Text=""
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Top"
+                   Foreground="#0078D4"
+                   FontSize="11"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,10" />
 
         <!-- Cancel Button -->
         <Button x:Name="CancelButton"
-                Grid.Row="7"
+                Grid.Row="8"
                 Content="Cancel"
                 Click="CancelButton_Click"
                 Style="{StaticResource SecondaryButton}"

@@ -531,41 +531,57 @@ public class MoviesViewModel : ViewModelBase
             progressDialog.Initialize(cts, autoClose: true);
             progressDialog.UpdateTitle("Processing Movies");
 
+            // Cast to FileProcessingService to access enhanced methods
+            var fileProcessingService = _fileProcessingService as FileProcessingService;
+
             // Start processing in background
             var processTask = Task.Run(async () =>
             {
-                int currentFileIndex = 0;
+                int successCount = 0;
 
-                var fileProgress = new Progress<(string fileName, int percentage)>(p =>
+                // Create detailed progress callback for ETA and transfer speed
+                Action<string, string> detailedCallback = (details, eta) =>
                 {
-                    progressDialog.UpdateCurrentFile(p.fileName);
-                    progressDialog.UpdateProgress(p.percentage);
-                });
+                    progressDialog.UpdateTransferProgress(details, eta);
+                };
 
-                var overallProgress = new Progress<(int current, int total)>(p =>
+                // Process files individually with detailed progress
+                for (int i = 0; i < moviesToProcess.Count; i++)
                 {
-                    currentFileIndex = p.current;
-                    int percentage = (p.current * 100) / p.total;
-                    progressDialog.UpdateProgress(percentage, $"File {p.current} of {p.total} ({percentage}%)");
+                    var movie = moviesToProcess[i];
 
-                    // Update the current processing movie for auto-scroll
-                    if (p.current > 0 && p.current <= moviesToProcess.Count)
+                    // Update overall progress
+                    int percentage = ((i + 1) * 100) / moviesToProcess.Count;
+                    progressDialog.UpdateProgress(percentage, $"File {i + 1} of {moviesToProcess.Count}");
+                    progressDialog.UpdateCurrentFile(movie.FileName);
+
+                    // Update current processing item for auto-scroll
+                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
                     {
-                        var currentMovie = moviesToProcess[p.current - 1];
-                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            CurrentProcessingMovie = currentMovie;
-                        });
+                        CurrentProcessingMovie = movie;
+                    });
+
+                    // Process with detailed progress including ETA
+                    bool success;
+                    if (fileProcessingService != null)
+                    {
+                        success = await fileProcessingService.ProcessMovieAsync(
+                            movie,
+                            null, // percentage progress (handled by detailedCallback)
+                            detailedCallback, // Detailed progress with speed & ETA
+                            cts.Token);
                     }
-                });
+                    else
+                    {
+                        // Fallback to interface method if cast fails
+                        success = await _fileProcessingService.ProcessMovieAsync(movie, null, cts.Token);
+                    }
 
-                var successCount = await _fileProcessingService.ProcessMoviesAsync(
-                    moviesToProcess,
-                    fileProgress,
-                    overallProgress,
-                    cts.Token);
+                    if (success)
+                        successCount++;
+                }
 
-                // Mark dialog as complete from within the task
+                // Mark dialog as complete
                 progressDialog.Complete($"Completed: {successCount} of {moviesToProcess.Count} movies processed");
 
                 return successCount;

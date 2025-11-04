@@ -103,21 +103,38 @@ if (d is ScrollToItemBehavior behavior && e.NewValue != null)
     private ScrollViewer? FindScrollViewer(DependencyObject element)
     {
         if (element is ScrollViewer scrollViewer)
-    return scrollViewer;
+            return scrollViewer;
 
+        // First, search descendants (children)
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
         {
-            var child = VisualTreeHelper.GetChild(element, i);
-     var result = FindScrollViewer(child);
+     var child = VisualTreeHelper.GetChild(element, i);
+            var result = FindScrollViewer(child);
     if (result != null)
-    return result;
+     return result;
         }
 
-        // Also check parent
-        if (element is FrameworkElement fe && fe.Parent is DependencyObject parent)
+        // If not found in descendants, search ancestors (parents)
+    var visited = new HashSet<DependencyObject>();
+        var current = element;
+        
+   while (current != null)
         {
-     return FindScrollViewer(parent);
-        }
+     if (!visited.Add(current))
+   break; // Already visited, prevent infinite loop
+      
+        if (current is ScrollViewer sv)
+            return sv;
+             
+    // Try visual parent first
+      current = VisualTreeHelper.GetParent(current);
+            
+        // If no visual parent, try logical parent
+            if (current == null && element is FrameworkElement fe)
+    {
+ current = fe.Parent as DependencyObject;
+       }
+    }
 
         return null;
     }

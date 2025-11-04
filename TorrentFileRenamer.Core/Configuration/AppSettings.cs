@@ -5,17 +5,23 @@ namespace TorrentFileRenamer.Core.Configuration
 {
     public static class LoggingService
     {
-        private static readonly string LogFilePath = Path.Combine(
+        private static readonly string LogDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "TorrentFileRenamer", "logs", $"log_{DateTime.Now:yyyy-MM-dd}.txt");
+            "TorrentFileRenamer", "logs");
+
+        private static string GetLogFilePath(DateTime date)
+        {
+            return Path.Combine(LogDirectory, $"log_{date:yyyy-MM-dd}.txt");
+        }
+
+        private static string CurrentLogFilePath => GetLogFilePath(DateTime.Now);
 
         static LoggingService()
         {
             try
             {
-                var logDir = Path.GetDirectoryName(LogFilePath);
-                if (!Directory.Exists(logDir))
-                    Directory.CreateDirectory(logDir!);
+                if (!Directory.Exists(LogDirectory))
+                    Directory.CreateDirectory(LogDirectory);
             }
             catch (Exception ex)
             {
@@ -58,7 +64,7 @@ namespace TorrentFileRenamer.Core.Configuration
                 {
                     try
                     {
-                        File.AppendAllText(LogFilePath, logEntry + Environment.NewLine);
+                        File.AppendAllText(CurrentLogFilePath, logEntry + Environment.NewLine);
                     }
                     catch
                     {
@@ -70,32 +76,118 @@ namespace TorrentFileRenamer.Core.Configuration
             }
         }
 
+        /// <summary>
+        /// Get recent log entries for troubleshooting, reading from multiple log files if needed
+        /// </summary>
         public static List<string> GetRecentLogs(int maxLines = 100)
         {
             try
             {
-                if (!File.Exists(LogFilePath))
+                var allLogs = new List<string>();
+
+                // Get all log files, sorted by date descending (newest first)
+                var logFiles = GetLogFiles().OrderByDescending(f => f).ToList();
+
+                if (!logFiles.Any())
+                {
+                    return new List<string> { "No log files found. Logs are saved to: " + LogDirectory };
+                }
+
+                // Read from newest to oldest until we have enough lines
+                foreach (var logFile in logFiles)
+                {
+                    try
+                    {
+                        if (File.Exists(logFile))
+                        {
+                            var lines = File.ReadAllLines(logFile);
+                            allLogs.AddRange(lines);
+
+                            if (allLogs.Count >= maxLines)
+                                break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error reading log file {logFile}: {ex.Message}");
+                        allLogs.Add($"ERROR: Could not read {Path.GetFileName(logFile)}: {ex.Message}");
+                    }
+                }
+
+                // Return the most recent entries
+                if (allLogs.Count == 0)
+                {
+                    return new List<string>
+                    {
+                        $"Log files exist but could not be read from: {LogDirectory}",
+                        $"Log files found: {logFiles.Count}",
+                        $"Current log file: {CurrentLogFilePath}",
+                        $"First log file: {(logFiles.Any() ? Path.GetFileName(logFiles[0]) : "none")}"
+                    };
+                }
+
+                // Return most recent entries (last N lines)
+                return allLogs.Skip(Math.Max(0, allLogs.Count - maxLines)).ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[GetRecentLogs] Exception: {ex}");
+                return new List<string>
+                {
+                    $"Unable to read log files: {ex.Message}",
+                    $"Log directory: {LogDirectory}",
+                    $"Current log file: {CurrentLogFilePath}",
+                    $"Stack trace: {ex.StackTrace}"
+                };
+            }
+        }
+
+        /// <summary>
+        /// Get all available log files
+        /// </summary>
+        public static List<string> GetLogFiles()
+        {
+            try
+            {
+                if (!Directory.Exists(LogDirectory))
                     return new List<string>();
 
-                var lines = File.ReadAllLines(LogFilePath);
-                return lines.Skip(Math.Max(0, lines.Length - maxLines)).ToList();
+                return Directory.GetFiles(LogDirectory, "log_*.txt")
+                    .OrderByDescending(f => f)
+                    .ToList();
             }
-            catch
+            catch (Exception ex)
             {
-                return new List<string> { "Unable to read log file" };
+                Debug.WriteLine($"[GetLogFiles] Exception: {ex.Message}");
+                return new List<string>();
             }
+        }
+
+        /// <summary>
+        /// Get log directory path for troubleshooting
+        /// </summary>
+        public static string GetLogDirectory()
+        {
+            return LogDirectory;
+        }
+
+        /// <summary>
+        /// Get current log file path
+        /// </summary>
+        public static string GetCurrentLogFilePath()
+        {
+            return CurrentLogFilePath;
         }
 
         public static void CleanupOldLogs(int daysToKeep = 30)
         {
             try
             {
-                var logDir = Path.GetDirectoryName(LogFilePath);
-                if (!Directory.Exists(logDir))
+                if (!Directory.Exists(LogDirectory))
                     return;
 
                 var cutoffDate = DateTime.Now.AddDays(-daysToKeep);
-                var oldFiles = Directory.GetFiles(logDir, "log_*.txt")
+                var oldFiles = Directory.GetFiles(LogDirectory, "log_*.txt")
                     .Where(f => File.GetCreationTime(f) < cutoffDate);
 
                 foreach (var file in oldFiles)

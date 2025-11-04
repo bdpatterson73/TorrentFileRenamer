@@ -18,6 +18,9 @@ public class LogViewerViewModel : ViewModelBase
     private LogEntryModel? _selectedLogEntry;
     private string _filterLevel = "All";
     private string _searchText = "";
+    private string _logFilePath = "";
+    private int _totalLogCount;
+    private bool? _dialogResult;
 
     public LogViewerViewModel(IDialogService dialogService)
     {
@@ -28,6 +31,10 @@ public class LogViewerViewModel : ViewModelBase
         ClearLogsCommand = new RelayCommand(ExecuteClearLogs);
         ExportLogsCommand = new RelayCommand(ExecuteExportLogs);
         CloseCommand = new RelayCommand(ExecuteClose);
+        OpenLogFolderCommand = new RelayCommand(ExecuteOpenLogFolder);
+
+        // Set log file path
+        _logFilePath = LoggingService.GetLogDirectory();
 
         // Load logs on startup
         LoadLogs();
@@ -71,9 +78,35 @@ public class LogViewerViewModel : ViewModelBase
         }
     }
 
+    public string LogFilePath
+    {
+        get => _logFilePath;
+        set => SetProperty(ref _logFilePath, value);
+    }
+
+    public int TotalLogCount
+    {
+        get => _totalLogCount;
+        set
+        {
+            if (SetProperty(ref _totalLogCount, value))
+            {
+                OnPropertyChanged(nameof(StatusMessage));
+            }
+        }
+    }
+
+    public string StatusMessage => LogEntries.Count > 0
+        ? $"Showing {LogEntries.Count} of {TotalLogCount} log entries | Logs: {LogFilePath}"
+        : $"No logs found | Log location: {LogFilePath}";
+
     public List<string> LogLevels { get; } = new() { "All", "INFO", "WARN", "ERROR", "DEBUG" };
 
-    public bool? DialogResult { get; private set; }
+    public bool? DialogResult
+    {
+        get => _dialogResult;
+        private set => SetProperty(ref _dialogResult, value);
+    }
 
     #endregion
 
@@ -83,6 +116,7 @@ public class LogViewerViewModel : ViewModelBase
     public ICommand ClearLogsCommand { get; }
     public ICommand ExportLogsCommand { get; }
     public ICommand CloseCommand { get; }
+    public ICommand OpenLogFolderCommand { get; }
 
     #endregion
 
@@ -132,6 +166,27 @@ public class LogViewerViewModel : ViewModelBase
         DialogResult = false;
     }
 
+    private void ExecuteOpenLogFolder()
+    {
+        try
+        {
+            var logDir = LoggingService.GetLogDirectory();
+            if (Directory.Exists(logDir))
+            {
+                System.Diagnostics.Process.Start("explorer.exe", logDir);
+            }
+            else
+            {
+                _dialogService.ShowMessage("Log Folder Not Found",
+                    $"The log directory does not exist yet:\n{logDir}\n\nLogs will be created when the application performs actions.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _dialogService.ShowMessage("Error Opening Folder", $"Failed to open log folder: {ex.Message}");
+        }
+    }
+
     #endregion
 
     #region Private Methods
@@ -139,33 +194,64 @@ public class LogViewerViewModel : ViewModelBase
     private void LoadLogs()
     {
         try
-        {
-            var logs = LoggingService.GetRecentLogs(500);
-            var logEntries = new List<LogEntryModel>();
+    {
+         var logs = LoggingService.GetRecentLogs(500);
+          var logEntries = new List<LogEntryModel>();
 
-            foreach (var log in logs)
-            {
-                var entry = ParseLogEntry(log);
-                if (entry != null)
-                {
-                    // Apply filters
-                    if (FilterLevel != "All" && entry.Level != FilterLevel)
-                        continue;
+     // Check if logs contain diagnostic messages
+         if (logs.Any() && (logs[0].Contains("No log files found") || logs[0].Contains("Unable to read") || logs[0].Contains("Log files exist but")))
+    {
+           // Show diagnostic information as log entries
+   foreach (var diagnosticMsg in logs)
+    {
+     logEntries.Add(new LogEntryModel
+       {
+     Timestamp = DateTime.Now,
+ Level = "INFO",
+    Context = "LogViewer",
+             Message = diagnosticMsg
+         });
+  }
+   }
+        else
+         {
+ foreach (var log in logs)
+           {
+  var entry = ParseLogEntry(log);
+            if (entry != null)
+     {
+      // Apply filters
+             if (FilterLevel != "All" && entry.Level != FilterLevel)
+continue;
 
-                    if (!string.IsNullOrWhiteSpace(SearchText) &&
-                        !entry.Message.Contains(SearchText, StringComparison.OrdinalIgnoreCase) &&
-                        !entry.Context.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
-                        continue;
+       if (!string.IsNullOrWhiteSpace(SearchText) &&
+         !entry.Message.Contains(SearchText, StringComparison.OrdinalIgnoreCase) &&
+               !entry.Context.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+            continue;
 
-                    logEntries.Add(entry);
-                }
+           logEntries.Add(entry);
+ }
+    }
             }
 
-            LogEntries = new ObservableCollection<LogEntryModel>(logEntries);
+          TotalLogCount = logs.Count;
+    LogEntries = new ObservableCollection<LogEntryModel>(logEntries);
+         OnPropertyChanged(nameof(StatusMessage));
         }
         catch (Exception ex)
         {
-            _dialogService.ShowMessage("Load Error", $"Failed to load logs: {ex.Message}");
+     TotalLogCount = 0;
+            LogEntries = new ObservableCollection<LogEntryModel>(new[]
+            {
+     new LogEntryModel
+        {
+         Timestamp = DateTime.Now,
+            Level = "ERROR",
+     Context = "LogViewer",
+    Message = $"Failed to load logs: {ex.Message}"
+        }
+});
+          OnPropertyChanged(nameof(StatusMessage));
         }
     }
 
@@ -175,32 +261,60 @@ public class LogViewerViewModel : ViewModelBase
         {
             // Expected format: [yyyy-MM-dd HH:mm:ss] [LEVEL] Context: Message
             if (string.IsNullOrWhiteSpace(logLine))
-                return null;
+         return null;
 
-            var parts = logLine.Split(new[] { "] [", "]: " }, StringSplitOptions.None);
-            if (parts.Length < 3)
-                return null;
+            // Split on "] [" first to separate timestamp and level
+            var firstSplit = logLine.Split(new[] { "] [" }, StringSplitOptions.None);
+    
+       if (firstSplit.Length < 2)
+        return null;
 
-            var timestampStr = parts[0].TrimStart('[');
-            var level = parts[1].Trim();
-            var context = parts[2].Trim();
-            var message = parts.Length > 3 ? string.Join(": ", parts.Skip(3)) : "";
+     // Extract timestamp (remove leading '[')
+         var timestampStr = firstSplit[0].TrimStart('[');
+      
+       // The rest is: "LEVEL] Context: Message"
+            // Split on "]" to separate level from context+message
+        var remainder = firstSplit[1];
+            var levelEndIndex = remainder.IndexOf(']');
+     
+if (levelEndIndex < 0)
+     return null;
 
-            if (!DateTime.TryParse(timestampStr, out var timestamp))
-                timestamp = DateTime.Now;
+            var level = remainder.Substring(0, levelEndIndex).Trim();
+        var contextAndMessage = remainder.Substring(levelEndIndex + 1).Trim();
+            
+// Split context and message on ": "
+    var colonIndex = contextAndMessage.IndexOf(": ");
+     string context;
+            string message;
+            
+     if (colonIndex >= 0)
+        {
+      context = contextAndMessage.Substring(0, colonIndex).Trim();
+    message = contextAndMessage.Substring(colonIndex + 2).Trim();
+        }
+     else
+       {
+  // No colon separator, treat everything as context
+              context = contextAndMessage;
+            message = "";
+    }
 
-            return new LogEntryModel
+       if (!DateTime.TryParse(timestampStr, out var timestamp))
+   timestamp = DateTime.Now;
+
+         return new LogEntryModel
             {
-                Timestamp = timestamp,
+           Timestamp = timestamp,
                 Level = level,
-                Context = context,
-                Message = message
+  Context = context,
+ Message = message
             };
         }
-        catch
-        {
-            return null;
-        }
+      catch
+    {
+   return null;
+   }
     }
 
     #endregion
