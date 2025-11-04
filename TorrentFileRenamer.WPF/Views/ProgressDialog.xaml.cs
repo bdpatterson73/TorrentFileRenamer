@@ -84,10 +84,7 @@ public partial class ProgressDialog : Window
     /// </summary>
     public void UpdateEta(string eta)
     {
-        Dispatcher.Invoke(() =>
-        {
-            EtaTextBlock.Text = string.IsNullOrEmpty(eta) ? "" : $"ETA: {eta}";
-        });
+        Dispatcher.Invoke(() => { EtaTextBlock.Text = string.IsNullOrEmpty(eta) ? "" : $"ETA: {eta}"; });
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ public class DetailedFileProgress : IProgress<int>
 {
     private readonly Action<string, string>? _updateCallback;
     private FileOperationProgress? _currentFileOperation;
-    
+
     public DetailedFileProgress(Action<string, string>? updateCallback = null)
     {
         _updateCallback = updateCallback;
@@ -17,11 +17,11 @@ public class DetailedFileProgress : IProgress<int>
 
     public void AttachFileOperation(FileOperationProgress fileOperation)
     {
-  _currentFileOperation = fileOperation;
-        
-     if (_currentFileOperation != null)
-  {
-         _currentFileOperation.ProgressChanged += OnFileProgressChanged;
+        _currentFileOperation = fileOperation;
+
+        if (_currentFileOperation != null)
+        {
+            _currentFileOperation.ProgressChanged += OnFileProgressChanged;
         }
     }
 
@@ -29,22 +29,22 @@ public class DetailedFileProgress : IProgress<int>
     {
         if (_currentFileOperation != null)
         {
-   _currentFileOperation.ProgressChanged -= OnFileProgressChanged;
+            _currentFileOperation.ProgressChanged -= OnFileProgressChanged;
             _currentFileOperation = null;
-      }
-  }
+        }
+    }
 
     private void OnFileProgressChanged(object? sender, FileProgressEventArgs e)
     {
         // Report detailed progress with speed and ETA
         string details = $"{e.FormattedProgress} at {e.FormattedSpeed}";
         string eta = e.FormattedTimeRemaining;
-        
-      _updateCallback?.Invoke(details, eta);
+
+        _updateCallback?.Invoke(details, eta);
     }
 
-  public void Report(int value)
+    public void Report(int value)
     {
-      // Basic progress reporting (for compatibility)
+        // Basic progress reporting (for compatibility)
     }
 }

@@ -540,10 +540,7 @@ public class MoviesViewModel : ViewModelBase
                 int successCount = 0;
 
                 // Create detailed progress callback for ETA and transfer speed
-                Action<string, string> detailedCallback = (details, eta) =>
-                {
-                    progressDialog.UpdateTransferProgress(details, eta);
-                };
+                Action<string, string> detailedCallback = (details, eta) => { progressDialog.UpdateTransferProgress(details, eta); };
 
                 // Process files individually with detailed progress
                 for (int i = 0; i < moviesToProcess.Count; i++)
@@ -556,10 +553,7 @@ public class MoviesViewModel : ViewModelBase
                     progressDialog.UpdateCurrentFile(movie.FileName);
 
                     // Update current processing item for auto-scroll
-                    System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        CurrentProcessingMovie = movie;
-                    });
+                    System.Windows.Application.Current.Dispatcher.Invoke(() => { CurrentProcessingMovie = movie; });
 
                     // Process with detailed progress including ETA
                     bool success;

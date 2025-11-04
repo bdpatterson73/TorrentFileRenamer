@@ -194,64 +194,64 @@ public class LogViewerViewModel : ViewModelBase
     private void LoadLogs()
     {
         try
-    {
-         var logs = LoggingService.GetRecentLogs(500);
-          var logEntries = new List<LogEntryModel>();
+        {
+            var logs = LoggingService.GetRecentLogs(500);
+            var logEntries = new List<LogEntryModel>();
 
-     // Check if logs contain diagnostic messages
-         if (logs.Any() && (logs[0].Contains("No log files found") || logs[0].Contains("Unable to read") || logs[0].Contains("Log files exist but")))
-    {
-           // Show diagnostic information as log entries
-   foreach (var diagnosticMsg in logs)
-    {
-     logEntries.Add(new LogEntryModel
-       {
-     Timestamp = DateTime.Now,
- Level = "INFO",
-    Context = "LogViewer",
-             Message = diagnosticMsg
-         });
-  }
-   }
-        else
-         {
- foreach (var log in logs)
-           {
-  var entry = ParseLogEntry(log);
-            if (entry != null)
-     {
-      // Apply filters
-             if (FilterLevel != "All" && entry.Level != FilterLevel)
-continue;
+            // Check if logs contain diagnostic messages
+            if (logs.Any() && (logs[0].Contains("No log files found") || logs[0].Contains("Unable to read") || logs[0].Contains("Log files exist but")))
+            {
+                // Show diagnostic information as log entries
+                foreach (var diagnosticMsg in logs)
+                {
+                    logEntries.Add(new LogEntryModel
+                    {
+                        Timestamp = DateTime.Now,
+                        Level = "INFO",
+                        Context = "LogViewer",
+                        Message = diagnosticMsg
+                    });
+                }
+            }
+            else
+            {
+                foreach (var log in logs)
+                {
+                    var entry = ParseLogEntry(log);
+                    if (entry != null)
+                    {
+                        // Apply filters
+                        if (FilterLevel != "All" && entry.Level != FilterLevel)
+                            continue;
 
-       if (!string.IsNullOrWhiteSpace(SearchText) &&
-         !entry.Message.Contains(SearchText, StringComparison.OrdinalIgnoreCase) &&
-               !entry.Context.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
-            continue;
+                        if (!string.IsNullOrWhiteSpace(SearchText) &&
+                            !entry.Message.Contains(SearchText, StringComparison.OrdinalIgnoreCase) &&
+                            !entry.Context.Contains(SearchText, StringComparison.OrdinalIgnoreCase))
+                            continue;
 
-           logEntries.Add(entry);
- }
-    }
+                        logEntries.Add(entry);
+                    }
+                }
             }
 
-          TotalLogCount = logs.Count;
-    LogEntries = new ObservableCollection<LogEntryModel>(logEntries);
-         OnPropertyChanged(nameof(StatusMessage));
+            TotalLogCount = logs.Count;
+            LogEntries = new ObservableCollection<LogEntryModel>(logEntries);
+            OnPropertyChanged(nameof(StatusMessage));
         }
         catch (Exception ex)
         {
-     TotalLogCount = 0;
+            TotalLogCount = 0;
             LogEntries = new ObservableCollection<LogEntryModel>(new[]
             {
-     new LogEntryModel
-        {
-         Timestamp = DateTime.Now,
-            Level = "ERROR",
-     Context = "LogViewer",
-    Message = $"Failed to load logs: {ex.Message}"
-        }
-});
-          OnPropertyChanged(nameof(StatusMessage));
+                new LogEntryModel
+                {
+                    Timestamp = DateTime.Now,
+                    Level = "ERROR",
+                    Context = "LogViewer",
+                    Message = $"Failed to load logs: {ex.Message}"
+                }
+            });
+            OnPropertyChanged(nameof(StatusMessage));
         }
     }
 
@@ -261,60 +261,60 @@ continue;
         {
             // Expected format: [yyyy-MM-dd HH:mm:ss] [LEVEL] Context: Message
             if (string.IsNullOrWhiteSpace(logLine))
-         return null;
+                return null;
 
             // Split on "] [" first to separate timestamp and level
             var firstSplit = logLine.Split(new[] { "] [" }, StringSplitOptions.None);
-    
-       if (firstSplit.Length < 2)
-        return null;
 
-     // Extract timestamp (remove leading '[')
-         var timestampStr = firstSplit[0].TrimStart('[');
-      
-       // The rest is: "LEVEL] Context: Message"
+            if (firstSplit.Length < 2)
+                return null;
+
+            // Extract timestamp (remove leading '[')
+            var timestampStr = firstSplit[0].TrimStart('[');
+
+            // The rest is: "LEVEL] Context: Message"
             // Split on "]" to separate level from context+message
-        var remainder = firstSplit[1];
+            var remainder = firstSplit[1];
             var levelEndIndex = remainder.IndexOf(']');
-     
-if (levelEndIndex < 0)
-     return null;
+
+            if (levelEndIndex < 0)
+                return null;
 
             var level = remainder.Substring(0, levelEndIndex).Trim();
-        var contextAndMessage = remainder.Substring(levelEndIndex + 1).Trim();
-            
+            var contextAndMessage = remainder.Substring(levelEndIndex + 1).Trim();
+
 // Split context and message on ": "
-    var colonIndex = contextAndMessage.IndexOf(": ");
-     string context;
+            var colonIndex = contextAndMessage.IndexOf(": ");
+            string context;
             string message;
-            
-     if (colonIndex >= 0)
-        {
-      context = contextAndMessage.Substring(0, colonIndex).Trim();
-    message = contextAndMessage.Substring(colonIndex + 2).Trim();
-        }
-     else
-       {
-  // No colon separator, treat everything as context
-              context = contextAndMessage;
-            message = "";
-    }
 
-       if (!DateTime.TryParse(timestampStr, out var timestamp))
-   timestamp = DateTime.Now;
-
-         return new LogEntryModel
+            if (colonIndex >= 0)
             {
-           Timestamp = timestamp,
+                context = contextAndMessage.Substring(0, colonIndex).Trim();
+                message = contextAndMessage.Substring(colonIndex + 2).Trim();
+            }
+            else
+            {
+                // No colon separator, treat everything as context
+                context = contextAndMessage;
+                message = "";
+            }
+
+            if (!DateTime.TryParse(timestampStr, out var timestamp))
+                timestamp = DateTime.Now;
+
+            return new LogEntryModel
+            {
+                Timestamp = timestamp,
                 Level = level,
-  Context = context,
- Message = message
+                Context = context,
+                Message = message
             };
         }
-      catch
-    {
-   return null;
-   }
+        catch
+        {
+            return null;
+        }
     }
 
     #endregion
