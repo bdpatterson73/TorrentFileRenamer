@@ -31,6 +31,7 @@ public class MoviesViewModel : ViewModelBase
     private string _searchText = string.Empty;
     private ProcessingStatus? _statusFilter;
     private ObservableCollection<MovieFileModel> _allMovies = new();
+    private MovieFileModel? _currentProcessingMovie;
 
     public MoviesViewModel(
         IScanningService scanningService,
@@ -269,6 +270,15 @@ public class MoviesViewModel : ViewModelBase
                 ApplyFilters();
             }
         }
+    }
+
+    /// <summary>
+    /// Currently processing movie (for auto-scroll)
+    /// </summary>
+    public MovieFileModel? CurrentProcessingMovie
+    {
+        get => _currentProcessingMovie;
+        set => SetProperty(ref _currentProcessingMovie, value);
     }
 
     /// <summary>
@@ -537,6 +547,16 @@ public class MoviesViewModel : ViewModelBase
                     currentFileIndex = p.current;
                     int percentage = (p.current * 100) / p.total;
                     progressDialog.UpdateProgress(percentage, $"File {p.current} of {p.total} ({percentage}%)");
+
+                    // Update the current processing movie for auto-scroll
+                    if (p.current > 0 && p.current <= moviesToProcess.Count)
+                    {
+                        var currentMovie = moviesToProcess[p.current - 1];
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            CurrentProcessingMovie = currentMovie;
+                        });
+                    }
                 });
 
                 var successCount = await _fileProcessingService.ProcessMoviesAsync(
@@ -563,6 +583,9 @@ public class MoviesViewModel : ViewModelBase
             // Update statistics after processing
             ApplyFilters();
             StatsViewModel.UpdateMovieStatistics(_allMovies);
+
+            // Clear current processing movie
+            CurrentProcessingMovie = null;
 
             if (successCount > 0)
             {
@@ -608,6 +631,10 @@ public class MoviesViewModel : ViewModelBase
             _allMovies.Remove(movie);
             Movies.Remove(movie);
             StatusMessage = $"{_allMovies.Count} movies in list";
+
+            // Update statistics after removal
+            StatsViewModel.UpdateMovieStatistics(_allMovies);
+
             ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RemoveLowConfidenceCommand).RaiseCanExecuteChanged();
         }

@@ -163,10 +163,14 @@
             <!-- Content Area: Card View, Compact View, or Grid View -->
             <Grid>
                 <!-- Card View -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                <ScrollViewer x:Name="CardViewScrollViewer"
+                              VerticalScrollBarVisibility="Auto"
                               Visibility="{Binding IsCardViewSelected, Converter={StaticResource BoolToVisibilityConverter}}">
                     <ItemsControl ItemsSource="{Binding Movies}"
                                   Margin="16">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ScrollToItemBehavior TargetItem="{Binding CurrentProcessingMovie}" />
+                        </i:Interaction.Behaviors>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel />
@@ -181,10 +185,14 @@
                 </ScrollViewer>
 
                 <!-- Compact View -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                <ScrollViewer x:Name="CompactViewScrollViewer"
+                              VerticalScrollBarVisibility="Auto"
                               Visibility="{Binding IsCompactViewSelected, Converter={StaticResource BoolToVisibilityConverter}}">
                     <ItemsControl ItemsSource="{Binding Movies}"
                                   Margin="16">
+                        <i:Interaction.Behaviors>
+                            <behaviors:ScrollToItemBehavior TargetItem="{Binding CurrentProcessingMovie}" />
+                        </i:Interaction.Behaviors>
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel />

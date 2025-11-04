@@ -30,6 +30,7 @@ public class TvEpisodesViewModel : ViewModelBase
     private string _searchText = string.Empty;
     private ProcessingStatus? _statusFilter;
     private ObservableCollection<FileEpisodeModel> _allEpisodes = new();
+    private FileEpisodeModel? _currentProcessingEpisode;
 
     public TvEpisodesViewModel(
         IScanningService scanningService,
@@ -189,6 +190,15 @@ public class TvEpisodesViewModel : ViewModelBase
                 ApplyFilters();
             }
         }
+    }
+
+    /// <summary>
+    /// Currently processing episode (for auto-scroll)
+    /// </summary>
+    public FileEpisodeModel? CurrentProcessingEpisode
+    {
+        get => _currentProcessingEpisode;
+        set => SetProperty(ref _currentProcessingEpisode, value);
     }
 
     #endregion
@@ -457,6 +467,16 @@ public class TvEpisodesViewModel : ViewModelBase
                     currentFileIndex = p.current;
                     int percentage = (p.current * 100) / p.total;
                     progressDialog.UpdateProgress(percentage, $"File {p.current} of {p.total} ({percentage}%)");
+
+                    // Update the current processing episode for auto-scroll
+                    if (p.current > 0 && p.current <= episodesToProcess.Count)
+                    {
+                        var currentEpisode = episodesToProcess[p.current - 1];
+                        System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            CurrentProcessingEpisode = currentEpisode;
+                        });
+                    }
                 });
 
                 var successCount = await _fileProcessingService.ProcessFilesAsync(
@@ -481,6 +501,9 @@ public class TvEpisodesViewModel : ViewModelBase
             // Update statistics after processing
             ApplyFilters();
             StatsViewModel.UpdateEpisodeStatistics(_allEpisodes);
+            
+            // Clear current processing episode
+            CurrentProcessingEpisode = null;
 
             if (successCount > 0)
             {
@@ -493,6 +516,7 @@ public class TvEpisodesViewModel : ViewModelBase
             {
                 var failedEpisodes = episodesToProcess.Where(e => e.Status == ProcessingStatus.Failed).ToList();
                 var errorMessages = string.Join("\n", failedEpisodes.Select(e => $"{e.NewFileName}: {e.ErrorMessage}"));
+
 
                 await _dialogService.ShowErrorAsync(
                     "Process Errors",
@@ -526,6 +550,10 @@ public class TvEpisodesViewModel : ViewModelBase
             _allEpisodes.Remove(episode);
             Episodes.Remove(episode);
             StatusMessage = $"{_allEpisodes.Count} episodes in list";
+            
+            // Update statistics after removal
+            StatsViewModel.UpdateEpisodeStatistics(_allEpisodes);
+        
             ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RemoveUnparsedCommand).RaiseCanExecuteChanged();
         }
@@ -739,8 +767,6 @@ public class TvEpisodesViewModel : ViewModelBase
             StatusMessage = $"Removed {failedEpisodes.Count} failed episodes. {_allEpisodes.Count} remaining.";
             ((RelayCommand)ClearAllCommand).RaiseCanExecuteChanged();
             ((RelayCommand)RemoveUnparsedCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)RemoveAllFailedCommand).RaiseCanExecuteChanged();
-            ((RelayCommand)RemoveAllCompletedCommand).RaiseCanExecuteChanged();
         }
     }
 
