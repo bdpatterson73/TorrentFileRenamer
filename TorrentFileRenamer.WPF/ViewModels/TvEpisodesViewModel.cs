@@ -419,138 +419,152 @@ public class TvEpisodesViewModel : ViewModelBase
     private async Task ProcessAsync()
     {
         var episodesToProcess = Episodes
-            .Where(e => e.Status == ProcessingStatus.Pending)
+    .Where(e => e.Status == ProcessingStatus.Pending || e.Status == ProcessingStatus.Failed)
             .ToList();
 
         if (episodesToProcess.Count == 0)
         {
-            await _dialogService.ShowMessageAsync("Process", "No pending episodes to process.");
-            return;
+     await _dialogService.ShowMessageAsync("Process", "No pending or failed episodes to process.");
+          return;
         }
 
-        var result = await _dialogService.ShowConfirmationAsync(
-            "Confirm Process",
-            $"Process {episodesToProcess.Count} episodes?");
+        var failedCount = episodesToProcess.Count(e => e.Status == ProcessingStatus.Failed);
+        var pendingCount = episodesToProcess.Count(e => e.Status == ProcessingStatus.Pending);
+        
+     string message = pendingCount > 0 && failedCount > 0
+            ? $"Process {pendingCount} pending and retry {failedCount} failed episodes?"
+         : failedCount > 0
+    ? $"Retry {failedCount} failed episodes?"
+  : $"Process {pendingCount} episodes?";
+
+        var result = await _dialogService.ShowConfirmationAsync("Confirm Process", message);
 
         if (!result)
         {
-            return;
+        return;
         }
 
         try
         {
-            IsProcessing = true;
+     IsProcessing = true;
             StatusMessage = $"Processing {episodesToProcess.Count} files...";
 
-            var progressDialog = new ProgressDialog();
+        var progressDialog = new ProgressDialog();
             if (WpfApplication.Current.MainWindow != null)
             {
-                progressDialog.Owner = WpfApplication.Current.MainWindow;
-            }
+      progressDialog.Owner = WpfApplication.Current.MainWindow;
+        }
 
-            var cts = new CancellationTokenSource();
+    var cts = new CancellationTokenSource();
             progressDialog.Initialize(cts, autoClose: true);
-            progressDialog.UpdateTitle("Processing TV Episodes");
+     progressDialog.UpdateTitle("Processing TV Episodes");
 
             // Cast to FileProcessingService to access enhanced methods
-            var fileProcessingService = _fileProcessingService as FileProcessingService;
+         var fileProcessingService = _fileProcessingService as FileProcessingService;
 
-            var processTask = Task.Run(async () =>
+          var processTask = Task.Run(async () =>
             {
-                int successCount = 0;
+    int successCount = 0;
 
-                // Create detailed progress callback for ETA and transfer speed
-                Action<string, string> detailedCallback = (details, eta) => { progressDialog.UpdateTransferProgress(details, eta); };
+    // Create detailed progress callback for ETA and transfer speed
+     Action<string, string> detailedCallback = (details, eta) => { progressDialog.UpdateTransferProgress(details, eta); };
 
-                // Process files individually with detailed progress
-                for (int i = 0; i < episodesToProcess.Count; i++)
-                {
-                    var episode = episodesToProcess[i];
+          // Process files individually with detailed progress
+           for (int i = 0; i < episodesToProcess.Count; i++)
+    {
+            var episode = episodesToProcess[i];
 
-// Update overall progress
-                    int percentage = ((i + 1) * 100) / episodesToProcess.Count;
-                    progressDialog.UpdateProgress(percentage, $"File {i + 1} of {episodesToProcess.Count}");
-                    progressDialog.UpdateCurrentFile(episode.NewFileName);
+      // Reset status to pending if it was failed (for retry)
+            if (episode.Status == ProcessingStatus.Failed)
+       {
+   episode.Status = ProcessingStatus.Pending;
+                 episode.ErrorMessage = string.Empty;
+       }
 
-                    // Update current processing item for auto-scroll
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => { CurrentProcessingEpisode = episode; });
+         // Update overall progress
+    int percentage = ((i + 1) * 100) / episodesToProcess.Count;
+             progressDialog.UpdateProgress(percentage, $"File {i + 1} of {episodesToProcess.Count}");
+     progressDialog.UpdateCurrentFile(episode.NewFileName);
+
+ // Update current processing item for auto-scroll
+      System.Windows.Application.Current.Dispatcher.Invoke(() => { CurrentProcessingEpisode = episode; });
 
                     // Process with detailed progress including ETA
-                    bool success;
-                    if (fileProcessingService != null)
-                    {
-                        success = await fileProcessingService.ProcessFileAsync(
-                            episode,
-                            null, // percentage progress (handled by detailedCallback)
-                            detailedCallback, // Detailed progress with speed & ETA
-                            cts.Token);
-                    }
-                    else
-                    {
-                        // Fallback to interface method if cast fails
-                        success = await _fileProcessingService.ProcessFileAsync(episode, null, cts.Token);
-                    }
+      bool success;
+        if (fileProcessingService != null)
+    {
+ success = await fileProcessingService.ProcessFileAsync(
+       episode,
+          null, // percentage progress (handled by detailedCallback)
+             detailedCallback, // Detailed progress with speed & ETA
+cts.Token);
+       }
+        else
+       {
+          // Fallback to interface method if cast fails
+    success = await _fileProcessingService.ProcessFileAsync(episode, null, cts.Token);
+    }
 
-                    if (success)
-                        successCount++;
-                }
+         if (success)
+           successCount++;
+  }
 
-                // Mark dialog as complete
-                progressDialog.Complete($"Completed: {successCount} of {episodesToProcess.Count} files processed");
+ // Mark dialog as complete
+  progressDialog.Complete($"Completed: {successCount} of {episodesToProcess.Count} files processed");
 
-                return successCount;
-            });
+            return successCount;
+});
 
-            progressDialog.ShowDialog();
+       progressDialog.ShowDialog();
 
             var successCount = await processTask;
 
-            var failedCount = episodesToProcess.Count - successCount;
-            StatusMessage = $"Processed {successCount} files successfully, {failedCount} failed";
+            var processedFailedCount = episodesToProcess.Count - successCount;
+            StatusMessage = $"Processed {successCount} files successfully, {processedFailedCount} failed";
 
-            // Update statistics after processing
+    // Update statistics after processing
             ApplyFilters();
-            StatsViewModel.UpdateEpisodeStatistics(_allEpisodes);
+   StatsViewModel.UpdateEpisodeStatistics(_allEpisodes);
 
-            // Clear current processing episode
+     // Clear current processing episode
             CurrentProcessingEpisode = null;
 
-            if (successCount > 0)
-            {
-                await _dialogService.ShowMessageAsync(
-                    "Process Complete",
-                    $"Successfully processed {successCount} of {episodesToProcess.Count} files.");
-            }
+        if (successCount > 0)
+       {
+await _dialogService.ShowMessageAsync(
+             "Process Complete",
+          $"Successfully processed {successCount} of {episodesToProcess.Count} files.");
+ }
 
-            if (failedCount > 0)
-            {
+          if (processedFailedCount > 0)
+   {
                 var failedEpisodes = episodesToProcess.Where(e => e.Status == ProcessingStatus.Failed).ToList();
-                var errorMessages = string.Join("\n", failedEpisodes.Select(e => $"{e.NewFileName}: {e.ErrorMessage}"));
+   var errorMessages = string.Join("\n", failedEpisodes.Select(e => $"{e.NewFileName}: {e.ErrorMessage}"));
 
 
-                await _dialogService.ShowErrorAsync(
-                    "Process Errors",
-                    $"Failed to process {failedCount} files:\n\n{errorMessages}");
-            }
-        }
+   await _dialogService.ShowErrorAsync(
+    "Process Errors",
+              $"Failed to process {processedFailedCount} files:\n\n{errorMessages}");
+ }
+      }
         catch (OperationCanceledException)
         {
-            StatusMessage = "Processing cancelled";
+         StatusMessage = "Processing cancelled";
         }
-        catch (Exception ex)
+    catch (Exception ex)
         {
             StatusMessage = $"Processing failed: {ex.Message}";
-            await _dialogService.ShowErrorAsync("Process Error", $"Failed to process files: {ex.Message}");
+   await _dialogService.ShowErrorAsync("Process Error", $"Failed to process files: {ex.Message}");
         }
-        finally
+ finally
         {
             IsProcessing = false;
         }
     }
 
-    private bool CanProcess()
+  private bool CanProcess()
     {
-        return !IsProcessing && Episodes.Any(e => e.Status == ProcessingStatus.Pending);
+     return !IsProcessing && Episodes.Any(e => e.Status == ProcessingStatus.Pending || e.Status == ProcessingStatus.Failed);
     }
 
     private void RemoveSelected(object? parameter)

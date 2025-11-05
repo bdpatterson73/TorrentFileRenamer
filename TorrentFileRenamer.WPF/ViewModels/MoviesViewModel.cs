@@ -497,141 +497,155 @@ public class MoviesViewModel : ViewModelBase
     private async Task ProcessAsync()
     {
         var moviesToProcess = Movies
-            .Where(m => m.Status == ProcessingStatus.Pending)
-            .ToList();
+            .Where(m => m.Status == ProcessingStatus.Pending || m.Status == ProcessingStatus.Failed)
+  .ToList();
 
-        if (moviesToProcess.Count == 0)
+      if (moviesToProcess.Count == 0)
         {
-            await _dialogService.ShowMessageAsync("Process", "No pending movies to process.");
+          await _dialogService.ShowMessageAsync("Process", "No pending or failed movies to process.");
             return;
-        }
+ }
 
-        var result = await _dialogService.ShowConfirmationAsync(
-            "Confirm Process",
-            $"Process {moviesToProcess.Count} movies?");
+    var failedCount = moviesToProcess.Count(m => m.Status == ProcessingStatus.Failed);
+        var pendingCount = moviesToProcess.Count(m => m.Status == ProcessingStatus.Pending);
+        
+ string message = pendingCount > 0 && failedCount > 0
+   ? $"Process {pendingCount} pending and retry {failedCount} failed movies?"
+            : failedCount > 0
+        ? $"Retry {failedCount} failed movies?"
+     : $"Process {pendingCount} movies?";
+
+        var result = await _dialogService.ShowConfirmationAsync("Confirm Process", message);
 
         if (!result)
-        {
-            return;
+      {
+  return;
         }
 
         try
         {
             IsProcessing = true;
-            StatusMessage = $"Processing {moviesToProcess.Count} files...";
+      StatusMessage = $"Processing {moviesToProcess.Count} files...";
 
             // Create progress dialog
             var progressDialog = new ProgressDialog();
             if (WpfApplication.Current.MainWindow != null)
-            {
-                progressDialog.Owner = WpfApplication.Current.MainWindow;
-            }
+   {
+         progressDialog.Owner = WpfApplication.Current.MainWindow;
+ }
 
-            var cts = new CancellationTokenSource();
-            progressDialog.Initialize(cts, autoClose: true);
+      var cts = new CancellationTokenSource();
+     progressDialog.Initialize(cts, autoClose: true);
             progressDialog.UpdateTitle("Processing Movies");
 
             // Cast to FileProcessingService to access enhanced methods
             var fileProcessingService = _fileProcessingService as FileProcessingService;
 
-            // Start processing in background
-            var processTask = Task.Run(async () =>
+ // Start processing in background
+         var processTask = Task.Run(async () =>
             {
-                int successCount = 0;
+  int successCount = 0;
 
-                // Create detailed progress callback for ETA and transfer speed
-                Action<string, string> detailedCallback = (details, eta) => { progressDialog.UpdateTransferProgress(details, eta); };
+       // Create detailed progress callback for ETA and transfer speed
+        Action<string, string> detailedCallback = (details, eta) => { progressDialog.UpdateTransferProgress(details, eta); };
 
-                // Process files individually with detailed progress
-                for (int i = 0; i < moviesToProcess.Count; i++)
-                {
-                    var movie = moviesToProcess[i];
+     // Process files individually with detailed progress
+      for (int i = 0; i < moviesToProcess.Count; i++)
+    {
+   var movie = moviesToProcess[i];
 
-                    // Update overall progress
-                    int percentage = ((i + 1) * 100) / moviesToProcess.Count;
-                    progressDialog.UpdateProgress(percentage, $"File {i + 1} of {moviesToProcess.Count}");
-                    progressDialog.UpdateCurrentFile(movie.FileName);
+          // Reset status to pending if it was failed (for retry)
+          if (movie.Status == ProcessingStatus.Failed)
+           {
+      movie.Status = ProcessingStatus.Pending;
+          movie.ErrorMessage = string.Empty;
+    }
 
-                    // Update current processing item for auto-scroll
-                    System.Windows.Application.Current.Dispatcher.Invoke(() => { CurrentProcessingMovie = movie; });
+     // Update overall progress
+           int percentage = ((i + 1) * 100) / moviesToProcess.Count;
+           progressDialog.UpdateProgress(percentage, $"File {i + 1} of {moviesToProcess.Count}");
+         progressDialog.UpdateCurrentFile(movie.FileName);
 
-                    // Process with detailed progress including ETA
-                    bool success;
-                    if (fileProcessingService != null)
-                    {
-                        success = await fileProcessingService.ProcessMovieAsync(
-                            movie,
-                            null, // percentage progress (handled by detailedCallback)
-                            detailedCallback, // Detailed progress with speed & ETA
-                            cts.Token);
-                    }
-                    else
-                    {
-                        // Fallback to interface method if cast fails
-                        success = await _fileProcessingService.ProcessMovieAsync(movie, null, cts.Token);
-                    }
+       // Update current processing item for auto-scroll
+        System.Windows.Application.Current.Dispatcher.Invoke(() => { CurrentProcessingMovie = movie; });
 
-                    if (success)
-                        successCount++;
-                }
+           // Process with detailed progress including ETA
+ bool success;
+          if (fileProcessingService != null)
+       {
+       success = await fileProcessingService.ProcessMovieAsync(
+        movie,
+      null, // percentage progress (handled by detailedCallback)
+             detailedCallback, // Detailed progress with speed & ETA
+      cts.Token);
+           }
+          else
+         {
+           // Fallback to interface method if cast fails
+   success = await _fileProcessingService.ProcessMovieAsync(movie, null, cts.Token);
+            }
 
-                // Mark dialog as complete
-                progressDialog.Complete($"Completed: {successCount} of {moviesToProcess.Count} movies processed");
+        if (success)
+    successCount++;
+          }
 
-                return successCount;
-            });
+  // Mark dialog as complete
+         progressDialog.Complete($"Completed: {successCount} of {moviesToProcess.Count} movies processed");
 
-            // Show progress dialog
-            progressDialog.ShowDialog();
+    return successCount;
+   });
 
-            // Wait for processing to complete
-            var successCount = await processTask;
+    // Show progress dialog
+   progressDialog.ShowDialog();
 
-            var failedCount = moviesToProcess.Count - successCount;
-            StatusMessage = $"Processed {successCount} files successfully, {failedCount} failed";
+       // Wait for processing to complete
+        var successCount = await processTask;
+
+    var failedProcessCount = moviesToProcess.Count - successCount;
+            StatusMessage = $"Processed {successCount} files successfully, {failedProcessCount} failed";
 
             // Update statistics after processing
-            ApplyFilters();
+      ApplyFilters();
             StatsViewModel.UpdateMovieStatistics(_allMovies);
 
-            // Clear current processing movie
+      // Clear current processing movie
             CurrentProcessingMovie = null;
 
-            if (successCount > 0)
-            {
-                await _dialogService.ShowMessageAsync(
-                    "Process Complete",
-                    $"Successfully processed {successCount} of {moviesToProcess.Count} files.");
-            }
+   if (successCount > 0)
+      {
+   await _dialogService.ShowMessageAsync(
+  "Process Complete",
+      $"Successfully processed {successCount} of {moviesToProcess.Count} files.");
+       }
 
-            if (failedCount > 0)
-            {
-                var failedMovies = moviesToProcess.Where(m => m.Status == ProcessingStatus.Failed).ToList();
-                var errorMessages = string.Join("\n", failedMovies.Select(m => $"{m.FileName}: {m.ErrorMessage}"));
+    if (failedProcessCount > 0)
+  {
+       var failedMovies = moviesToProcess.Where(m => m.Status == ProcessingStatus.Failed).ToList();
+              var errorMessages = string.Join("\n", failedMovies.Select(m => $"{m.FileName}: {m.ErrorMessage}"));
 
-                await _dialogService.ShowErrorAsync(
-                    "Process Errors",
-                    $"Failed to process {failedCount} files:\n\n{errorMessages}");
-            }
-        }
+      await _dialogService.ShowErrorAsync(
+       "Process Errors",
+   $"Failed to process {failedProcessCount} files:\n\n{errorMessages}");
+     }
+    }
         catch (OperationCanceledException)
         {
-            StatusMessage = "Processing cancelled";
-        }
-        catch (Exception ex)
+      StatusMessage = "Processing cancelled";
+      }
+   catch (Exception ex)
         {
-            StatusMessage = $"Processing failed: {ex.Message}";
+ StatusMessage = $"Processing failed: {ex.Message}";
             await _dialogService.ShowErrorAsync("Process Error", $"Failed to process files: {ex.Message}");
         }
         finally
         {
-            IsProcessing = false;
-        }
+    IsProcessing = false;
+     }
     }
 
     private bool CanProcess()
     {
-        return !IsProcessing && Movies.Any(m => m.Status == ProcessingStatus.Pending);
+        return !IsProcessing && Movies.Any(m => m.Status == ProcessingStatus.Pending || m.Status == ProcessingStatus.Failed);
     }
 
     private void RemoveSelected(object? parameter)
@@ -984,4 +998,4 @@ public class MoviesViewModel : ViewModelBase
             ((AsyncRelayCommand)ExportCommand).RaiseCanExecuteChanged();
         }
     }
-}
+    }

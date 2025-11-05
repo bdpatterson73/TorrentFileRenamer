@@ -89,46 +89,86 @@ namespace TorrentFileRenamer.Core.Utilities
         }
 
         public async Task<bool> CopyFileWithRetryAsync(string sourceFile, string destinationFile,
-            int maxRetries = 3, int bufferSize = DefaultBufferSize, CancellationToken cancellationToken = default)
+    int maxRetries = 3, int bufferSize = DefaultBufferSize, CancellationToken cancellationToken = default)
         {
-            for (int attempt = 1; attempt <= maxRetries; attempt++)
-            {
+      int baseDelayMs = 2000; // Start with 2 seconds
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+   {
                 try
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
+ {
+      cancellationToken.ThrowIfCancellationRequested();
 
-                    if (attempt > 1)
-                    {
-                        ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
-                            false, $"Retry attempt {attempt}/{maxRetries}");
-                    }
+               if (attempt > 1)
+           {
+     // Calculate exponential backoff delay: 2s, 4s, 8s, etc.
+     int delayMs = baseDelayMs * (int)Math.Pow(2, attempt - 2);
+       ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+        false, $"Retry attempt {attempt}/{maxRetries} (waiting {delayMs / 1000}s before retry)");
+       
+          // Wait with exponential backoff before retrying
+           await Task.Delay(delayMs, cancellationToken);
+    }
 
-                    return await CopyFileAsync(sourceFile, destinationFile, bufferSize, cancellationToken);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (IOException) when (attempt < maxRetries)
-                {
-                    ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
-                        false, $"Copy attempt {attempt} failed, retrying in 5 seconds...");
-                    await Task.Delay(5000, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    if (attempt >= maxRetries)
-                    {
-                        ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
-                            false, $"Copy failed after {maxRetries} attempts: {ex.Message}");
-                        return false;
-                    }
+ ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+            false, $"Starting copy attempt {attempt}/{maxRetries}...");
 
-                    await Task.Delay(5000, cancellationToken);
+      bool result = await CopyFileAsync(sourceFile, destinationFile, bufferSize, cancellationToken);
+     
+   if (result)
+    {
+    if (attempt > 1)
+    {
+            ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+            false, $"Copy succeeded on attempt {attempt}/{maxRetries}");
+         }
+     return true;
+ }
+
+    // If copy failed but didn't throw an exception
+            if (attempt < maxRetries)
+  {
+               ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+                false, $"Copy attempt {attempt}/{maxRetries} failed, will retry...");
+     }
+          }
+           catch (OperationCanceledException)
+           {
+ ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+   false, "Copy cancelled by user");
+  throw;
+  }
+        catch (IOException ex) when (attempt < maxRetries)
+      {
+         int nextDelayMs = baseDelayMs * (int)Math.Pow(2, attempt - 1);
+  ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+    false, $"Network error on attempt {attempt}/{maxRetries}: {ex.Message}. Retrying in {nextDelayMs / 1000}s...");
+   }
+            catch (UnauthorizedAccessException ex) when (attempt < maxRetries)
+      {
+     int nextDelayMs = baseDelayMs * (int)Math.Pow(2, attempt - 1);
+            ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+      false, $"Access denied on attempt {attempt}/{maxRetries}: {ex.Message}. Retrying in {nextDelayMs / 1000}s...");
+            }
+   catch (Exception ex)
+                {
+  if (attempt >= maxRetries)
+              {
+         ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+   false, $"Copy failed after {maxRetries} attempts: {ex.Message}");
+         Debug.WriteLine($"Copy failed after {maxRetries} attempts: {ex}");
+         return false;
+          }
+
+  int nextDelayMs = baseDelayMs * (int)Math.Pow(2, attempt - 1);
+             ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+      false, $"Error on attempt {attempt}/{maxRetries}: {ex.Message}. Retrying in {nextDelayMs / 1000}s...");
                 }
             }
 
-            return false;
+            ReportProgress(sourceFile, destinationFile, 0, 0, 0, TimeSpan.Zero,
+             false, $"Copy failed after {maxRetries} attempts");
+      return false;
         }
 
         private void ReportProgress(string sourceFile, string destinationFile, long copiedBytes, long totalBytes,
@@ -136,27 +176,27 @@ namespace TorrentFileRenamer.Core.Utilities
         {
             var args = new FileProgressEventArgs
             {
-                SourceFile = sourceFile,
-                DestinationFile = destinationFile,
-                CopiedBytes = copiedBytes,
-                TotalBytes = totalBytes,
-                PercentComplete = totalBytes > 0 ? (double)copiedBytes / totalBytes * 100 : 0,
+         SourceFile = sourceFile,
+   DestinationFile = destinationFile,
+    CopiedBytes = copiedBytes,
+      TotalBytes = totalBytes,
+PercentComplete = totalBytes > 0 ? (double)copiedBytes / totalBytes * 100 : 0,
                 SpeedBytesPerSecond = speedBytesPerSecond,
-                ElapsedTime = elapsed,
-                IsComplete = isComplete,
-                CustomMessage = customMessage
-            };
+       ElapsedTime = elapsed,
+             IsComplete = isComplete,
+   CustomMessage = customMessage
+};
 
             ProgressChanged?.Invoke(this, args);
-        }
+    }
 
         private static double CalculateSpeed(long bytes, TimeSpan elapsed)
         {
-            if (elapsed.TotalSeconds <= 0)
-                return 0;
+ if (elapsed.TotalSeconds <= 0)
+      return 0;
             return bytes / elapsed.TotalSeconds;
         }
-    }
+  }
 
     public class FileProgressEventArgs : EventArgs
     {
