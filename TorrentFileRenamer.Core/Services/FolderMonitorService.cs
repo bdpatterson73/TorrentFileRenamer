@@ -71,6 +71,7 @@ namespace TorrentFileRenamer.Core.Services
 
                 _fileWatcher.Created += FileWatcher_Created;
                 _fileWatcher.Changed += FileWatcher_Changed;
+                _fileWatcher.Renamed += FileWatcher_Renamed;
                 _fileWatcher.Error += FileWatcher_Error;
 
                 _stabilityTimer.Start();
@@ -147,6 +148,14 @@ namespace TorrentFileRenamer.Core.Services
         private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             HandleFileEvent(e.FullPath, "Changed");
+        }
+
+        private void FileWatcher_Renamed(object sender, RenamedEventArgs e)
+        {
+            // When a file is renamed, treat it as a new file to re-evaluate
+            // This handles the case where a file without a show name is renamed to include one
+            Debug.WriteLine($"File renamed from '{Path.GetFileName(e.OldFullPath)}' to '{Path.GetFileName(e.FullPath)}'");
+            HandleFileEvent(e.FullPath, "Renamed");
         }
 
         private void FileWatcher_Error(object sender, ErrorEventArgs e)
@@ -248,7 +257,33 @@ namespace TorrentFileRenamer.Core.Services
                 int tvConfidence = MediaTypeDetector.GetTVEpisodeConfidence(fileName);
                 int movieConfidence = MediaTypeDetector.GetMovieConfidence(fileName);
 
-                return tvConfidence > 50 && tvConfidence > movieConfidence;
+                // Must have good TV confidence and better than movie confidence
+                if (tvConfidence <= 50 || tvConfidence <= movieConfidence)
+                    return false;
+
+                // Additional check: Ensure the file has a parseable show name
+                // Create a temporary episode to test parsing
+                try
+                {
+                    FileEpisode testEpisode = new FileEpisode(filePath, DestinationFolder);
+
+                    // File must have a valid show name (not empty, not "Unknown Show")
+                    // and valid episode information to be processed by auto-monitor
+                    if (testEpisode.EpisodeNumber < 0 ||
+                        string.IsNullOrWhiteSpace(testEpisode.ShowName) ||
+                        testEpisode.ShowName == "Unknown Show")
+                    {
+                        Debug.WriteLine($"Skipping file without valid show name: {fileName}");
+                        return false;
+                    }
+
+                    return true;
+                }
+                catch (Exception parseEx)
+                {
+                    Debug.WriteLine($"Error pre-parsing file {fileName}: {parseEx.Message}");
+                    return false;
+                }
             }
             catch (Exception ex)
             {
