@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -25,8 +25,8 @@ public class MoviesViewModel : ViewModelBase
     private string _statusMessage = "No movies scanned";
     private bool _isProcessing;
     private int _minimumConfidence = 40;
-    private bool _isCardViewSelected = true;
-    private bool _isCompactViewSelected;
+    private bool _isCardViewSelected;
+    private bool _isCompactViewSelected = true;
     private bool _isGridViewSelected;
     private string _searchText = string.Empty;
     private ProcessingStatus? _statusFilter;

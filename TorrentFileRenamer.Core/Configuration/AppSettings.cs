@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text.Json;
 
 namespace TorrentFileRenamer.Core.Configuration
@@ -299,6 +299,7 @@ namespace TorrentFileRenamer.Core.Configuration
     {
         public string WatchFolder { get; set; } = "";
         public string DestinationFolder { get; set; } = "";
+        public string MovieDestinationFolder { get; set; } = "";
         public string FileExtensions { get; set; } = "*.mp4;*.mkv;*.avi;*.m4v";
         public int StabilityDelaySeconds { get; set; } = 30;
         public bool AutoStartOnLoad { get; set; } = false;

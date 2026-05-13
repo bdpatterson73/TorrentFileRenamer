@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using TorrentFileRenamer.Core.Models;
 using TorrentFileRenamer.Core.Utilities;
 
@@ -14,6 +14,7 @@ namespace TorrentFileRenamer.Core.Services
 
         public string WatchFolder { get; set; } = "";
         public string DestinationFolder { get; set; } = "";
+        public string MovieDestinationFolder { get; set; } = "";
         public string[] FileExtensions { get; set; } = Array.Empty<string>();
         public int StabilityDelaySeconds { get; set; } = 30;
 
@@ -126,7 +127,15 @@ namespace TorrentFileRenamer.Core.Services
 
                     foreach (string file in files)
                     {
-                        if (IsVideoFile(file) && IsFileTVShow(file))
+                        if (!IsVideoFile(file))
+                            continue;
+
+                        if (IsFileTVShow(file))
+                        {
+                            FileFound?.Invoke(this, new FileFoundEventArgs(file, "Existing file found"));
+                            AddPendingFile(file);
+                        }
+                        else if (IsFileMovie(file))
                         {
                             FileFound?.Invoke(this, new FileFoundEventArgs(file, "Existing file found"));
                             AddPendingFile(file);
@@ -174,14 +183,20 @@ namespace TorrentFileRenamer.Core.Services
                 if (!IsVideoFile(filePath))
                     return;
 
-                if (!IsFileTVShow(filePath))
+                if (IsFileTVShow(filePath))
                 {
-                    Debug.WriteLine($"Skipping non-TV file: {Path.GetFileName(filePath)}");
-                    return;
+                    FileFound?.Invoke(this, new FileFoundEventArgs(filePath, eventType));
+                    AddPendingFile(filePath);
                 }
-
-                FileFound?.Invoke(this, new FileFoundEventArgs(filePath, eventType));
-                AddPendingFile(filePath);
+                else if (IsFileMovie(filePath))
+                {
+                    FileFound?.Invoke(this, new FileFoundEventArgs(filePath, eventType));
+                    AddPendingFile(filePath);
+                }
+                else
+                {
+                    Debug.WriteLine($"Skipping unrecognized media file: {Path.GetFileName(filePath)}");
+                }
             }
             catch (Exception ex)
             {
@@ -230,7 +245,10 @@ namespace TorrentFileRenamer.Core.Services
 
                 foreach (string filePath in readyFiles)
                 {
-                    ProcessTVShowFile(filePath);
+                    if (IsFileTVShow(filePath))
+                        ProcessTVShowFile(filePath);
+                    else
+                        ProcessMovieFile(filePath);
                 }
             }
             catch (Exception ex)
@@ -288,6 +306,20 @@ namespace TorrentFileRenamer.Core.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error checking if file is TV show: {ex.Message}");
+                return false;
+            }
+        }
+
+        private bool IsFileMovie(string filePath)
+        {
+            try
+            {
+                string fileName = Path.GetFileName(filePath);
+                return MediaTypeDetector.IsLikelyMovie(fileName);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error checking if file is movie: {ex.Message}");
                 return false;
             }
         }
@@ -396,6 +428,85 @@ namespace TorrentFileRenamer.Core.Services
                     {
                         if (File.Exists(episode.NewFileNamePath))
                             File.Delete(episode.NewFileNamePath);
+                        FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, "File copy verification failed"));
+                    }
+                }
+                else
+                {
+                    FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, "File copy failed after retries"));
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorOccurred?.Invoke(this, ex);
+                FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, $"Error: {ex.Message}"));
+            }
+        }
+
+        private async void ProcessMovieFile(string filePath)
+        {
+            try
+            {
+                string movieDestination = !string.IsNullOrWhiteSpace(MovieDestinationFolder)
+                    ? MovieDestinationFolder
+                    : DestinationFolder;
+
+                if (string.IsNullOrWhiteSpace(movieDestination))
+                {
+                    FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, "No movie destination folder configured"));
+                    return;
+                }
+
+                StatusChanged?.Invoke(this, $"Processing movie: {Path.GetFileName(filePath)}");
+
+                MovieFile movie = new MovieFile(filePath, movieDestination);
+
+                if (string.IsNullOrWhiteSpace(movie.MovieName) || movie.MovieName == "Unknown Movie")
+                {
+                    FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, "Could not parse movie information"));
+                    return;
+                }
+
+                string destPath = movie.NewDestDirectory;
+                string? destDir = Path.GetDirectoryName(destPath);
+
+                if (destDir != null && !Directory.Exists(destDir))
+                {
+                    Directory.CreateDirectory(destDir);
+                }
+
+                if (File.Exists(destPath))
+                {
+                    FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, "Destination file already exists"));
+                    return;
+                }
+
+                var fileOperation = new FileOperationProgress();
+                fileOperation.ProgressChanged += (sender, args) =>
+                {
+                    FileProgressChanged?.Invoke(this, args);
+
+                    if (!args.IsComplete)
+                    {
+                        StatusChanged?.Invoke(this,
+                            $"Copying {Path.GetFileName(filePath)}: {args.FormattedProgress} at {args.FormattedSpeed} - ETA: {args.FormattedTimeRemaining}");
+                    }
+                };
+
+                bool success = await fileOperation.CopyFileWithRetryAsync(filePath, destPath, maxRetries: 3);
+
+                if (success)
+                {
+                    if (VerifyFileCopy(filePath, destPath))
+                    {
+                        File.Delete(filePath);
+                        FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, true, $"Successfully moved to: {destPath}"));
+                        StatusChanged?.Invoke(this, $"Completed movie: {movie.MovieName}{(!string.IsNullOrEmpty(movie.MovieYear) ? $" ({movie.MovieYear})" : "")}");
+                    }
+                    else
+                    {
+                        if (File.Exists(destPath))
+                            File.Delete(destPath);
                         FileProcessed?.Invoke(this, new FileProcessedEventArgs(filePath, false, "File copy verification failed"));
                     }
                 }

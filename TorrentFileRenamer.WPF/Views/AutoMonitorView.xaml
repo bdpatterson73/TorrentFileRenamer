@@ -1,4 +1,4 @@
-<UserControl x:Class="TorrentFileRenamer.WPF.Views.AutoMonitorView"
+﻿<UserControl x:Class="TorrentFileRenamer.WPF.Views.AutoMonitorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -94,6 +94,7 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Watch Folder:" FontWeight="SemiBold"
@@ -102,18 +103,24 @@
                                        TextTrimming="CharacterEllipsis" Margin="0,0,0,5"
                                        ToolTip="{Binding WatchFolder}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Destination:" FontWeight="SemiBold"
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="TV Destination:" FontWeight="SemiBold"
                                        Margin="0,0,0,5" />
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DestinationFolder}"
                                        TextTrimming="CharacterEllipsis" Margin="0,0,0,5"
                                        ToolTip="{Binding DestinationFolder}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Extensions:" FontWeight="SemiBold"
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Movie Destination:" FontWeight="SemiBold"
                                        Margin="0,0,0,5" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding FileExtensions}" Margin="0,0,0,5" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding MovieDestinationFolder}"
+                                       TextTrimming="CharacterEllipsis" Margin="0,0,0,5"
+                                       ToolTip="{Binding MovieDestinationFolder}" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Stability Delay:" FontWeight="SemiBold" />
-                            <TextBlock Grid.Row="3" Grid.Column="1">
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Extensions:" FontWeight="SemiBold"
+                                       Margin="0,0,0,5" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding FileExtensions}" Margin="0,0,0,5" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Stability Delay:" FontWeight="SemiBold" />
+                            <TextBlock Grid.Row="4" Grid.Column="1">
                                 <Run Text="{Binding StabilityDelay}" />
                                 <Run Text="seconds" />
                             </TextBlock>

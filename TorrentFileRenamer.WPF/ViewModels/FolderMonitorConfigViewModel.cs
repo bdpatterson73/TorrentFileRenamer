@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using Microsoft.Win32;
 using TorrentFileRenamer.WPF.ViewModels.Base;
@@ -12,6 +12,7 @@ public class FolderMonitorConfigViewModel : ViewModelBase
 {
     private string _watchFolder = string.Empty;
     private string _destinationFolder = string.Empty;
+    private string _movieDestinationFolder = string.Empty;
     private string _fileExtensions = "*.mp4;*.mkv;*.avi;*.m4v";
     private int _stabilityDelay = 30;
     private bool _autoStart = false;
@@ -20,6 +21,7 @@ public class FolderMonitorConfigViewModel : ViewModelBase
     {
         BrowseWatchFolderCommand = new RelayCommand(BrowseWatchFolder);
         BrowseDestinationFolderCommand = new RelayCommand(BrowseDestinationFolder);
+        BrowseMovieDestinationFolderCommand = new RelayCommand(BrowseMovieDestinationFolder);
     }
 
     public string WatchFolder
@@ -44,6 +46,12 @@ public class FolderMonitorConfigViewModel : ViewModelBase
                 OnPropertyChanged(nameof(IsValid));
             }
         }
+    }
+
+    public string MovieDestinationFolder
+    {
+        get => _movieDestinationFolder;
+        set => SetProperty(ref _movieDestinationFolder, value);
     }
 
     public string FileExtensions
@@ -71,6 +79,7 @@ public class FolderMonitorConfigViewModel : ViewModelBase
 
     public RelayCommand BrowseWatchFolderCommand { get; }
     public RelayCommand BrowseDestinationFolderCommand { get; }
+    public RelayCommand BrowseMovieDestinationFolderCommand { get; }
 
     private void BrowseWatchFolder()
     {
@@ -101,6 +110,24 @@ public class FolderMonitorConfigViewModel : ViewModelBase
         if (dialog.ShowDialog() == true)
         {
             DestinationFolder = dialog.FolderName;
+        }
+    }
+
+    private void BrowseMovieDestinationFolder()
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Title = "Select Movie Destination Folder",
+            InitialDirectory = !string.IsNullOrWhiteSpace(MovieDestinationFolder) && Directory.Exists(MovieDestinationFolder)
+                ? MovieDestinationFolder
+                : (!string.IsNullOrWhiteSpace(DestinationFolder) && Directory.Exists(DestinationFolder)
+                    ? DestinationFolder
+                    : Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments))
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            MovieDestinationFolder = dialog.FolderName;
         }
     }
 }

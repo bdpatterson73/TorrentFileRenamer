@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using TorrentFileRenamer.Core.Configuration;
@@ -23,6 +23,7 @@ public class AutoMonitorViewModel : ViewModelBase
     private MonitoringStatus _currentStatus = MonitoringStatus.Stopped;
     private string _watchFolder = string.Empty;
     private string _destinationFolder = string.Empty;
+    private string _movieDestinationFolder = string.Empty;
     private string _fileExtensions = "*.mp4;*.mkv;*.avi;*.m4v";
     private int _stabilityDelay = 30;
     private bool _autoStart = false;
@@ -112,6 +113,12 @@ public class AutoMonitorViewModel : ViewModelBase
         set => SetProperty(ref _destinationFolder, value);
     }
 
+    public string MovieDestinationFolder
+    {
+        get => _movieDestinationFolder;
+        set => SetProperty(ref _movieDestinationFolder, value);
+    }
+
     public string FileExtensions
     {
         get => _fileExtensions;
@@ -169,6 +176,7 @@ public class AutoMonitorViewModel : ViewModelBase
             // Apply configuration to service
             _folderMonitorService.WatchFolder = _watchFolder;
             _folderMonitorService.DestinationFolder = _destinationFolder;
+            _folderMonitorService.MovieDestinationFolder = _movieDestinationFolder;
             _folderMonitorService.FileExtensions = ParseFileExtensions(_fileExtensions);
             _folderMonitorService.StabilityDelaySeconds = _stabilityDelay;
 
@@ -241,6 +249,7 @@ public class AutoMonitorViewModel : ViewModelBase
         // Pre-populate with current settings
         dialog.ViewModel.WatchFolder = _watchFolder;
         dialog.ViewModel.DestinationFolder = _destinationFolder;
+        dialog.ViewModel.MovieDestinationFolder = _movieDestinationFolder;
         dialog.ViewModel.FileExtensions = _fileExtensions;
         dialog.ViewModel.StabilityDelay = _stabilityDelay;
         dialog.ViewModel.AutoStart = _autoStart;
@@ -250,6 +259,7 @@ public class AutoMonitorViewModel : ViewModelBase
             // Apply new settings
             WatchFolder = dialog.ViewModel.WatchFolder;
             DestinationFolder = dialog.ViewModel.DestinationFolder;
+            MovieDestinationFolder = dialog.ViewModel.MovieDestinationFolder;
             FileExtensions = dialog.ViewModel.FileExtensions;
             StabilityDelay = dialog.ViewModel.StabilityDelay;
             AutoStart = dialog.ViewModel.AutoStart;
@@ -385,6 +395,10 @@ public class AutoMonitorViewModel : ViewModelBase
             var config = _appSettings.Monitoring;
             WatchFolder = config.WatchFolder;
             DestinationFolder = config.DestinationFolder;
+            // Fall back to the last-used Movies scan destination if no dedicated monitoring path is set
+            MovieDestinationFolder = !string.IsNullOrWhiteSpace(config.MovieDestinationFolder)
+                ? config.MovieDestinationFolder
+                : _appSettings.LastMovieDestinationPath;
             FileExtensions = config.FileExtensions;
             StabilityDelay = config.StabilityDelaySeconds;
             AutoStart = config.AutoStartOnLoad;
@@ -404,6 +418,7 @@ public class AutoMonitorViewModel : ViewModelBase
             var config = _appSettings.Monitoring;
             config.WatchFolder = _watchFolder;
             config.DestinationFolder = _destinationFolder;
+            config.MovieDestinationFolder = _movieDestinationFolder;
             config.FileExtensions = _fileExtensions;
             config.StabilityDelaySeconds = _stabilityDelay;
             config.AutoStartOnLoad = _autoStart;

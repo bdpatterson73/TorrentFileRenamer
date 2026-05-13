@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -24,8 +24,8 @@ public class TvEpisodesViewModel : ViewModelBase
     private readonly AppSettings _appSettings;
     private string _statusMessage = "No episodes scanned";
     private bool _isProcessing;
-    private bool _isCardViewSelected = true;
-    private bool _isCompactViewSelected;
+    private bool _isCardViewSelected;
+    private bool _isCompactViewSelected = true;
     private bool _isGridViewSelected;
     private string _searchText = string.Empty;
     private ProcessingStatus? _statusFilter;

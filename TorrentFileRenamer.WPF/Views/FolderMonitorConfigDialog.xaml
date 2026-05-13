@@ -1,9 +1,9 @@
-<Window x:Class="TorrentFileRenamer.WPF.Views.FolderMonitorConfigDialog"
+﻿<Window x:Class="TorrentFileRenamer.WPF.Views.FolderMonitorConfigDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:TorrentFileRenamer.WPF.ViewModels"
         Title="Folder Monitor Configuration"
-        Height="400"
+        Height="480"
         Width="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
@@ -27,12 +27,13 @@
     <Grid Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Watch Folder -->
@@ -77,8 +78,35 @@
                     Width="80" />
         </Grid>
 
+        <!-- Movie Destination Folder -->
+        <Grid Grid.Row="2" Margin="0,10,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="Movie Destination Folder:" />
+            <TextBox Grid.Row="1" Grid.Column="0"
+                     Text="{Binding MovieDestinationFolder, UpdateSourceTrigger=PropertyChanged}"
+                     Margin="0,0,5,0" />
+            <Button Grid.Row="1" Grid.Column="1"
+                    Content="Browse..."
+                    Command="{Binding BrowseMovieDestinationFolderCommand}"
+                    Width="80" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                       Text="Leave blank to use the TV Destination Folder for movies. Pre-populated from the Movies scan tab if set."
+                       FontSize="10"
+                       Foreground="Gray"
+                       Margin="5,2,0,0" />
+        </Grid>
+
         <!-- File Extensions -->
-        <StackPanel Grid.Row="2" Margin="0,10,0,0">
+        <StackPanel Grid.Row="3" Margin="0,10,0,0">
             <Label Content="File Extensions (semicolon-separated):" />
             <TextBox Text="{Binding FileExtensions, UpdateSourceTrigger=PropertyChanged}" />
             <TextBlock Text="Example: *.mp4;*.mkv;*.avi;*.m4v"
@@ -88,7 +116,7 @@
         </StackPanel>
 
         <!-- Stability Delay -->
-        <StackPanel Grid.Row="3" Margin="0,10,0,0">
+        <StackPanel Grid.Row="4" Margin="0,10,0,0">
             <Label Content="File Stability Delay (seconds):" />
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -117,14 +145,14 @@
         </StackPanel>
 
         <!-- Auto Start -->
-        <CheckBox Grid.Row="4"
+        <CheckBox Grid.Row="5"
                   Content="Auto-start monitoring when application loads"
                   IsChecked="{Binding AutoStart}"
                   Margin="0,15,0,0"
                   VerticalAlignment="Center" />
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="6"
+        <StackPanel Grid.Row="7"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,10,0,0">
